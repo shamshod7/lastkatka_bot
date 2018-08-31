@@ -2,10 +2,8 @@ package com.senderman.lastkatkabot;
 
 import com.annimon.tgbotsmodule.BotHandler;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.UnbanChatMember;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.UnpinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -18,29 +16,35 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class LastkatkaBotHandler extends BotHandler {
 
+    private static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
+
     private final BotConfig botConfig;
-    private ArrayList<Long> allowedChats;
-    private HashSet<String> members;
-    private HashSet<Integer> membersIds;
-    private HashSet<String> vegans;
-    private boolean isCollectingVegans = false;
-    private boolean tournamentEnabled = false;
+    private Set<Long> allowedChats;
+    private Set<String> members;
+    private Set<Integer> membersIds;
+    private Set<String> vegans;
+    private boolean isCollectingVegans;
+    private boolean tournamentEnabled;
 
     LastkatkaBotHandler(BotConfig botConfig) {
         this.botConfig = botConfig;
-        allowedChats = new ArrayList<>();
-        allowedChats.add(botConfig.getLastkatka());
-        allowedChats.add(botConfig.getLastvegan());
-        allowedChats.add(botConfig.getTourgroup());
+        allowedChats = new HashSet<>(List.of(
+                botConfig.getLastkatka(),
+                botConfig.getLastvegan(),
+                botConfig.getTourgroup()
+        ));
         vegans = new HashSet<>();
         members = new HashSet<>();
         membersIds = new HashSet<>();
+
+        isCollectingVegans = false;
+        tournamentEnabled = false;
     }
 
     @Override
@@ -55,66 +59,67 @@ public class LastkatkaBotHandler extends BotHandler {
 
     private void processTournament(Message message, String text) { // TODO
 
-        if (text.startsWith("/score") && botConfig.getAdmins().contains(message.getFrom().getId())) {
-            if (text.split(" ").length == 5) {
-                String score = getScore(text.split(" "));
-                SendMessage sm = new SendMessage()
+        if (text.startsWith("/score") && isFromAdmin(message)) {
+            var params = text.split(" ");
+            if (params.length == 5) {
+                String score = getScore(params);
+                sendMessage(new SendMessage()
                         .setChatId(botConfig.getTourchannel())
                         .setText(score)
-                        .setParseMode(ParseMode.HTML);
-                sendMessage(sm);
+                        .enableHtml(true));
             }
 
-        } else if (text.startsWith("/win") && botConfig.getAdmins().contains(message.getFrom().getId())) {
-            String[] params = text.split(" ");
+        } else if (text.startsWith("/win") && isFromAdmin(message)) {
+            var params = text.split(" ");
             if (params.length == 6) {
                 String score = getScore(params);
-                for (Integer membersId : membersIds) {
-                    RestrictChatMember rcm = new RestrictChatMember(botConfig.getTourgroup(), membersId);
-                    try {
-                        execute(rcm);
-                    } catch (TelegramApiException e) {
-                        BotLogger.error("RESTRICT", e);
-                    }
-                }
-                members.clear();
-                membersIds.clear();
+                restrictMembers(botConfig.getTourgroup());
                 tournamentEnabled = false;
 
-                SendMessage toChannel = new SendMessage()
+                var toChannel = new SendMessage()
                         .setChatId(botConfig.getTourchannel())
                         .setText(score + "\n\n<b>" + params[1] + " выходит в " + params[5] + "!</b>")
-                        .setParseMode(ParseMode.HTML);
+                        .enableHtml(true);
                 sendMessage(toChannel);
 
-                SendMessage toVegans = new SendMessage()
+                var toVegans = new SendMessage()
                         .setChatId(botConfig.getLastvegan())
                         .setText("<b>Раунд завершен.</b>\n\n<b>Победитель:</b> "
                                 + params[1] + "\nБолельщики, посетите "
                                 + botConfig.getTourchannel() + ",  чтобы узнать подробности")
-                        .setParseMode(ParseMode.HTML);
+                        .enableHtml(true);
                 sendMessage(toVegans);
             }
-        } else if (text.startsWith("/rt") && botConfig.getAdmins().contains(message.getFrom().getId())) {
-            for (Integer membersId : membersIds) {
-                RestrictChatMember rcm = new RestrictChatMember(botConfig.getTourgroup(), membersId);
-                try {
-                    execute(rcm);
-                } catch (TelegramApiException e) {
-                    BotLogger.error("RESTRICT", e);
-                }
-            }
-            members.clear();
-            membersIds.clear();
+        } else if (text.startsWith("/rt") && isFromAdmin(message)) {
+            restrictMembers(botConfig.getTourgroup());
             tournamentEnabled = false;
-            SendMessage sm = new SendMessage(botConfig.getLastvegan(),
+            sendMessage(new SendMessage(botConfig.getLastvegan(),
                     "<b>Турнир отменен из-за непредвиденных обстоятельств!</b>")
-                    .setParseMode(ParseMode.HTML);
-            sendMessage(sm);
+                    .enableHtml(true));
         }
     }
 
-    private String getScore(String... params) {
+    private boolean isFromAdmin(Message message) {
+        return botConfig.getAdmins().contains(message.getFrom().getId());
+    }
+
+    private boolean isAllowedChat(Message message) {
+        return allowedChats.contains(message.getChatId());
+    }
+
+    private void restrictMembers(long groupId) {
+        for (Integer membersId : membersIds) {
+            try {
+                execute(new RestrictChatMember(groupId, membersId));
+            } catch (TelegramApiException e) {
+                BotLogger.error("RESTRICT", e);
+            }
+        }
+        members.clear();
+        membersIds.clear();
+    }
+
+    private String getScore(String[] params) {
         String player1 = "<b>" + params[1] + "</b>";
         String player2 = "<b>" + params[3] + "</b>";
         return player1 + " - " +
@@ -125,24 +130,25 @@ public class LastkatkaBotHandler extends BotHandler {
 
     private void veganTimer() {
         for (int i = 300; i > 0; i--) {
-            if (isCollectingVegans) {
-                if (i % 60 == 0 && i != 300) {
-                    SendMessage sm = new SendMessage(botConfig.getLastvegan(), "Осталось " + i / 60
-                            + " минуты чтобы джойнуться\n/join@veganwarsbot");
-                    sendMessage(sm);
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    BotLogger.error("TIMER", e);
-                }
+            if (!isCollectingVegans) break;
 
-            } else {
-                break;
+            if (i % 60 == 0 && i != 300) {
+                sendMessage(new SendMessage(
+                        botConfig.getLastvegan(),
+                        "Осталось " + (i / 60) + " минуты чтобы джойнуться\n/join@veganwarsbot"));
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                BotLogger.error("TIMER", e);
             }
         }
         isCollectingVegans = false;
         vegans.clear();
+    }
+
+    private void sendMessage(Long chatId, String message) {
+        sendMessage(new SendMessage(chatId, message));
     }
 
     private void sendMessage(SendMessage message) {
@@ -151,6 +157,10 @@ public class LastkatkaBotHandler extends BotHandler {
         } catch (TelegramApiException e) {
             BotLogger.error("SEND", e);
         }
+    }
+
+    private void delMessage(Long chatId, Integer messageId) {
+        delMessage(new DeleteMessage(chatId, messageId));
     }
 
     private void delMessage(DeleteMessage message) {
@@ -168,7 +178,7 @@ public class LastkatkaBotHandler extends BotHandler {
             if ((update.getCallbackQuery().getData().equals("register_in_tournament"))) {
                 if (members.contains(update.getCallbackQuery().getFrom().getUserName())) {
                     membersIds.add(update.getCallbackQuery().getFrom().getId());
-                    RestrictChatMember rcm = new RestrictChatMember()
+                    var rcm = new RestrictChatMember()
                             .setChatId(botConfig.getTourgroup())
                             .setUserId(update.getCallbackQuery().getFrom().getId())
                             .setCanSendMessages(true)
@@ -188,17 +198,17 @@ public class LastkatkaBotHandler extends BotHandler {
         Message message = update.getMessage();
         // don't process old messages
         long current = System.currentTimeMillis() / 1000;
-            if (message.getDate() + 60 >= current) {
+        if (message.getDate() + 60 >= current) {
             long chatId = message.getChatId();
             int messageId = message.getMessageId();
 
             // restrict any user that not in tournament
-            if (message.getChatId() == botConfig.getTourgroup() && !botConfig.getAdmins().contains(message.getFrom().getId())) {
+            if (message.getChatId() == botConfig.getTourgroup() && !isFromAdmin(message)) {
                 List<User> news = message.getNewChatMembers();
                 if (news != null)
                     for (User user : news) {
                         if (!membersIds.contains(user.getId())) {
-                            RestrictChatMember rcm = new RestrictChatMember()
+                            var rcm = new RestrictChatMember()
                                     .setChatId(botConfig.getTourgroup())
                                     .setUserId(user.getId())
                                     .setCanSendMessages(false);
@@ -211,134 +221,130 @@ public class LastkatkaBotHandler extends BotHandler {
                     }
 
             }  else if (update.getMessage().hasText()) { // leave from foreign groups
-                if (!message.isUserMessage() && !allowedChats.contains(message.getChatId())) {
-                    SendMessage sm = new SendMessage(chatId, "Какая-то левая конфа, ну её нафиг");
-                    sendMessage(sm);
-                    LeaveChat lc = new LeaveChat().setChatId(chatId);
+                if (!message.isUserMessage() && !isAllowedChat(message)) {
+                    sendMessage(chatId, "Какая-то левая конфа, ну её нафиг");
                     try {
-                        execute(lc);
+                        execute(new LeaveChat().setChatId(chatId));
                     } catch (TelegramApiException e) {
                         BotLogger.error("LEAVE", e);
                     }
+                    return null;
+                }
+
+                String text = message.getText();
+
+                if (text.startsWith("/pinthis") && !message.isUserMessage() && message.isReply()) {
+                    try {
+                        execute(new PinChatMessage(chatId, message.getReplyToMessage().getMessageId())
+                                .setDisableNotification(true));
+                    } catch (TelegramApiException e) {
+                        BotLogger.error("PINMESSAGE", e);
+                    }
+                    delMessage(chatId, messageId);
+
+                } else if (text.startsWith("/unpin") && !message.isUserMessage()) {
+                    try {
+                        execute(new UnpinChatMessage(chatId));
+                    } catch (TelegramApiException e) {
+                        BotLogger.error("UNPIN", e);
+                    }
+                    delMessage(chatId, messageId);
+
+                } else if (text.startsWith("/bite") && !message.isUserMessage() && message.isReply()) {
+                    String name = message.getFrom().getFirstName();
+                    sendMessage(new SendMessage(chatId, "Вы были укушены за ушко юзером " + name)
+                            .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
+                    delMessage(chatId, messageId);
+
+                } else if (text.startsWith("/pat") && !message.isUserMessage() && message.isReply()) {
+                    String name = message.getFrom().getFirstName();
+                    sendMessage(new SendMessage(chatId, "Юзер " + name + " погладил вас по голове")
+                            .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
+                    delMessage(chatId, messageId);
+
+                } else if (text.startsWith("/tourgroup") && isFromAdmin(message)) {
+                    // Replace old tour group
+                    var params = text.split(" ");
+                    if (params.length == 2) {
+                        allowedChats.remove(botConfig.getTourgroup());
+                        botConfig.setTourgroup(Long.valueOf(params[1]));
+                        allowedChats.add(botConfig.getTourgroup());
+                        sendMessage(chatId, "Группа турнира успешно назначена!");
+                    }
+
+                } else if (text.startsWith("/tourchannel") && isFromAdmin(message)) {
+                    // Replace old tour channel
+                    var params = text.split(" ");
+                    if (params.length == 2) {
+                        botConfig.setTourchannel(params[1]);
+                        sendMessage(chatId, "Канал успешно назначен!");
+                    }
+
+                } else if (text.startsWith("/setup") && isFromAdmin(message)) {
+                    var params = text.split(" ");
+                    if (params.length != 4) {
+                        sendMessage(chatId, "Неверное количество аргументов!");
+                    } else { // TODO
+                        members.clear();
+                        membersIds.clear();
+                        members.add(params[1].replace("@", ""));
+                        members.add(params[2].replace("@", ""));
+                        tournamentEnabled = true;
+
+                        var markup = new InlineKeyboardMarkup();
+                        var row1 = List.of(
+                                new InlineKeyboardButton()
+                                        .setText("На турнир!")
+                                        .setCallbackData(CALLBACK_REGISTER_IN_TOURNAMENT)
+                        );
+                        markup.setKeyboard(List.of(row1));
+                        var toVegans = new SendMessage()
+                                .setChatId(botConfig.getLastvegan())
+                                .setText("<b>Турнир активирован!</b>\n\n"
+                                + String.join(", ", params[1], params[2],
+                                        "нажмите на кнопку ниже для снятия ограничения в группе турнира\n\n")
+                                + "Группа турнира (болельщикам read-only) - " + botConfig.getTourgroupname())
+                                .setReplyMarkup(markup)
+                                .enableHtml(true);
+                        sendMessage(toVegans);
+
+                        var toChannel = new SendMessage()
+                                .setChatId(botConfig.getTourchannel())
+                                .setText("<b>" + params[3] + "</b>\n"
+                                        + params[1] + " vs " + params[2])
+                                .enableHtml(true);
+                        sendMessage(toChannel);
+                    }
+                } else if (botConfig.getVeganCommands().contains(text)) {
+                    if (!isCollectingVegans) {
+                        isCollectingVegans = true;
+                        vegans.clear();
+                        new Thread(this::veganTimer).start();
+                    }
 
                 } else {
-
-                    String text = message.getText();
-
-                    if (text.startsWith("/pinthis") && !message.isUserMessage() && message.isReply()) {
-                        PinChatMessage pcm = new PinChatMessage(chatId, message.getReplyToMessage().getMessageId())
-                                .setDisableNotification(true);
-                        try {
-                            execute(pcm);
-                        } catch (TelegramApiException e) {
-                            BotLogger.error("PINMESSAGE", e);
-                        }
-                        DeleteMessage dm = new DeleteMessage(chatId, messageId);
-                        delMessage(dm);
-
-                    } else if (text.startsWith("/unpin") && !message.isUserMessage()) {
-                        UnpinChatMessage ucm = new UnpinChatMessage(chatId);
-                        try {
-                            execute(ucm);
-                        } catch (TelegramApiException e) {
-                            BotLogger.error("UNPIN", e);
-                        }
-                        DeleteMessage dm = new DeleteMessage(chatId, messageId);
-                        delMessage(dm);
-
-                    } else if (text.startsWith("/bite") && !message.isUserMessage() && message.isReply()) {
-                        String name = message.getFrom().getFirstName();
-                        SendMessage sm = new SendMessage(chatId, "Вы были укушены за ушко юзером " + name)
-                                .setReplyToMessageId(message.getReplyToMessage().getMessageId());
-                        sendMessage(sm);
-                        DeleteMessage dm = new DeleteMessage(chatId, messageId);
-                        delMessage(dm);
-
-                    } else if (text.startsWith("/pat") && !message.isUserMessage() && message.isReply()) {
-                        String name = message.getFrom().getFirstName();
-                        SendMessage sm = new SendMessage(chatId, "Юзер " + name + " погладил вас по голове")
-                                .setReplyToMessageId(message.getReplyToMessage().getMessageId());
-                        sendMessage(sm);
-                        DeleteMessage dm = new DeleteMessage(chatId, messageId);
-                        delMessage(dm);
-
-                    } else if (text.startsWith("/tourgroup") && botConfig.getAdmins().contains(message.getFrom().getId())) {
-                        botConfig.setTourgroup(Long.valueOf(text.split(" ")[1]));
-                        allowedChats.remove(2);
-                        allowedChats.add(botConfig.getTourgroup());
-                        SendMessage sm = new SendMessage(chatId, "Группа турнира успешно назначена!");
-                        sendMessage(sm);
-
-                    } else if (text.startsWith("/tourchannel") && botConfig.getAdmins().contains(message.getFrom().getId())) {
-                        botConfig.setTourchannel(text.split(" ")[1]);
-                        SendMessage sm = new SendMessage(chatId, "Канал успешно назначен!");
-                        sendMessage(sm);
-
-                    } else if (text.startsWith("/setup") && botConfig.getAdmins().contains(message.getFrom().getId())) {
-                        String[] params = text.split(" ");
-                        if (params.length != 4) {
-                            SendMessage sm = new SendMessage(chatId, "Неверное количество аргументов!");
-                            sendMessage(sm);
-                        } else { // TODO
-                            members = new HashSet<>();
-                            membersIds = new HashSet<>();
-                            members.add(params[1].replace("@", ""));
-                            members.add(params[2].replace("@", ""));
-                            tournamentEnabled = true;
-
-                            InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
-                            List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-                            List<InlineKeyboardButton> row1 = new ArrayList<>();
-                            row1.add(new InlineKeyboardButton().setText("На турнир!")
-                                    .setCallbackData("register_in_tournament"));
-                            rows.add(row1);
-                            markup.setKeyboard(rows);
-                            SendMessage toVegans = new SendMessage()
-                                    .setChatId(botConfig.getLastvegan())
-                                    .setText("<b>Турнир активирован!</b>\n\n"
-                                    + String.join(", ", params[1], params[2],
-                                            "нажмите на кнопку ниже для снятия ограничения в группе турнира\n\n")
-                                    + "Группа турнира (болельщикам read-only) - " + botConfig.getTourgroupname())
-                                    .setReplyMarkup(markup)
-                                    .setParseMode(ParseMode.HTML);
-                            sendMessage(toVegans);
-
-                            SendMessage toChannel = new SendMessage()
-                                    .setChatId(botConfig.getTourchannel())
-                                    .setText("<b>" + params[3] + "</b>\n"
-                                            + params[1] + " vs " + params[2])
-                                    .setParseMode(ParseMode.HTML);
-                            sendMessage(toChannel);
-                        }
-                    } else if (botConfig.getVeganCommands().contains(text)) {
-                        if (!isCollectingVegans) {
-                            isCollectingVegans = true;
-                            vegans = new HashSet<>();
-                            new Thread(this::veganTimer).start();
-                        }
-
-                    } else if (text.startsWith("/join@veganwarsbot") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
-                        if (!vegans.contains(message.getFrom().getUserName())) {
-                            vegans.add(message.getFrom().getUserName());
+                    if (text.startsWith("/join@veganwarsbot") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
+                        var userName = message.getFrom().getUserName();
+                        if (!vegans.contains(userName)) {
+                            vegans.add(userName);
                             int count = vegans.size();
                             String toSend = "Джойнулось " + count + " игроков";
                             if (count % 2 != 0 && count > 2) {
                                 toSend += "\nГарантированно будет крыса!";
                             }
-                            SendMessage sm = new SendMessage(botConfig.getLastvegan(), toSend);
-                            sendMessage(sm);
+                            sendMessage(botConfig.getLastvegan(), toSend);
                         }
 
                     } else if (text.startsWith("/flee@veganwarsbot") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
-                        if (vegans.contains(message.getFrom().getUserName())) {
-                            vegans.remove(message.getFrom().getUserName());
+                        var userName = message.getFrom().getUserName();
+                        if (vegans.contains(userName)) {
+                            vegans.remove(userName);
                             int count = vegans.size();
                             String toSend = "Осталось " + count + " игроков";
                             if (count % 2 != 0 && count > 2) {
                                 toSend += "\nГарантированно будет крыса!";
                             }
-                            SendMessage sm = new SendMessage(botConfig.getLastvegan(), toSend);
-                            sendMessage(sm);
+                            sendMessage(botConfig.getLastvegan(), toSend);
                         }
 
                     } else if (text.startsWith("/fight@veganwarsbot") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
@@ -346,8 +352,7 @@ public class LastkatkaBotHandler extends BotHandler {
                             isCollectingVegans = false;
                             vegans.clear();
                         } else {
-                            SendMessage sm = new SendMessage(botConfig.getLastvegan(), "Чото вас, веганов, маловато");
-                            sendMessage(sm);
+                            sendMessage(botConfig.getLastvegan(), "Чото вас, веганов, маловато");
                         }
 
                     } else if (text.startsWith("/reset") && chatId == botConfig.getLastvegan()) {

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class LastkatkaBot implements BotModule {
 
-    public static void main(String... args) {
+    public static void main(String[] args) {
         final var profile = (args.length >= 1 && !args[0].isEmpty()) ? args[0] : "";
         Runner.run(profile, List.of(new LastkatkaBot()));
     }
