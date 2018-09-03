@@ -1,6 +1,7 @@
 package com.senderman.lastkatkabot;
 
 import com.annimon.tgbotsmodule.BotHandler;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
@@ -57,7 +58,7 @@ public class LastkatkaBotHandler extends BotHandler {
         return botConfig.getToken();
     }
 
-    private void processTournament(Message message, String text) { // TODO
+    private void processTournament(Message message, String text) {
 
         if (text.startsWith("/score") && isFromAdmin(message)) {
             var params = text.split(" ");
@@ -175,7 +176,7 @@ public class LastkatkaBotHandler extends BotHandler {
     public BotApiMethod onUpdate(Update update) {
 
         if (update.hasCallbackQuery()) {
-            if ((update.getCallbackQuery().getData().equals("register_in_tournament"))) {
+            if ((update.getCallbackQuery().getData().equals(CALLBACK_REGISTER_IN_TOURNAMENT))) {
                 if (members.contains(update.getCallbackQuery().getFrom().getUserName())) {
                     membersIds.add(update.getCallbackQuery().getFrom().getId());
                     var rcm = new RestrictChatMember()
@@ -185,8 +186,12 @@ public class LastkatkaBotHandler extends BotHandler {
                             .setCanAddWebPagePreviews(true)
                             .setCanSendMediaMessages(true)
                             .setCanSendOtherMessages(true);
+                    AnswerCallbackQuery acq = new AnswerCallbackQuery()
+                            .setCallbackQueryId(update.getCallbackQuery().getId())
+                            .setText("Вам даны права на отправку сообщений в группе турнира!");
                     try {
                         execute(rcm);
+                        execute(acq);
                     } catch (TelegramApiException e) {
                         BotLogger.fine("UNBAN", "Some error, but this doesn't matter");
                     }
@@ -195,10 +200,11 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
         }
 
-        final var message = update.getMessage();
-        if (message == null) {
+        if (!update.hasMessage()) {
             return null;
         }
+
+        final var message = update.getMessage();
 
         // don't process old messages
         long current = System.currentTimeMillis() / 1000;
@@ -291,7 +297,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 var params = text.split(" ");
                 if (params.length != 4) {
                     sendMessage(chatId, "Неверное количество аргументов!");
-                } else { // TODO
+                } else {
                     members.clear();
                     membersIds.clear();
                     members.add(params[1].replace("@", ""));
