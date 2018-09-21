@@ -3,6 +3,7 @@ package com.senderman.lastkatkabot;
 import com.annimon.tgbotsmodule.BotHandler;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
@@ -281,7 +282,11 @@ public class LastkatkaBotHandler extends BotHandler {
                 delMessage(chatId, messageId);
 
             } else if (text.startsWith("/help") && message.isUserMessage()) {
-                sendMessage(chatId, botConfig.getHelp());
+                SendMessage sm = new SendMessage()
+                        .setChatId(chatId)
+                        .setText(botConfig.getHelp())
+                        .enableMarkdown(true);
+                sendMessage(sm);
 
             } else if (text.startsWith("/tourgroup") && isFromAdmin(message)) {
                 // Replace old tour group
