@@ -108,6 +108,11 @@ public class LastkatkaBotHandler extends BotHandler {
         return allowedChats.contains(message.getChatId());
     }
 
+    private boolean isFromWwBot(Message message) {
+        return botConfig.getWwBots().contains(message.getReplyToMessage().getFrom().getUserName()) &&
+                message.getReplyToMessage().getText().contains("#players");
+    }
+
     private void restrictMembers(long groupId) {
         for (Integer membersId : membersIds) {
             try {
@@ -233,8 +238,8 @@ public class LastkatkaBotHandler extends BotHandler {
                     }
                 }
 
-        }  else if (message.hasText()) { // leave from foreign groups
-            if (!message.isUserMessage() && !isAllowedChat(message)) {
+        } else if (message.hasText()) {
+            if (!message.isUserMessage() && !isAllowedChat(message)) { // leave from foreign groups
                 sendMessage(chatId, "Какая-то левая конфа, ну её нафиг");
                 try {
                     execute(new LeaveChat().setChatId(chatId));
@@ -246,7 +251,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
             String text = message.getText();
 
-            if (text.startsWith("/pinthis") && !message.isUserMessage() && message.isReply()) {
+            if (text.startsWith("/pinthis") && !message.isUserMessage() && message.isReply() && isFromWwBot(message)) {
                 try {
                     execute(new PinChatMessage(chatId, message.getReplyToMessage().getMessageId())
                             .setDisableNotification(true));
@@ -274,6 +279,9 @@ public class LastkatkaBotHandler extends BotHandler {
                 sendMessage(new SendMessage(chatId, "Юзер " + name + " погладил вас по голове")
                         .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
                 delMessage(chatId, messageId);
+
+            } else if (text.startsWith("/help") && message.isUserMessage()) {
+                sendMessage(chatId, botConfig.getHelp());
 
             } else if (text.startsWith("/tourgroup") && isFromAdmin(message)) {
                 // Replace old tour group
@@ -314,9 +322,9 @@ public class LastkatkaBotHandler extends BotHandler {
                     var toVegans = new SendMessage()
                             .setChatId(botConfig.getLastvegan())
                             .setText("<b>Турнир активирован!</b>\n\n"
-                            + String.join(", ", params[1], params[2],
+                                    + String.join(", ", params[1], params[2],
                                     "нажмите на кнопку ниже для снятия ограничения в группе турнира\n\n")
-                            + "Группа турнира (болельщикам read-only) - " + botConfig.getTourgroupname())
+                                    + "Группа турнира (болельщикам read-only) - " + botConfig.getTourgroupname())
                             .setReplyMarkup(markup)
                             .enableHtml(true);
                     sendMessage(toVegans);
@@ -371,6 +379,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 } else if (text.startsWith("/reset") && chatId == botConfig.getLastvegan()) {
                     isCollectingVegans = false;
                     vegans.clear();
+                    sendMessage(botConfig.getLastvegan(), "Список игроков сброшен");
 
                 } else if (tournamentEnabled) {
                     processTournament(message, text);

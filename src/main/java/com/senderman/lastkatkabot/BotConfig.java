@@ -32,7 +32,13 @@ public class BotConfig {
     private Set<String> veganCommands;
 
     @JsonProperty
+    private Set<String> wwBots;
+
+    @JsonProperty
     private Set<Integer> admins;
+
+    @JsonProperty
+    private String help;
 
     public String getToken() {
         return token;
@@ -106,6 +112,22 @@ public class BotConfig {
         this.veganCommands = veganCommands;
     }
 
+    public Set<String> getWwBots() {
+        return wwBots;
+    }
+
+    public void setWwBots(Set<String> wwBots) {
+        this.wwBots = wwBots;
+    }
+
+    public String getHelp() {
+        return help;
+    }
+
+    public void setHelp(String help) {
+        this.help = help;
+    }
+
     @Override
     public String toString() {
         return "BotConfig{" +
@@ -115,8 +137,11 @@ public class BotConfig {
                 ", lastvegan=" + lastvegan +
                 ", tourgroup=" + tourgroup +
                 ", tourchannel='" + tourchannel + '\'' +
+                ", tourgroupname='" + tourgroupname + '\'' +
                 ", veganCommands=" + veganCommands +
+                ", wwBots=" + wwBots +
                 ", admins=" + admins +
+                ", help='" + help + '\'' +
                 '}';
     }
 }
