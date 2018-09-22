@@ -7,7 +7,6 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
-import org.telegram.telegrambots.meta.api.methods.pinnedmessages.UnpinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -258,14 +257,6 @@ public class LastkatkaBotHandler extends BotHandler {
                             .setDisableNotification(true));
                 } catch (TelegramApiException e) {
                     BotLogger.error("PINMESSAGE", e);
-                }
-                delMessage(chatId, messageId);
-
-            } else if (text.startsWith("/unpin") && !message.isUserMessage()) {
-                try {
-                    execute(new UnpinChatMessage(chatId));
-                } catch (TelegramApiException e) {
-                    BotLogger.error("UNPIN", e);
                 }
                 delMessage(chatId, messageId);
 
