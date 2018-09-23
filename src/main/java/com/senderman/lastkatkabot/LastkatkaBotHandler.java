@@ -187,7 +187,6 @@ public class LastkatkaBotHandler extends BotHandler {
                             .setChatId(botConfig.getTourgroup())
                             .setUserId(update.getCallbackQuery().getFrom().getId())
                             .setCanSendMessages(true)
-                            .setCanAddWebPagePreviews(true)
                             .setCanSendMediaMessages(true)
                             .setCanSendOtherMessages(true);
                     var acq = new AnswerCallbackQuery()
@@ -197,7 +196,16 @@ public class LastkatkaBotHandler extends BotHandler {
                         execute(acq);
                         execute(rcm);
                     } catch (TelegramApiException e) {
-                        BotLogger.fine("UNBAN", "Some error, but this doesn't matter");
+                        BotLogger.error("UNBAN", "Failed to unban member");
+                    }
+                } else {
+                    var acq = new AnswerCallbackQuery()
+                            .setCallbackQueryId(update.getCallbackQuery().getId())
+                            .setText("Вы не являетесь участником текущего раунда!");
+                    try {
+                        execute(acq);
+                    } catch (TelegramApiException e) {
+                        BotLogger.fine("UNKNOWN MEMBER", "This error means nothing");
                     }
                 }
             }
@@ -216,8 +224,8 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
         }
 
-        long chatId = message.getChatId();
-        int messageId = message.getMessageId();
+        final long chatId = message.getChatId();
+        final int messageId = message.getMessageId();
 
         // restrict any user that not in tournament
         if (message.getChatId() == botConfig.getTourgroup() && !isFromAdmin(message)) {
@@ -261,13 +269,15 @@ public class LastkatkaBotHandler extends BotHandler {
 
             } else if (text.startsWith("/bite") && !message.isUserMessage() && message.isReply()) {
                 String name = message.getFrom().getFirstName();
-                sendMessage(new SendMessage(chatId, name + " укусил тебя за ушко")
+                String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
+                sendMessage(new SendMessage(chatId, name + " укусил " + who + " за ушко")
                         .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
                 delMessage(chatId, messageId);
 
             } else if (text.startsWith("/pat") && !message.isUserMessage() && message.isReply()) {
                 String name = message.getFrom().getFirstName();
-                sendMessage(new SendMessage(chatId, name + " погладил тебя по голове")
+                String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
+                sendMessage(new SendMessage(chatId, name + " погладил " + who + " по голове")
                         .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
                 delMessage(chatId, messageId);
 
@@ -311,12 +321,12 @@ public class LastkatkaBotHandler extends BotHandler {
 
                     var toChannel = new SendMessage()
                             .setChatId(botConfig.getTourchannel())
-                            .setText("**" + params[3] + "**\n"
+                            .setText("**" + params[3] + "**\n\n"
                                     + params[1] + " vs " + params[2])
                             .enableMarkdown(true);
                     sendMessage(toChannel);
                 }
-            } else if (botConfig.getVeganCommands().contains(text)) {
+            } else if (botConfig.getVeganCommands().contains(text) && chatId == botConfig.getLastvegan()) {
                 if (!isCollectingVegans) {
                     isCollectingVegans = true;
                     vegans.clear();
@@ -324,7 +334,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 }
 
             } else {
-                if (text.startsWith("/join@veganwarsbot") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
+                if (text.startsWith("/join") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
                     var userName = message.getFrom().getUserName();
                     if (!vegans.contains(userName)) {
                         vegans.add(userName);
@@ -336,7 +346,7 @@ public class LastkatkaBotHandler extends BotHandler {
                         sendMessage(botConfig.getLastvegan(), toSend);
                     }
 
-                } else if (text.startsWith("/flee@veganwarsbot") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
+                } else if (text.startsWith("/flee") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
                     var userName = message.getFrom().getUserName();
                     if (vegans.contains(userName)) {
                         vegans.remove(userName);
@@ -348,7 +358,7 @@ public class LastkatkaBotHandler extends BotHandler {
                         sendMessage(botConfig.getLastvegan(), toSend);
                     }
 
-                } else if (text.startsWith("/fight@veganwarsbot") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
+                } else if (text.startsWith("/fight") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
                     if (vegans.size() > 1) {
                         isCollectingVegans = false;
                         vegans.clear();
