@@ -40,6 +40,9 @@ public class BotConfig {
     @JsonProperty
     private String help;
 
+    @JsonProperty
+    private String announce;
+
     public String getToken() {
         return token;
     }
@@ -126,6 +129,14 @@ public class BotConfig {
 
     public void setHelp(String help) {
         this.help = help;
+    }
+
+    public String getAnnounce() {
+        return announce;
+    }
+
+    public void setAnnounce(String announce) {
+        this.announce = announce;
     }
 
     @Override
