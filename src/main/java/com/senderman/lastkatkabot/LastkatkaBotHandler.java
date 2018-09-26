@@ -29,6 +29,7 @@ public class LastkatkaBotHandler extends BotHandler {
     private Set<String> members;
     private Set<Integer> membersIds;
     private Set<String> vegans;
+    private Set<Integer> blacklist;
     private boolean isCollectingVegans;
     private boolean tournamentEnabled;
 
@@ -42,6 +43,7 @@ public class LastkatkaBotHandler extends BotHandler {
         vegans = new HashSet<>();
         members = new HashSet<>();
         membersIds = new HashSet<>();
+        blacklist = new HashSet<>();
 
         isCollectingVegans = false;
         tournamentEnabled = false;
@@ -103,6 +105,10 @@ public class LastkatkaBotHandler extends BotHandler {
         return botConfig.getAdmins().contains(message.getFrom().getId());
     }
 
+    private boolean isInBlacklist(Message message) {
+        return blacklist.contains(message.getFrom().getId());
+    }
+
     private boolean isAllowedChat(Message message) {
         return allowedChats.contains(message.getChatId());
     }
@@ -110,6 +116,13 @@ public class LastkatkaBotHandler extends BotHandler {
     private boolean isFromWwBot(Message message) {
         return botConfig.getWwBots().contains(message.getReplyToMessage().getFrom().getUserName()) &&
                 message.getReplyToMessage().getText().contains("#players");
+    }
+
+    private boolean isValidJoin(Message message) {
+        boolean a = message.isReply() && message.getReplyToMessage().getFrom().getUserName().equals("veganwarsbot");
+        boolean b = message.getText().startsWith("/join@veganwarsbot");
+        boolean c = message.getChatId() == botConfig.getLastvegan();
+        return (a || b) && c && isCollectingVegans;
     }
 
     private void restrictMembers(long groupId) {
@@ -269,18 +282,32 @@ public class LastkatkaBotHandler extends BotHandler {
                 delMessage(chatId, messageId);
 
             } else if (text.startsWith("/bite") && !message.isUserMessage() && message.isReply()) {
+                delMessage(chatId, messageId);
+                if (isInBlacklist(message))
+                    return null;
+
                 String name = message.getFrom().getFirstName();
                 String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
                 sendMessage(new SendMessage(chatId, name + " укусил " + who + " за ушко")
                         .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
-                delMessage(chatId, messageId);
 
             } else if (text.startsWith("/pat") && !message.isUserMessage() && message.isReply()) {
+                delMessage(chatId, messageId);
+                if (isInBlacklist(message))
+                    return null;
+
                 String name = message.getFrom().getFirstName();
                 String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
                 sendMessage(new SendMessage(chatId, name + " погладил " + who + " по голове")
                         .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
-                delMessage(chatId, messageId);
+
+            } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
+                blacklist.add(message.getReplyToMessage().getFrom().getId());
+                sendMessage(chatId, message.getFrom().getFirstName() + " был плохой кошечкой, и теперь не может гладить и кусать!");
+
+            } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
+                blacklist.remove(message.getReplyToMessage().getFrom().getId());
+                sendMessage(chatId, message.getFrom().getFirstName() + " вел себя хорошо, и теперь может гладить и кусать!");
 
             } else if (text.startsWith("/help") && message.isUserMessage()) {
                 SendMessage sm = new SendMessage()
@@ -289,15 +316,15 @@ public class LastkatkaBotHandler extends BotHandler {
                 sendMessage(sm);
 
             } else if (text.startsWith("/announce") && isFromAdmin(message)) {
-                String[] params = text.split(" ");
+                String[] params = text.split("\n");
                 if (params.length != 6) {
                     sendMessage(chatId, "Неверное количество аргументов!");
                     return null;
                 }
                 String announce = botConfig.getAnnounce()
-                        .replace("DATE", params[1].replace("_", " "))
-                        .replace("UNTIL", params[2].replace("_", " "))
-                        .replace("AWARD", params[3].replace("_", " "))
+                        .replace("DATE", params[1])
+                        .replace("UNTIL", params[2])
+                        .replace("AWARD", params[3])
                         .replace("LINK", params[4])
                         .replace("VOTE", params[5]);
                 sendMessage(botConfig.getLastvegan(), announce);
@@ -348,7 +375,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 }
 
             } else {
-                if (text.startsWith("/join") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
+                if (text.startsWith("/join") && isValidJoin(message)) {
                     var userName = message.getFrom().getUserName();
                     if (!vegans.contains(userName)) {
                         vegans.add(userName);
