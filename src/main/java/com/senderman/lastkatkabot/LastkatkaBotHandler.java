@@ -84,7 +84,7 @@ public class LastkatkaBotHandler extends BotHandler {
             String goingTo = (params[5].equals("over")) ? " выиграл турнир" : " выходит в " + params[5].replace("_", " ");
             var toChannel = new SendMessage()
                     .setChatId(botConfig.getTourchannel())
-                    .setText(score + "\n\n<b>" + params[1] + goingTo + "!</b>");
+                    .setText(score + "\n\n" + params[1] + "<b>" + goingTo + "!</b>");
             sendMessage(toChannel);
 
             var toVegans = new SendMessage()
@@ -138,8 +138,8 @@ public class LastkatkaBotHandler extends BotHandler {
     }
 
     private String getScore(String[] params) {
-        String player1 = "<b>" + params[1] + "</b>";
-        String player2 = "<b>" + params[3] + "</b>";
+        String player1 = params[1];
+        String player2 = params[3];
         return player1 + " - " +
                 player2 + "\n" +
                 params[2] + ":" +
@@ -195,17 +195,21 @@ public class LastkatkaBotHandler extends BotHandler {
 
         if (update.hasCallbackQuery()) {
             if ((update.getCallbackQuery().getData().equals(CALLBACK_REGISTER_IN_TOURNAMENT))) {
-                if (members.contains(update.getCallbackQuery().getFrom().getUserName())) {
-                    membersIds.add(update.getCallbackQuery().getFrom().getId());
+                int id = update.getCallbackQuery().getFrom().getId();
+                if (members.contains(update.getCallbackQuery().getFrom().getUserName()) && !membersIds.contains(id)) {
+                    membersIds.add(id);
                     var rcm = new RestrictChatMember()
                             .setChatId(botConfig.getTourgroup())
-                            .setUserId(update.getCallbackQuery().getFrom().getId())
+                            .setUserId(id)
                             .setCanSendMessages(true)
                             .setCanSendMediaMessages(true)
                             .setCanSendOtherMessages(true);
                     var acq = new AnswerCallbackQuery()
                             .setCallbackQueryId(update.getCallbackQuery().getId())
-                            .setText("Вам даны права на отправку сообщений в группе турнира!");
+                            .setText("Вам даны права на отправку сообщений в группе турнира!")
+                            .setShowAlert(true);
+                    sendMessage(botConfig.getTourgroup(),
+                            update.getCallbackQuery().getFrom().getFirstName() + " <b>получил доступ к игре</b>");
                     try {
                         execute(acq);
                         execute(rcm);
@@ -215,7 +219,8 @@ public class LastkatkaBotHandler extends BotHandler {
                 } else {
                     var acq = new AnswerCallbackQuery()
                             .setCallbackQueryId(update.getCallbackQuery().getId())
-                            .setText("Вы не являетесь участником текущего раунда!");
+                            .setText("Вы не являетесь участником текущего раунда!")
+                            .setShowAlert(true);
                     try {
                         execute(acq);
                     } catch (TelegramApiException e) {
@@ -303,11 +308,13 @@ public class LastkatkaBotHandler extends BotHandler {
 
             } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
                 blacklist.add(message.getReplyToMessage().getFrom().getId());
-                sendMessage(chatId, message.getFrom().getFirstName() + " был плохой кошечкой, и теперь не может гладить и кусать!");
+                sendMessage(chatId, message.getReplyToMessage().getFrom().getFirstName() +
+                        " был плохой кошечкой, и теперь не может гладить и кусать!");
 
             } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
                 blacklist.remove(message.getReplyToMessage().getFrom().getId());
-                sendMessage(chatId, message.getFrom().getFirstName() + " вел себя хорошо, и теперь может гладить и кусать!");
+                sendMessage(chatId, message.getReplyToMessage().getFrom().getFirstName() +
+                        " вел себя хорошо, и теперь может гладить и кусать!");
 
             } else if (text.startsWith("/help") && message.isUserMessage()) {
                 SendMessage sm = new SendMessage()
