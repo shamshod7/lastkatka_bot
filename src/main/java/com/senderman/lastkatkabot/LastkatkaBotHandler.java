@@ -16,9 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class LastkatkaBotHandler extends BotHandler {
 
@@ -28,9 +26,8 @@ public class LastkatkaBotHandler extends BotHandler {
     private Set<Long> allowedChats;
     private Set<String> members;
     private Set<Integer> membersIds;
-    private Set<String> vegans;
+    private Map<Long, VeganTimer> veganTimers;
     private Set<Integer> blacklist;
-    private boolean isCollectingVegans;
     private boolean tournamentEnabled;
 
     LastkatkaBotHandler(BotConfig botConfig) {
@@ -40,12 +37,10 @@ public class LastkatkaBotHandler extends BotHandler {
                 botConfig.getLastvegan(),
                 botConfig.getTourgroup()
         ));
-        vegans = new HashSet<>();
+        veganTimers = new HashMap<>();
         members = new HashSet<>();
         membersIds = new HashSet<>();
         blacklist = new HashSet<>();
-
-        isCollectingVegans = false;
         tournamentEnabled = false;
     }
 
@@ -118,13 +113,6 @@ public class LastkatkaBotHandler extends BotHandler {
                 message.getReplyToMessage().getText().contains("#players");
     }
 
-    private boolean isValidJoin(Message message) {
-        boolean a = message.isReply() && message.getReplyToMessage().getFrom().getUserName().equals("veganwarsbot");
-        boolean b = message.getText().startsWith("/join@veganwarsbot");
-        boolean c = message.getChatId() == botConfig.getLastvegan();
-        return (a || b) && c && isCollectingVegans;
-    }
-
     private void restrictMembers(long groupId) {
         for (Integer membersId : membersIds) {
             try {
@@ -137,6 +125,10 @@ public class LastkatkaBotHandler extends BotHandler {
         membersIds.clear();
     }
 
+    void removeVeganTimer(long chatId) {
+        veganTimers.remove(chatId);
+    }
+
     private String getScore(String[] params) {
         String player1 = params[1];
         String player2 = params[3];
@@ -146,30 +138,11 @@ public class LastkatkaBotHandler extends BotHandler {
                 params[4];
     }
 
-    private void veganTimer() {
-        for (int i = 300; i > 0; i--) {
-            if (!isCollectingVegans) break;
-
-            if (i % 60 == 0 && i != 300) {
-                sendMessage(new SendMessage(
-                        botConfig.getLastvegan(),
-                        "Осталось " + (i / 60) + " минуты чтобы джойнуться\n\nДжоин --> /join@veganwarsbot"));
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                BotLogger.error("TIMER", e);
-            }
-        }
-        isCollectingVegans = false;
-        vegans.clear();
-    }
-
-    private void sendMessage(Long chatId, String message) {
+    void sendMessage(Long chatId, String message) {
         sendMessage(new SendMessage(chatId, message));
     }
 
-    private void sendMessage(SendMessage message) {
+    void sendMessage(SendMessage message) {
         message.enableHtml(true);
         try {
             execute(message);
@@ -374,48 +347,27 @@ public class LastkatkaBotHandler extends BotHandler {
                                 + params[1] + " vs " + params[2]);
                 sendMessage(toChannel);
 
-            } else if (botConfig.getVeganCommands().contains(text) && chatId == botConfig.getLastvegan()) {
-                if (!isCollectingVegans) {
-                    isCollectingVegans = true;
-                    vegans.clear();
-                    new Thread(this::veganTimer).start();
+            } else if (botConfig.getVeganCommands().contains(text)) { // start veganwars
+                if (!veganTimers.containsKey(chatId)) {
+                    veganTimers.put(chatId, new VeganTimer(chatId, this));
+                    veganTimers.get(chatId).start();
                 }
 
             } else {
-                if (text.startsWith("/join") && isValidJoin(message)) {
-                    var userName = message.getFrom().getUserName();
-                    if (!vegans.contains(userName)) {
-                        vegans.add(userName);
-                        int count = vegans.size();
-                        String toSend = "Джойнулось " + count + " игроков";
-                        if (count % 2 != 0 && count > 2) {
-                            toSend += "\nБудет крыса!";
-                        }
-                        sendMessage(botConfig.getLastvegan(), toSend);
+                if (text.startsWith("/join") && veganTimers.containsKey(chatId)) {
+                    veganTimers.get(chatId).addPlayer(message.getFrom().getId(), message);
+
+                } else if (text.startsWith("/flee") && veganTimers.containsKey(chatId)) {
+                    veganTimers.get(chatId).removePlayer(message.getFrom().getId());
+
+                } else if (text.startsWith("/fight") && veganTimers.containsKey(chatId)) {
+                    if (veganTimers.get(chatId).getVegansAmount() > 1) {
+                        veganTimers.get(chatId).stop();
                     }
 
-                } else if (text.startsWith("/flee") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
-                    var userName = message.getFrom().getUserName();
-                    if (vegans.contains(userName)) {
-                        vegans.remove(userName);
-                        int count = vegans.size();
-                        String toSend = "Осталось " + count + " игроков";
-                        if (count % 2 != 0 && count > 2) {
-                            toSend += "\nБудет крыса!";
-                        }
-                        sendMessage(botConfig.getLastvegan(), toSend);
-                    }
-
-                } else if (text.startsWith("/fight") && chatId == botConfig.getLastvegan() && isCollectingVegans) {
-                    if (vegans.size() > 1) {
-                        isCollectingVegans = false;
-                        vegans.clear();
-                    }
-
-                } else if (text.startsWith("/reset") && chatId == botConfig.getLastvegan()) {
-                    isCollectingVegans = false;
-                    vegans.clear();
-                    sendMessage(botConfig.getLastvegan(), "Список игроков сброшен");
+                } else if (text.startsWith("/reset") && veganTimers.containsKey(chatId)) {
+                    veganTimers.get(chatId).stop();
+                    sendMessage(chatId, "Список игроков сброшен");
 
                 } else if (tournamentEnabled) {
                     processTournament(message, text);
