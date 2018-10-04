@@ -46,12 +46,12 @@ public class LastkatkaBotHandler extends BotHandler {
 
     @Override
     public String getBotUsername() {
-        return botConfig.getUsername();
+        return System.getenv("username");
     }
 
     @Override
     public String getBotToken() {
-        return botConfig.getToken();
+        return System.getenv("token");
     }
 
     private void processTournament(Message message, String text) {

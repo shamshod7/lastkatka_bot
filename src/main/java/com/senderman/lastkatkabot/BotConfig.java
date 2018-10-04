@@ -7,14 +7,6 @@ import java.util.Set;
 
 public class BotConfig {
 
-    @NotBlank
-    @JsonProperty(required = true)
-    private String token;
-
-    @NotBlank
-    @JsonProperty(required = true)
-    private String username;
-
     @JsonProperty(required = true)
     private long lastkatka;
     @JsonProperty(required = true)
@@ -42,22 +34,6 @@ public class BotConfig {
 
     @JsonProperty
     private String announce;
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public long getLastkatka() {
         return lastkatka;
@@ -142,9 +118,7 @@ public class BotConfig {
     @Override
     public String toString() {
         return "BotConfig{" +
-                "token='" + token + '\'' +
-                ", username='" + username + '\'' +
-                ", lastkatka=" + lastkatka +
+                "lastkatka=" + lastkatka +
                 ", lastvegan=" + lastvegan +
                 ", tourgroup=" + tourgroup +
                 ", tourchannel='" + tourchannel + '\'' +
@@ -153,6 +127,7 @@ public class BotConfig {
                 ", wwBots=" + wwBots +
                 ", admins=" + admins +
                 ", help='" + help + '\'' +
+                ", announce='" + announce + '\'' +
                 '}';
     }
 }
