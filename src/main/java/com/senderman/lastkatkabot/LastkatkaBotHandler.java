@@ -265,8 +265,8 @@ public class LastkatkaBotHandler extends BotHandler {
 
             String text = message.getText();
             String name = message.getFrom().getFirstName()
-                    .replace("<", "&lt")
-                    .replace(">", "&gt");
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;");
 
             if (text.startsWith("/pinlist") && !message.isUserMessage() && message.isReply() && isFromWwBot(message)) {
                 try {
