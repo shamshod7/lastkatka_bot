@@ -17,21 +17,33 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class LastkatkaBotHandler extends BotHandler {
 
     private static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
 
     private final BotConfig botConfig;
+    private Set<Integer> admins;
     private Set<Long> allowedChats;
     private Set<String> members;
     private Set<Integer> membersIds;
-    private Map<Long, VeganTimer> veganTimers;
     private Set<Integer> blacklist;
+    private Map<Long, VeganTimer> veganTimers;
     private boolean tournamentEnabled;
 
     LastkatkaBotHandler(BotConfig botConfig) {
         this.botConfig = botConfig;
+
+        admins = new HashSet<>();
+        String envAdmins = System.getenv("admins");
+        if (envAdmins == null) {
+            admins.add(94197300);
+        } else {
+            for (String envAdmin : envAdmins.split(" ")) {
+                admins.add((Integer.valueOf(envAdmin)));
+            }
+        }
         allowedChats = new HashSet<>(List.of(
                 botConfig.getLastkatka(),
                 botConfig.getLastvegan(),
@@ -97,7 +109,7 @@ public class LastkatkaBotHandler extends BotHandler {
     }
 
     private boolean isFromAdmin(Message message) {
-        return botConfig.getAdmins().contains(message.getFrom().getId());
+        return admins.contains(message.getFrom().getId());
     }
 
     private boolean isInBlacklist(Message message) {
@@ -182,7 +194,10 @@ public class LastkatkaBotHandler extends BotHandler {
                             .setText("Вам даны права на отправку сообщений в группе турнира!")
                             .setShowAlert(true);
                     sendMessage(botConfig.getTourgroup(),
-                            update.getCallbackQuery().getFrom().getFirstName() + " <b>получил доступ к игре</b>");
+                            update.getCallbackQuery().getFrom().getFirstName()
+                                    .replace("<", "&lt")
+                                    .replace(">", "&gt")
+                                    + " <b>получил доступ к игре</b>");
                     try {
                         execute(acq);
                         execute(rcm);
@@ -249,6 +264,9 @@ public class LastkatkaBotHandler extends BotHandler {
             }
 
             String text = message.getText();
+            String name = message.getFrom().getFirstName()
+                    .replace("<", "&lt")
+                    .replace(">", "&gt");
 
             if (text.startsWith("/pinlist") && !message.isUserMessage() && message.isReply() && isFromWwBot(message)) {
                 try {
@@ -264,7 +282,6 @@ public class LastkatkaBotHandler extends BotHandler {
                 if (isInBlacklist(message))
                     return null;
 
-                String name = message.getFrom().getFirstName();
                 String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
                 sendMessage(new SendMessage(chatId, name + " укусил " + who + " за ушко")
                         .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
@@ -274,20 +291,26 @@ public class LastkatkaBotHandler extends BotHandler {
                 if (isInBlacklist(message))
                     return null;
 
-                String name = message.getFrom().getFirstName();
                 String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
                 sendMessage(new SendMessage(chatId, name + " погладил " + who + " по голове")
                         .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
 
             } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
                 blacklist.add(message.getReplyToMessage().getFrom().getId());
-                sendMessage(chatId, message.getReplyToMessage().getFrom().getFirstName() +
+                sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
                         " был плохой кошечкой, и теперь не может гладить и кусать!");
 
             } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
                 blacklist.remove(message.getReplyToMessage().getFrom().getId());
-                sendMessage(chatId, message.getReplyToMessage().getFrom().getFirstName() +
+                sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
                         " вел себя хорошо, и теперь может гладить и кусать!");
+
+            } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
+                int random = ThreadLocalRandom.current().nextInt(1, 7);
+                sendMessage(new SendMessage()
+                .setChatId(chatId)
+                .setText("Кубик брошен. Результат: " + random)
+                .setReplyToMessageId(messageId));
 
             } else if (text.startsWith("/help") && message.isUserMessage()) {
                 SendMessage sm = new SendMessage()
