@@ -44,11 +44,19 @@ public class LastkatkaBotHandler extends BotHandler {
                 admins.add((Integer.valueOf(envAdmin)));
             }
         }
+
         allowedChats = new HashSet<>(List.of(
                 botConfig.getLastkatka(),
                 botConfig.getLastvegan(),
                 botConfig.getTourgroup()
         ));
+        String envAllowed = System.getenv("allowed_chats");
+        if (envAllowed != null) {
+            for (String envAllow: envAllowed.split(" ")) {
+                allowedChats.add(Long.valueOf(envAllow));
+            }
+        }
+
         veganTimers = new HashMap<>();
         members = new HashSet<>();
         membersIds = new HashSet<>();
