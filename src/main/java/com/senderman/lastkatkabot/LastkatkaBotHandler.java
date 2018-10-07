@@ -197,7 +197,7 @@ public class LastkatkaBotHandler extends BotHandler {
     }
 
     private void removeFromBlacklist(int id) {
-        collection.deleteOne(Filters.eq(id));
+        collection.deleteOne(Filters.eq("id", id));
         updateBlacklist();
     }
 
