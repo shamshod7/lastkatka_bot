@@ -29,7 +29,6 @@ public class LastkatkaBotHandler extends BotHandler {
     private Set<String> members;
     private Set<Integer> membersIds;
     private Set<Integer> blacklist;
-    private Map<Long, VeganTimer> veganTimers;
     private boolean tournamentEnabled;
 
     LastkatkaBotHandler(BotConfig botConfig) {
@@ -52,12 +51,11 @@ public class LastkatkaBotHandler extends BotHandler {
         ));
         String envAllowed = System.getenv("allowed_chats");
         if (envAllowed != null) {
-            for (String envAllow: envAllowed.split(" ")) {
+            for (String envAllow : envAllowed.split(" ")) {
                 allowedChats.add(Long.valueOf(envAllow));
             }
         }
 
-        veganTimers = new HashMap<>();
         members = new HashSet<>();
         membersIds = new HashSet<>();
         blacklist = new HashSet<>();
@@ -145,10 +143,6 @@ public class LastkatkaBotHandler extends BotHandler {
         membersIds.clear();
     }
 
-    void removeVeganTimer(long chatId) {
-        veganTimers.remove(chatId);
-    }
-
     private String getScore(String[] params) {
         String player1 = params[1];
         String player2 = params[3];
@@ -158,11 +152,11 @@ public class LastkatkaBotHandler extends BotHandler {
                 params[4];
     }
 
-    void sendMessage(Long chatId, String message) {
+    private void sendMessage(Long chatId, String message) {
         sendMessage(new SendMessage(chatId, message));
     }
 
-    void sendMessage(SendMessage message) {
+    private void sendMessage(SendMessage message) {
         message.enableHtml(true);
         try {
             execute(message);
@@ -260,151 +254,131 @@ public class LastkatkaBotHandler extends BotHandler {
                     }
                 }
 
-        } else if (message.hasText()) {
-            if (!message.isUserMessage() && !isAllowedChat(message)) { // leave from foreign groups
-                sendMessage(chatId, "Какая-то левая конфа. СЛАВА ЛАСТКАТКЕ!");
-                try {
-                    execute(new LeaveChat().setChatId(chatId));
-                } catch (TelegramApiException e) {
-                    BotLogger.error("LEAVE", e);
-                }
+        }
+        if (!message.isUserMessage() && !isAllowedChat(message)) { // leave from foreign groups
+            sendMessage(chatId, "Какая-то левая конфа. СЛАВА ЛАСТКАТКЕ!");
+            try {
+                execute(new LeaveChat().setChatId(chatId));
+            } catch (TelegramApiException e) {
+                BotLogger.error("LEAVE", e);
+            }
+            return null;
+
+        } else if (!message.hasText()) {
+            return null;
+        }
+
+        String text = message.getText();
+        String name = message.getFrom().getFirstName()
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
+
+        if (text.startsWith("/pinlist") && !message.isUserMessage() && message.isReply() && isFromWwBot(message)) {
+            try {
+                execute(new PinChatMessage(chatId, message.getReplyToMessage().getMessageId())
+                        .setDisableNotification(true));
+            } catch (TelegramApiException e) {
+                BotLogger.error("PINMESSAGE", e);
+            }
+            delMessage(chatId, messageId);
+
+        } else if (text.startsWith("/bite") && !message.isUserMessage() && message.isReply()) {
+            delMessage(chatId, messageId);
+            if (isInBlacklist(message))
+                return null;
+
+            String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
+            sendMessage(new SendMessage(chatId, name + " укусил " + who + " за ушко")
+                    .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
+
+        } else if (text.startsWith("/pat") && !message.isUserMessage() && message.isReply()) {
+            delMessage(chatId, messageId);
+            if (isInBlacklist(message))
+                return null;
+
+            String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
+            sendMessage(new SendMessage(chatId, name + " погладил " + who + " по голове")
+                    .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
+
+        } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
+            blacklist.add(message.getReplyToMessage().getFrom().getId());
+            sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
+                    " был плохой кошечкой, и теперь не может гладить и кусать!");
+
+        } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
+            blacklist.remove(message.getReplyToMessage().getFrom().getId());
+            sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
+                    " вел себя хорошо, и теперь может гладить и кусать!");
+
+        } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
+            int random = ThreadLocalRandom.current().nextInt(1, 7);
+            sendMessage(new SendMessage()
+                    .setChatId(chatId)
+                    .setText("Кубик брошен. Результат: " + random)
+                    .setReplyToMessageId(messageId));
+
+        } else if (text.startsWith("/help") && message.isUserMessage()) {
+            SendMessage sm = new SendMessage()
+                    .setChatId(chatId)
+                    .setText(botConfig.getHelp());
+            sendMessage(sm);
+
+        } else if (text.startsWith("/announce") && isFromAdmin(message)) {
+            String[] params = text.split("\n");
+            if (params.length != 6) {
+                sendMessage(chatId, "Неверное количество аргументов!");
                 return null;
             }
+            String announce = botConfig.getAnnounce()
+                    .replace("DATE", params[1])
+                    .replace("UNTIL", params[2])
+                    .replace("AWARD", params[3])
+                    .replace("LINK", params[4])
+                    .replace("VOTE", params[5]);
+            sendMessage(botConfig.getLastvegan(), announce);
 
-            String text = message.getText();
-            String name = message.getFrom().getFirstName()
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;");
-
-            if (text.startsWith("/pinlist") && !message.isUserMessage() && message.isReply() && isFromWwBot(message)) {
-                try {
-                    execute(new PinChatMessage(chatId, message.getReplyToMessage().getMessageId())
-                            .setDisableNotification(true));
-                } catch (TelegramApiException e) {
-                    BotLogger.error("PINMESSAGE", e);
-                }
-                delMessage(chatId, messageId);
-
-            } else if (text.startsWith("/bite") && !message.isUserMessage() && message.isReply()) {
-                delMessage(chatId, messageId);
-                if (isInBlacklist(message))
-                    return null;
-
-                String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
-                sendMessage(new SendMessage(chatId, name + " укусил " + who + " за ушко")
-                        .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
-
-            } else if (text.startsWith("/pat") && !message.isUserMessage() && message.isReply()) {
-                delMessage(chatId, messageId);
-                if (isInBlacklist(message))
-                    return null;
-
-                String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
-                sendMessage(new SendMessage(chatId, name + " погладил " + who + " по голове")
-                        .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
-
-            } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-                blacklist.add(message.getReplyToMessage().getFrom().getId());
-                sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
-                        " был плохой кошечкой, и теперь не может гладить и кусать!");
-
-            } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-                blacklist.remove(message.getReplyToMessage().getFrom().getId());
-                sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
-                        " вел себя хорошо, и теперь может гладить и кусать!");
-
-            } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
-                int random = ThreadLocalRandom.current().nextInt(1, 7);
-                sendMessage(new SendMessage()
-                .setChatId(chatId)
-                .setText("Кубик брошен. Результат: " + random)
-                .setReplyToMessageId(messageId));
-
-            } else if (text.startsWith("/help") && message.isUserMessage()) {
-                SendMessage sm = new SendMessage()
-                        .setChatId(chatId)
-                        .setText(botConfig.getHelp());
-                sendMessage(sm);
-
-            } else if (text.startsWith("/announce") && isFromAdmin(message)) {
-                String[] params = text.split("\n");
-                if (params.length != 6) {
-                    sendMessage(chatId, "Неверное количество аргументов!");
-                    return null;
-                }
-                String announce = botConfig.getAnnounce()
-                        .replace("DATE", params[1])
-                        .replace("UNTIL", params[2])
-                        .replace("AWARD", params[3])
-                        .replace("LINK", params[4])
-                        .replace("VOTE", params[5]);
-                sendMessage(botConfig.getLastvegan(), announce);
-
-            } else if (text.startsWith("/setup") && isFromAdmin(message)) {
-                var params = text.split(" ");
-                if (params.length != 4) {
-                    sendMessage(chatId, "Неверное количество аргументов!");
-                    return null;
-                }
-                members.clear();
-                membersIds.clear();
-                members.add(params[1].replace("@", ""));
-                members.add(params[2].replace("@", ""));
-                tournamentEnabled = true;
-
-                var markup = new InlineKeyboardMarkup();
-                var row1 = List.of(
-                        new InlineKeyboardButton()
-                                .setText("Снять ограничения")
-                                .setCallbackData(CALLBACK_REGISTER_IN_TOURNAMENT)
-                );
-                var row2 = List.of(
-                        new InlineKeyboardButton()
-                                .setText("Группа турнира")
-                                .setUrl("https://t.me/" + botConfig.getTourgroupname().replace("@", "")));
-                markup.setKeyboard(List.of(row1, row2));
-                var toVegans = new SendMessage()
-                        .setChatId(botConfig.getLastvegan())
-                        .setText("<b>Турнир активирован!</b>\n\n"
-                                + String.join(", ", params[1], params[2],
-                                "нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n"))
-                        .setReplyMarkup(markup)
-                        .enableMarkdown(true);
-                sendMessage(toVegans);
-
-                var toChannel = new SendMessage()
-                        .setChatId(botConfig.getTourchannel())
-                        .setText("<b>" + params[3].replace("_", " ") + "</b>\n\n"
-                                + params[1] + " vs " + params[2]);
-                sendMessage(toChannel);
-
-            } else if (botConfig.getVeganCommands().contains(text)) { // start veganwars
-                if (!veganTimers.containsKey(chatId)) {
-                    veganTimers.put(chatId, new VeganTimer(chatId, this));
-                    veganTimers.get(chatId).start();
-                }
-
-            } else {
-                if (text.startsWith("/join") && veganTimers.containsKey(chatId)) {
-                    veganTimers.get(chatId).addPlayer(message.getFrom().getId(), message);
-
-                } else if (text.startsWith("/flee") && veganTimers.containsKey(chatId)) {
-                    veganTimers.get(chatId).removePlayer(message.getFrom().getId());
-
-                } else if (text.startsWith("/fight") && veganTimers.containsKey(chatId)) {
-                    if (veganTimers.get(chatId).getVegansAmount() > 1) {
-                        veganTimers.get(chatId).stop();
-                    }
-
-                } else if (text.startsWith("/reset") && veganTimers.containsKey(chatId)) {
-                    veganTimers.get(chatId).stop();
-                    sendMessage(chatId, "Список игроков сброшен");
-
-                } else if (tournamentEnabled) {
-                    processTournament(message, text);
-                }
+        } else if (text.startsWith("/setup") && isFromAdmin(message)) {
+            var params = text.split(" ");
+            if (params.length != 4) {
+                sendMessage(chatId, "Неверное количество аргументов!");
+                return null;
             }
+            members.clear();
+            membersIds.clear();
+            members.add(params[1].replace("@", ""));
+            members.add(params[2].replace("@", ""));
+            tournamentEnabled = true;
+
+            var markup = new InlineKeyboardMarkup();
+            var row1 = List.of(
+                    new InlineKeyboardButton()
+                            .setText("Снять ограничения")
+                            .setCallbackData(CALLBACK_REGISTER_IN_TOURNAMENT)
+            );
+            var row2 = List.of(
+                    new InlineKeyboardButton()
+                            .setText("Группа турнира")
+                            .setUrl("https://t.me/" + botConfig.getTourgroupname().replace("@", "")));
+            markup.setKeyboard(List.of(row1, row2));
+            var toVegans = new SendMessage()
+                    .setChatId(botConfig.getLastvegan())
+                    .setText("<b>Турнир активирован!</b>\n\n"
+                            + String.join(", ", params[1], params[2],
+                            "нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n"))
+                    .setReplyMarkup(markup)
+                    .enableMarkdown(true);
+            sendMessage(toVegans);
+
+            var toChannel = new SendMessage()
+                    .setChatId(botConfig.getTourchannel())
+                    .setText("<b>" + params[3].replace("_", " ") + "</b>\n\n"
+                            + params[1] + " vs " + params[2]);
+            sendMessage(toChannel);
+
+        } else if (tournamentEnabled) {
+            processTournament(message, text);
         }
+
         return null;
     }
 }

@@ -5,10 +5,6 @@ tourgroup : -1001153873643
 tourgroupname : "@bigelmogame"
 tourchannel : '@bigelmocucumber'
 
-veganCommands:
-  - '/game@veganwarsbot'
-  - '/customgame@veganwarsbot'
-
 wwBots:
   - 'werewolfbot'
   - 'werewolfbetabot'
@@ -21,7 +17,6 @@ help: |
   /pat - ответьте этой командой на сообщение юзера, чтобы погладить его по голове
   /bite - точно так же, как /pat, только укусить
 
-  Кроме того, бот ведет подсчет игроков для PvP и Custom Pvp в @lastvegan. Если что-то пойдет не так - используйте команду /reset для сброса счетчика
 
   <b>Следующая информация только для администрации!</b>
 

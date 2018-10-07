@@ -21,9 +21,6 @@ public class BotConfig {
     private String tourgroupname;
 
     @JsonProperty
-    private Set<String> veganCommands;
-
-    @JsonProperty
     private Set<String> wwBots;
 
     @JsonProperty
@@ -72,14 +69,6 @@ public class BotConfig {
         this.tourchannel = tourchannel;
     }
 
-    public Set<String> getVeganCommands() {
-        return veganCommands;
-    }
-
-    public void setVeganCommands(Set<String> veganCommands) {
-        this.veganCommands = veganCommands;
-    }
-
     public Set<String> getWwBots() {
         return wwBots;
     }
@@ -112,7 +101,6 @@ public class BotConfig {
                 ", tourgroup=" + tourgroup +
                 ", tourchannel='" + tourchannel + '\'' +
                 ", tourgroupname='" + tourgroupname + '\'' +
-                ", veganCommands=" + veganCommands +
                 ", wwBots=" + wwBots +
                 ", help='" + help + '\'' +
                 ", announce='" + announce + '\'' +
