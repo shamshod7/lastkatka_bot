@@ -191,14 +191,31 @@ public class LastkatkaBotHandler extends BotHandler {
         }
     }
 
-    private void addToBlacklist(int id) {
-        collection.insertOne(new Document("id", id));
+    private void addToBlacklist(int id, String username, String name) {
+        collection.insertOne(new Document("id", id)
+                .append("username", username)
+                .append("name", name));
         updateBlacklist();
     }
 
     private void removeFromBlacklist(int id) {
         collection.deleteOne(Filters.eq("id", id));
         updateBlacklist();
+    }
+
+    private String getBlackList() {
+        StringBuilder result = new StringBuilder("<b>Список плохих кошечек:</b>\n\n");
+        try (MongoCursor<Document> cursor = collection.find().iterator()) {
+            while (cursor.hasNext()) {
+                Document doc = cursor.next();
+                result.append("<a href=\"https://t.me/")
+                        .append(doc.getString("username"))
+                        .append("\">")
+                        .append(doc.getString("name"))
+                        .append("</a>\n");
+            }
+        }
+        return result.toString();
     }
 
     private void updateBlacklist() {
@@ -334,7 +351,9 @@ public class LastkatkaBotHandler extends BotHandler {
                     .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
 
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-            addToBlacklist(message.getReplyToMessage().getFrom().getId());
+            addToBlacklist(message.getReplyToMessage().getFrom().getId(),
+                    message.getReplyToMessage().getFrom().getUserName(),
+                    message.getReplyToMessage().getFrom().getFirstName());
             sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
                     " был плохой кошечкой, и теперь не может гладить и кусать!");
 
@@ -342,6 +361,9 @@ public class LastkatkaBotHandler extends BotHandler {
             removeFromBlacklist(message.getReplyToMessage().getFrom().getId());
             sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
                     " вел себя хорошо, и теперь может гладить и кусать!");
+
+        } else if (text.startsWith("/nekos") && isFromAdmin(message)) {
+            sendMessage(chatId, getBlackList());
 
         } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
             int random = ThreadLocalRandom.current().nextInt(1, 7);
