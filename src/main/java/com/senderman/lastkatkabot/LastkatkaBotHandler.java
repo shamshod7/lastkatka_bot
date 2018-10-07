@@ -30,15 +30,15 @@ public class LastkatkaBotHandler extends BotHandler {
 
     private static final String MONGODB = System.getenv("database");
     private final MongoClient client;
-    private final MongoDatabase database;
-    private final MongoCollection collection;
+    private final MongoDatabase lastkatkaDatabase;
+    private final MongoCollection blacklistCollection;
 
     private final BotConfig botConfig;
-    private Set<Integer> admins;
-    private Set<Long> allowedChats;
-    private Set<String> members;
-    private Set<Integer> membersIds;
-    private Set<Integer> blacklist;
+    private final Set<Integer> admins;
+    private final Set<Long> allowedChats;
+    private final Set<String> members;
+    private final Set<Integer> membersIds;
+    private final Set<Integer> blacklist;
     private boolean tournamentEnabled;
 
     LastkatkaBotHandler(BotConfig botConfig) {
@@ -67,12 +67,13 @@ public class LastkatkaBotHandler extends BotHandler {
         }
 
         client = MongoClients.create(MONGODB);
-        database = client.getDatabase("lastkatka");
-        collection = database.getCollection("blacklist");
+        lastkatkaDatabase = client.getDatabase("lastkatka");
+        blacklistCollection = lastkatkaDatabase.getCollection("blacklist");
+        blacklist = new HashSet<>();
+        updateBlacklist();
 
         members = new HashSet<>();
         membersIds = new HashSet<>();
-        blacklist = new HashSet<>();
         tournamentEnabled = false;
     }
 
@@ -193,19 +194,19 @@ public class LastkatkaBotHandler extends BotHandler {
     }
 
     private void addToBlacklist(int id, String name) {
-        collection.insertOne(new Document("id", id)
+        blacklistCollection.insertOne(new Document("id", id)
                 .append("name", name));
         updateBlacklist();
     }
 
     private void removeFromBlacklist(int id) {
-        collection.deleteOne(Filters.eq("id", id));
+        blacklistCollection.deleteOne(Filters.eq("id", id));
         updateBlacklist();
     }
 
     private String getBlackList() {
         StringBuilder result = new StringBuilder("<b>Список плохих кошечек:</b>\n\n");
-        try (MongoCursor<Document> cursor = collection.find().iterator()) {
+        try (MongoCursor<Document> cursor = blacklistCollection.find().iterator()) {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
                 result.append("<a href=\"tg://user?id=")
@@ -220,11 +221,16 @@ public class LastkatkaBotHandler extends BotHandler {
 
     private void updateBlacklist() {
         blacklist.clear();
-        try (MongoCursor<Document> cursor = collection.find().iterator()) {
+        try (MongoCursor<Document> cursor = blacklistCollection.find().iterator()) {
             while (cursor.hasNext()) {
                 blacklist.add(cursor.next().getInteger("id"));
             }
         }
+    }
+
+    private void resetBlackList() {
+        blacklist.clear();
+        blacklistCollection.deleteMany(new Document());
     }
 
     @Override
@@ -363,6 +369,10 @@ public class LastkatkaBotHandler extends BotHandler {
 
         } else if (text.startsWith("/nekos") && isFromAdmin(message)) {
             sendMessage(chatId, getBlackList());
+
+        } else if (text.startsWith("/loveneko") && isFromAdmin(message)) {
+            resetBlackList();
+            sendMessage(chatId, "Все кошечки - хорошие!");
 
         } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
             int random = ThreadLocalRandom.current().nextInt(1, 7);
