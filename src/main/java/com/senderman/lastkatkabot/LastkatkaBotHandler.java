@@ -172,6 +172,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
     private void sendMessage(SendMessage message) {
         message.enableHtml(true);
+        message.disableWebPagePreview();
         try {
             execute(message);
         } catch (TelegramApiException e) {
@@ -191,9 +192,8 @@ public class LastkatkaBotHandler extends BotHandler {
         }
     }
 
-    private void addToBlacklist(int id, String username, String name) {
+    private void addToBlacklist(int id, String name) {
         collection.insertOne(new Document("id", id)
-                .append("username", username)
                 .append("name", name));
         updateBlacklist();
     }
@@ -208,8 +208,8 @@ public class LastkatkaBotHandler extends BotHandler {
         try (MongoCursor<Document> cursor = collection.find().iterator()) {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
-                result.append("<a href=\"https://t.me/")
-                        .append(doc.getString("username"))
+                result.append("<a href=\"tg://user?id=")
+                        .append(doc.getInteger("id"))
                         .append("\">")
                         .append(doc.getString("name"))
                         .append("</a>\n");
@@ -352,7 +352,6 @@ public class LastkatkaBotHandler extends BotHandler {
 
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
             addToBlacklist(message.getReplyToMessage().getFrom().getId(),
-                    message.getReplyToMessage().getFrom().getUserName(),
                     message.getReplyToMessage().getFrom().getFirstName());
             sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
                     " был плохой кошечкой, и теперь не может гладить и кусать!");
