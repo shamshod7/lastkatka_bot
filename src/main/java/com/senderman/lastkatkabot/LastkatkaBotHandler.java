@@ -1,6 +1,9 @@
 package com.senderman.lastkatkabot;
 
 import com.annimon.tgbotsmodule.BotHandler;
+import com.mongodb.client.*;
+import com.mongodb.client.model.Filters;
+import org.bson.Document;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
@@ -16,12 +19,19 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class LastkatkaBotHandler extends BotHandler {
 
     private static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
+
+    private static final String MONGODB = System.getenv("database");
+    private final MongoClient client;
+    private final MongoDatabase database;
+    private final MongoCollection collection;
 
     private final BotConfig botConfig;
     private Set<Integer> admins;
@@ -55,6 +65,10 @@ public class LastkatkaBotHandler extends BotHandler {
                 allowedChats.add(Long.valueOf(envAllow));
             }
         }
+
+        client = MongoClients.create(MONGODB);
+        database = client.getDatabase("lastkatka");
+        collection = database.getCollection("blacklist");
 
         members = new HashSet<>();
         membersIds = new HashSet<>();
@@ -174,6 +188,25 @@ public class LastkatkaBotHandler extends BotHandler {
             execute(message);
         } catch (TelegramApiException e) {
             BotLogger.error("DELETE", e);
+        }
+    }
+
+    private void addToBlacklist(int id) {
+        collection.insertOne(new Document("id", id));
+        updateBlacklist();
+    }
+
+    private void removeFromBlacklist(int id) {
+        collection.deleteOne(Filters.eq(id));
+        updateBlacklist();
+    }
+
+    private void updateBlacklist() {
+        blacklist.clear();
+        try (MongoCursor<Document> cursor = collection.find().iterator()) {
+            while (cursor.hasNext()) {
+                blacklist.add(cursor.next().getInteger("id"));
+            }
         }
     }
 
@@ -301,12 +334,12 @@ public class LastkatkaBotHandler extends BotHandler {
                     .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
 
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-            blacklist.add(message.getReplyToMessage().getFrom().getId());
+            addToBlacklist(message.getReplyToMessage().getFrom().getId());
             sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
                     " был плохой кошечкой, и теперь не может гладить и кусать!");
 
         } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-            blacklist.remove(message.getReplyToMessage().getFrom().getId());
+            removeFromBlacklist(message.getReplyToMessage().getFrom().getId());
             sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
                     " вел себя хорошо, и теперь может гладить и кусать!");
 
