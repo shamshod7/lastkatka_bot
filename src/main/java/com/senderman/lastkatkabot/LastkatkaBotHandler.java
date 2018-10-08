@@ -354,6 +354,7 @@ public class LastkatkaBotHandler extends BotHandler {
             if (message.isReply()) {
                 sm.setReplyToMessageId(message.getReplyToMessage().getMessageId());
             }
+            sendMessage(sm);
 
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
             addToBlacklist(message.getReplyToMessage().getFrom().getId(),
