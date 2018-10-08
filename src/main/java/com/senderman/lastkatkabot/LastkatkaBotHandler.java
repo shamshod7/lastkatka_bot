@@ -205,14 +205,16 @@ public class LastkatkaBotHandler extends BotHandler {
     }
 
     private String getBlackList() {
-        StringBuilder result = new StringBuilder("<b>Список плохих кошечек:</b>\n\n");
+        StringBuilder result = new StringBuilder("<b>Список плохих кис:</b>\n\n");
         try (MongoCursor<Document> cursor = blacklistCollection.find().iterator()) {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
                 result.append("<a href=\"tg://user?id=")
                         .append(doc.getInteger("id"))
                         .append("\">")
-                        .append(doc.getString("name"))
+                        .append(doc.getString("name")
+                                .replace("<", "&lt;")
+                                .replace(">", "&gt;"))
                         .append("</a>\n");
             }
         }
@@ -338,41 +340,38 @@ public class LastkatkaBotHandler extends BotHandler {
             }
             delMessage(chatId, messageId);
 
-        } else if (text.startsWith("/bite") && !message.isUserMessage() && message.isReply()) {
+        } else if (text.startsWith("/action") && !message.isUserMessage()) {
             delMessage(chatId, messageId);
             if (isInBlacklist(message))
                 return null;
 
-            String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
-            sendMessage(new SendMessage(chatId, name + " укусил " + who + " за ушко")
-                    .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
-
-        } else if (text.startsWith("/pat") && !message.isUserMessage() && message.isReply()) {
-            delMessage(chatId, messageId);
-            if (isInBlacklist(message))
+            if (text.split(" ").length == 1) {
                 return null;
+            }
 
-            String who = (message.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) ? "себя" : "тебя";
-            sendMessage(new SendMessage(chatId, name + " погладил " + who + " по голове")
-                    .setReplyToMessageId(message.getReplyToMessage().getMessageId()));
+            String action = text.replace("/action", "");
+            SendMessage sm = new SendMessage(chatId, name + action);
+            if (message.isReply()) {
+                sm.setReplyToMessageId(message.getReplyToMessage().getMessageId());
+            }
 
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
             addToBlacklist(message.getReplyToMessage().getFrom().getId(),
                     message.getReplyToMessage().getFrom().getFirstName());
             sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
-                    " был плохой кошечкой, и теперь не может гладить и кусать!");
+                    " - плохая киса!");
 
         } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
             removeFromBlacklist(message.getReplyToMessage().getFrom().getId());
             sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
-                    " вел себя хорошо, и теперь может гладить и кусать!");
+                    " хорошая киса!");
 
         } else if (text.startsWith("/nekos") && isFromAdmin(message)) {
             sendMessage(chatId, getBlackList());
 
         } else if (text.startsWith("/loveneko") && isFromAdmin(message)) {
             resetBlackList();
-            sendMessage(chatId, "Все кошечки - хорошие!");
+            sendMessage(chatId, "Все кисы - хорошие!");
 
         } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
             int random = ThreadLocalRandom.current().nextInt(1, 7);
