@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictCh
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -27,6 +28,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class LastkatkaBotHandler extends BotHandler {
 
     private static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
+    private static final String CALLBACK_PAY_RESPECTS = "pay_respects";
 
     private static final String MONGODB = System.getenv("database");
     private final MongoClient client;
@@ -239,9 +241,12 @@ public class LastkatkaBotHandler extends BotHandler {
     public BotApiMethod onUpdate(Update update) {
 
         if (update.hasCallbackQuery()) {
-            if ((update.getCallbackQuery().getData().equals(CALLBACK_REGISTER_IN_TOURNAMENT))) {
-                int id = update.getCallbackQuery().getFrom().getId();
-                if (members.contains(update.getCallbackQuery().getFrom().getUserName()) && !membersIds.contains(id)) {
+            CallbackQuery query = update.getCallbackQuery();
+            String callbackData = query.getData();
+
+            if (callbackData.equals(CALLBACK_REGISTER_IN_TOURNAMENT)) {
+                int id = query.getFrom().getId();
+                if (members.contains(query.getFrom().getUserName()) && !membersIds.contains(id)) {
                     membersIds.add(id);
                     var rcm = new RestrictChatMember()
                             .setChatId(botConfig.getTourgroup())
@@ -250,11 +255,11 @@ public class LastkatkaBotHandler extends BotHandler {
                             .setCanSendMediaMessages(true)
                             .setCanSendOtherMessages(true);
                     var acq = new AnswerCallbackQuery()
-                            .setCallbackQueryId(update.getCallbackQuery().getId())
+                            .setCallbackQueryId(query.getId())
                             .setText("Вам даны права на отправку сообщений в группе турнира!")
                             .setShowAlert(true);
                     sendMessage(botConfig.getTourgroup(),
-                            update.getCallbackQuery().getFrom().getFirstName()
+                            query.getFrom().getFirstName()
                                     .replace("<", "&lt")
                                     .replace(">", "&gt")
                                     + " <b>получил доступ к игре</b>");
@@ -266,7 +271,7 @@ public class LastkatkaBotHandler extends BotHandler {
                     }
                 } else {
                     var acq = new AnswerCallbackQuery()
-                            .setCallbackQueryId(update.getCallbackQuery().getId())
+                            .setCallbackQueryId(query.getId())
                             .setText("Вы не являетесь участником текущего раунда!")
                             .setShowAlert(true);
                     try {
@@ -275,7 +280,22 @@ public class LastkatkaBotHandler extends BotHandler {
                         BotLogger.fine("UNKNOWN MEMBER", "This error means nothing");
                     }
                 }
+
+            } else if (callbackData.equals(CALLBACK_PAY_RESPECTS)) {
+                var acq = new AnswerCallbackQuery()
+                        .setCallbackQueryId(query.getId())
+                        .setText("You've payed respects")
+                        .setShowAlert(true);
+                sendMessage(new SendMessage()
+                        .setChatId(query.getMessage().getChatId())
+                        .setText(query.getFrom().getFirstName() + " have payed respects"));
+                try {
+                    execute(acq);
+                } catch (TelegramApiException e) {
+                    BotLogger.error("PAY_REPECTS", e.toString());
+                }
             }
+
             return null;
         }
 
@@ -356,6 +376,18 @@ public class LastkatkaBotHandler extends BotHandler {
             }
             sendMessage(sm);
 
+        } else if (text.startsWith("/f@" + getBotUsername()) && message.isReply()) {
+            delMessage(chatId, messageId);
+            var markup = new InlineKeyboardMarkup();
+            var row1 = List.of(new InlineKeyboardButton()
+                    .setText("F")
+                    .setCallbackData(CALLBACK_PAY_RESPECTS));
+            markup.setKeyboard(List.of(row1));
+            sendMessage(new SendMessage()
+                    .setChatId(chatId)
+                    .setText("Press F to pay respects to" + message.getReplyToMessage().getFrom().getFirstName())
+                    .setReplyMarkup(markup));
+
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
             addToBlacklist(message.getReplyToMessage().getFrom().getId(),
                     message.getReplyToMessage().getFrom().getFirstName());
@@ -429,8 +461,7 @@ public class LastkatkaBotHandler extends BotHandler {
                     .setText("<b>Турнир активирован!</b>\n\n"
                             + String.join(", ", params[1], params[2],
                             "нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n"))
-                    .setReplyMarkup(markup)
-                    .enableMarkdown(true);
+                    .setReplyMarkup(markup);
             sendMessage(toVegans);
 
             var toChannel = new SendMessage()
