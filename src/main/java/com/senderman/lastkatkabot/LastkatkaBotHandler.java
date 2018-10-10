@@ -385,7 +385,7 @@ public class LastkatkaBotHandler extends BotHandler {
             markup.setKeyboard(List.of(row1));
             sendMessage(new SendMessage()
                     .setChatId(chatId)
-                    .setText("Press F to pay respects to" + message.getReplyToMessage().getFrom().getFirstName())
+                    .setText("Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName())
                     .setReplyMarkup(markup));
 
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
