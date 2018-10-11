@@ -6,7 +6,6 @@ import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
@@ -173,18 +172,20 @@ public class LastkatkaBotHandler extends BotHandler {
                 params[4];
     }
 
-    public void sendMessage(Long chatId, String message) {
-        sendMessage(new SendMessage(chatId, message));
+    private Message sendMessage(Long chatId, String message) {
+        return sendMessage(new SendMessage(chatId, message));
     }
 
-    public void sendMessage(SendMessage message) {
+    private Message sendMessage(SendMessage message) {
         message.enableHtml(true);
         message.disableWebPagePreview();
+        Message result = null;
         try {
-            execute(message);
+            result = execute(message);
         } catch (TelegramApiException e) {
             BotLogger.error("SEND", e);
         }
+        return result;
     }
 
     private void delMessage(Long chatId, Integer messageId) {
@@ -212,9 +213,9 @@ public class LastkatkaBotHandler extends BotHandler {
 
     private String getBlackList() {
         StringBuilder result = new StringBuilder("<b>Список плохих кис:</b>\n\n");
-        try (MongoCursor<Document> cursor = blacklistCollection.find().iterator()) {
+        try (MongoCursor cursor = blacklistCollection.find().iterator()) {
             while (cursor.hasNext()) {
-                Document doc = cursor.next();
+                Document doc = (Document) cursor.next();
                 result.append("<a href=\"tg://user?id=")
                         .append(doc.getInteger("id"))
                         .append("\">")
@@ -229,9 +230,10 @@ public class LastkatkaBotHandler extends BotHandler {
 
     private void updateBlacklist() {
         blacklist.clear();
-        try (MongoCursor<Document> cursor = blacklistCollection.find().iterator()) {
+        try (MongoCursor cursor = blacklistCollection.find().iterator()) {
             while (cursor.hasNext()) {
-                blacklist.add(cursor.next().getInteger("id"));
+                Document doc = (Document) cursor.next();
+                blacklist.add(doc.getInteger("id"));
             }
         }
     }
@@ -245,7 +247,7 @@ public class LastkatkaBotHandler extends BotHandler {
         return markup;
     }
 
-    InlineKeyboardMarkup getMarkupForDuel(int messageId) {
+    InlineKeyboardMarkup getMarkupForDuel() {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
@@ -266,79 +268,87 @@ public class LastkatkaBotHandler extends BotHandler {
             CallbackQuery query = update.getCallbackQuery();
             String callbackData = query.getData();
 
-            if (callbackData.equals(CALLBACK_REGISTER_IN_TOURNAMENT)) {
-                int id = query.getFrom().getId();
-                if (members.contains(query.getFrom().getUserName()) && !membersIds.contains(id)) {
-                    membersIds.add(id);
-                    var rcm = new RestrictChatMember()
-                            .setChatId(botConfig.getTourgroup())
-                            .setUserId(id)
-                            .setCanSendMessages(true)
-                            .setCanSendMediaMessages(true)
-                            .setCanSendOtherMessages(true);
-                    var acq = new AnswerCallbackQuery()
-                            .setCallbackQueryId(query.getId())
-                            .setText("Вам даны права на отправку сообщений в группе турнира!")
-                            .setShowAlert(true);
-                    sendMessage(botConfig.getTourgroup(),
-                            query.getFrom().getFirstName()
-                                    .replace("<", "&lt")
-                                    .replace(">", "&gt")
-                                    + " <b>получил доступ к игре</b>");
-                    try {
-                        execute(acq);
-                        execute(rcm);
-                    } catch (TelegramApiException e) {
-                        BotLogger.error("UNBAN", "Failed to unban member");
+            switch (callbackData) {
+                case CALLBACK_REGISTER_IN_TOURNAMENT: {
+                    int id = query.getFrom().getId();
+                    if (members.contains(query.getFrom().getUserName()) && !membersIds.contains(id)) {
+                        membersIds.add(id);
+                        var rcm = new RestrictChatMember()
+                                .setChatId(botConfig.getTourgroup())
+                                .setUserId(id)
+                                .setCanSendMessages(true)
+                                .setCanSendMediaMessages(true)
+                                .setCanSendOtherMessages(true);
+                        var acq = new AnswerCallbackQuery()
+                                .setCallbackQueryId(query.getId())
+                                .setText("Вам даны права на отправку сообщений в группе турнира!")
+                                .setShowAlert(true);
+                        sendMessage(botConfig.getTourgroup(),
+                                query.getFrom().getFirstName()
+                                        .replace("<", "&lt")
+                                        .replace(">", "&gt")
+                                        + " <b>получил доступ к игре</b>");
+                        try {
+                            execute(acq);
+                            execute(rcm);
+                        } catch (TelegramApiException e) {
+                            BotLogger.error("UNBAN", "Failed to unban member");
+                        }
+                    } else {
+                        var acq = new AnswerCallbackQuery()
+                                .setCallbackQueryId(query.getId())
+                                .setText("Вы не являетесь участником текущего раунда!")
+                                .setShowAlert(true);
+                        try {
+                            execute(acq);
+                        } catch (TelegramApiException e) {
+                            BotLogger.fine("UNKNOWN MEMBER", "This error means nothing");
+                        }
                     }
-                } else {
-                    var acq = new AnswerCallbackQuery()
-                            .setCallbackQueryId(query.getId())
-                            .setText("Вы не являетесь участником текущего раунда!")
-                            .setShowAlert(true);
-                    try {
-                        execute(acq);
-                    } catch (TelegramApiException e) {
-                        BotLogger.fine("UNKNOWN MEMBER", "This error means nothing");
-                    }
+
+                    break;
                 }
 
-            } else if (callbackData.equals(CALLBACK_PAY_RESPECTS)) {
-                if (query.getMessage().getText().contains(query.getFrom().getFirstName())) {
+                case CALLBACK_PAY_RESPECTS:
+                    if (query.getMessage().getText().contains(query.getFrom().getFirstName())) {
+                        var acq = new AnswerCallbackQuery()
+                                .setCallbackQueryId(query.getId())
+                                .setText("You've already payed respects! (or you've tried to pay respects to yourself)")
+                                .setShowAlert(true);
+                        try {
+                            execute(acq);
+                        } catch (TelegramApiException e) {
+                            BotLogger.error("PAY_RESPECTS", e.toString());
+                        }
+                        return null;
+                    }
                     var acq = new AnswerCallbackQuery()
                             .setCallbackQueryId(query.getId())
-                            .setText("You've already payed respects! (or you've tried to pay respects to yourself)")
+                            .setText("You've payed respects")
                             .setShowAlert(true);
+                    var emt = new EditMessageText()
+                            .setChatId(query.getMessage().getChatId())
+                            .setMessageId(query.getMessage().getMessageId())
+                            .setInlineMessageId(query.getInlineMessageId())
+                            .setReplyMarkup(getMarkupForPayingRespects())
+                            .setText(query.getMessage().getText()
+                                    + "\n" + query.getFrom().getFirstName() + " have payed respects");
                     try {
+                        execute(emt);
                         execute(acq);
                     } catch (TelegramApiException e) {
                         BotLogger.error("PAY_RESPECTS", e.toString());
                     }
-                    return null;
+                    break;
+
+                case CALLBACK_JOIN_DUEL: {
+                    String name = query.getFrom().getFirstName();
+                    int id = query.getFrom().getId();
+                    int messageId = query.getMessage().getMessageId();
+                    long chatId = query.getMessage().getChatId();
+                    duels.get(chatId).get(messageId).addPlayer(id, name);
+                    break;
                 }
-                var acq = new AnswerCallbackQuery()
-                        .setCallbackQueryId(query.getId())
-                        .setText("You've payed respects")
-                        .setShowAlert(true);
-                var emt = new EditMessageText()
-                        .setChatId(query.getMessage().getChatId())
-                        .setMessageId(query.getMessage().getMessageId())
-                        .setInlineMessageId(query.getInlineMessageId())
-                        .setReplyMarkup(getMarkupForPayingRespects())
-                        .setText(query.getMessage().getText()
-                                + "\n" + query.getFrom().getFirstName() + " have payed respects");
-                try {
-                    execute(emt);
-                    execute(acq);
-                } catch (TelegramApiException e) {
-                    BotLogger.error("PAY_RESPECTS", e.toString());
-                }
-            } else if (callbackData.equals(CALLBACK_JOIN_DUEL)) {
-                String name = query.getFrom().getFirstName();
-                int id = query.getFrom().getId();
-                int messageId = query.getMessage().getMessageId();
-                long chatId = query.getMessage().getChatId();
-                duels.get(chatId).get(messageId).addPlayer(id, name);
             }
 
             return null;
@@ -477,17 +487,17 @@ public class LastkatkaBotHandler extends BotHandler {
             var sm = new SendMessage()
                     .setChatId(chatId)
                     .setText("Набор на дуэль! Жмите кнопку ниже\nДжойнулись:")
-                    .setReplyMarkup(getMarkupForDuel(messageId));
+                    .setReplyMarkup(getMarkupForDuel());
 
+            int duelMessageId = sendMessage(sm).getMessageId();
             var duel = new Duel(message, this);
             if (duels.containsKey(chatId)) {
-                duels.get(chatId).put(messageId, duel);
+                duels.get(chatId).put(duelMessageId, duel);
             } else {
                 Map<Integer, Duel> duelMap = new HashMap<>();
-                duelMap.put(messageId, duel);
+                duelMap.put(duelMessageId, duel);
                 duels.put(chatId, duelMap);
             }
-            sendMessage(sm);
 
         } else if (text.startsWith("/setup") && isFromAdmin(message)) {
             var params = text.split(" ");

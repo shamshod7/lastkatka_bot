@@ -31,7 +31,7 @@ class Duel {
             return;
         }
         players.put(id, name);
-        editMessage(messageText + "\n" + name, handler.getMarkupForDuel(messageId));
+        editMessage(messageText + "\n" + name, handler.getMarkupForDuel());
 
         if (players.size() == 2) {
             new Thread(this::start).start();
@@ -55,7 +55,7 @@ class Duel {
         editMessage(messageText + "\n\nВыстрел! " + winner + " победно смотрит на медленно умирающего " + loser + "!", null);
         sleep();
         if (ThreadLocalRandom.current().nextInt(0, 100) < 21) {
-            editMessage(messageText + "\n\nНо, умирая, " + loser +
+            editMessage(messageText + "\n\nУмирая, " + loser +
                     " успевает выстрелить в голову " + winner + "! Оба противника мертвы!", null);
         } else {
             editMessage(messageText + "\n\n" + winner + " выиграл дуэль!", null);
