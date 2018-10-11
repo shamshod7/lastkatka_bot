@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictCh
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -20,9 +21,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class LastkatkaBotHandler extends BotHandler {
@@ -41,6 +40,7 @@ public class LastkatkaBotHandler extends BotHandler {
     private final Set<String> members;
     private final Set<Integer> membersIds;
     private final Set<Integer> blacklist;
+    public final Map<Long, Duel> duels;
     private boolean tournamentEnabled;
 
     LastkatkaBotHandler(BotConfig botConfig) {
@@ -68,15 +68,17 @@ public class LastkatkaBotHandler extends BotHandler {
             }
         }
 
+        duels = new HashMap<>();
+
+        members = new HashSet<>();
+        membersIds = new HashSet<>();
+        tournamentEnabled = false;
+
         client = MongoClients.create(MONGODB);
         lastkatkaDatabase = client.getDatabase("lastkatka");
         blacklistCollection = lastkatkaDatabase.getCollection("blacklist");
         blacklist = new HashSet<>();
         updateBlacklist();
-
-        members = new HashSet<>();
-        membersIds = new HashSet<>();
-        tournamentEnabled = false;
     }
 
     @Override
@@ -169,11 +171,11 @@ public class LastkatkaBotHandler extends BotHandler {
                 params[4];
     }
 
-    private void sendMessage(Long chatId, String message) {
+    public void sendMessage(Long chatId, String message) {
         sendMessage(new SendMessage(chatId, message));
     }
 
-    private void sendMessage(SendMessage message) {
+    public void sendMessage(SendMessage message) {
         message.enableHtml(true);
         message.disableWebPagePreview();
         try {
@@ -282,14 +284,29 @@ public class LastkatkaBotHandler extends BotHandler {
                 }
 
             } else if (callbackData.equals(CALLBACK_PAY_RESPECTS)) {
+                if (query.getMessage().getText().contains(query.getFrom().getFirstName())) {
+                    var acq = new AnswerCallbackQuery()
+                            .setCallbackQueryId(query.getId())
+                            .setText("You've already payed respects!")
+                            .setShowAlert(true);
+                    try {
+                        execute(acq);
+                    } catch (TelegramApiException e) {
+                        BotLogger.error("PAY_RESPECTS", e.toString());
+                    }
+                    return null;
+                }
                 var acq = new AnswerCallbackQuery()
                         .setCallbackQueryId(query.getId())
                         .setText("You've payed respects")
                         .setShowAlert(true);
-                sendMessage(new SendMessage()
+                EditMessageText emt = new EditMessageText()
                         .setChatId(query.getMessage().getChatId())
-                        .setText(query.getFrom().getFirstName() + " have payed respects"));
+                        .setMessageId(query.getMessage().getMessageId())
+                        .setText(query.getMessage().getText()
+                                + "\n" + query.getFrom().getFirstName() + " have payed respects");
                 try {
+                    execute(emt);
                     execute(acq);
                 } catch (TelegramApiException e) {
                     BotLogger.error("PAY_REPECTS", e.toString());
@@ -385,7 +402,8 @@ public class LastkatkaBotHandler extends BotHandler {
             markup.setKeyboard(List.of(row1));
             sendMessage(new SendMessage()
                     .setChatId(chatId)
-                    .setText("Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName())
+                    .setText("Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName()
+                            + "\n <b>Users who have payed respects:</b>")
                     .setReplyMarkup(markup));
 
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
@@ -432,6 +450,19 @@ public class LastkatkaBotHandler extends BotHandler {
                     .replace("LINK", params[4])
                     .replace("VOTE", params[5]);
             sendMessage(botConfig.getLastvegan(), announce);
+
+        } else if (text.startsWith("/duel") && !message.isUserMessage()) {
+            if (duels.containsKey(chatId)) {
+                return null;
+            }
+            duels.put(chatId, new Duel(chatId, this));
+            sendMessage(chatId, "Ну чо, выйдем раз на раз? Дуэль началась, жмите /joinduel");
+
+        } else if (text.startsWith("/joinduel") && !message.isUserMessage()) {
+            if (!duels.containsKey(chatId)) {
+                return null;
+            }
+            duels.get(chatId).addPlayer(message.getFrom().getId(), name);
 
         } else if (text.startsWith("/setup") && isFromAdmin(message)) {
             var params = text.split(" ");
