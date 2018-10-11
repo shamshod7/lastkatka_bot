@@ -43,22 +43,32 @@ class Duel {
         String player1 = i.next();
         String player2 = i.next();
         messageText = player1 + " vs " + player2;
-        editMessage("Дуэль началась!\n" + messageText, null);
+        messageText += "\n\nДуэль началась!";
+        editMessage(messageText, null);
         sleep();
-        editMessage(messageText + "\n\nПротивники взяли пистолеты и расходятся в разные стороны...", null);
+
+        messageText += "\n\nПротивники взяли пистолеты и расходятся в разные стороны...";
+        editMessage(messageText, null);
         sleep();
-        editMessage(messageText + "\n\nПротивники встали лицом к лицу...", null);
+
+        messageText += "\n\nПротивники встали лицом к лицу...";
+        editMessage(messageText, null);
         sleep();
+
         int random = ThreadLocalRandom.current().nextInt(0, 100);
         String winner = (random < 50) ? player1 : player2;
         String loser = (random < 50) ? player2 : player1;
-        editMessage(messageText + "\n\nВыстрел! " + winner + " победно смотрит на медленно умирающего " + loser + "!", null);
+        messageText += "\n\n\uD83D\uDCA5Выстрел! " + winner + " победно смотрит на медленно умирающего " + loser + "!";
+        editMessage(messageText, null);
         sleep();
+
         if (ThreadLocalRandom.current().nextInt(0, 100) < 21) {
-            editMessage(messageText + "\n\nУмирая, " + loser +
-                    " успевает выстрелить в голову " + winner + "! Оба противника мертвы!", null);
+            messageText += "\n\n\uD83D\uDCA5Умирая, " + loser +
+                    " успевает выстрелить в голову " + winner + "! Оба противника мертвы!";
+            editMessage(messageText, null);
         } else {
-            editMessage(messageText + "\n\n" + winner + " выиграл дуэль!", null);
+            messageText += "\n\n\uD83D\uDC51" + winner + " выиграл дуэль!\"";
+            editMessage(messageText, null);
         }
         handler.duels.get(chatId).remove(messageId);
     }
