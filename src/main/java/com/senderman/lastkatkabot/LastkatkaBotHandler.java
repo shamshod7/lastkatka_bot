@@ -6,6 +6,7 @@ import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
@@ -40,7 +41,7 @@ public class LastkatkaBotHandler extends BotHandler {
     private final Set<String> members;
     private final Set<Integer> membersIds;
     private final Set<Integer> blacklist;
-    public final Map<Long, Duel> duels;
+    final Map<Long, Duel> duels;
     private boolean tournamentEnabled;
 
     LastkatkaBotHandler(BotConfig botConfig) {
@@ -234,6 +235,15 @@ public class LastkatkaBotHandler extends BotHandler {
         }
     }
 
+    private InlineKeyboardMarkup getMarkupForPayingRespects() {
+        var markup = new InlineKeyboardMarkup();
+        var row1 = List.of(new InlineKeyboardButton()
+                .setText("F")
+                .setCallbackData(CALLBACK_PAY_RESPECTS));
+        markup.setKeyboard(List.of(row1));
+        return markup;
+    }
+
     private void resetBlackList() {
         blacklist.clear();
         blacklistCollection.deleteMany(new Document());
@@ -287,7 +297,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 if (query.getMessage().getText().contains(query.getFrom().getFirstName())) {
                     var acq = new AnswerCallbackQuery()
                             .setCallbackQueryId(query.getId())
-                            .setText("You've already payed respects!")
+                            .setText("You've already payed respects! (or you've tried to pay respects to yourself)")
                             .setShowAlert(true);
                     try {
                         execute(acq);
@@ -303,6 +313,9 @@ public class LastkatkaBotHandler extends BotHandler {
                 EditMessageText emt = new EditMessageText()
                         .setChatId(query.getMessage().getChatId())
                         .setMessageId(query.getMessage().getMessageId())
+                        .setInlineMessageId(query.getInlineMessageId())
+                        .setReplyMarkup(getMarkupForPayingRespects())
+                        .setParseMode(ParseMode.HTML)
                         .setText(query.getMessage().getText()
                                 + "\n" + query.getFrom().getFirstName() + " have payed respects");
                 try {
@@ -395,16 +408,11 @@ public class LastkatkaBotHandler extends BotHandler {
 
         } else if (text.startsWith("/f@" + getBotUsername()) && message.isReply()) {
             delMessage(chatId, messageId);
-            var markup = new InlineKeyboardMarkup();
-            var row1 = List.of(new InlineKeyboardButton()
-                    .setText("F")
-                    .setCallbackData(CALLBACK_PAY_RESPECTS));
-            markup.setKeyboard(List.of(row1));
             sendMessage(new SendMessage()
                     .setChatId(chatId)
                     .setText("Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName()
                             + "\n <b>Users who have payed respects:</b>")
-                    .setReplyMarkup(markup));
+                    .setReplyMarkup(getMarkupForPayingRespects()));
 
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
             addToBlacklist(message.getReplyToMessage().getFrom().getId(),

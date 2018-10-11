@@ -39,9 +39,9 @@ class Duel {
         sleep();
         handler.sendMessage(chatId, "Противники встали лицом к лицу...");
         sleep();
-        int random = ThreadLocalRandom.current().nextInt(1, 3);
-        String winner = (random == 1) ? player1 : player2;
-        String loser = (random == 1) ? player2 : player1;
+        int random = ThreadLocalRandom.current().nextInt(0, 100);
+        String winner = (random < 50) ? player1 : player2;
+        String loser = (random < 50) ? player2 : player1;
         handler.sendMessage(chatId, "Выстрел! " + winner +
                 " победно смотрит на медленно умирающего " + loser + "!");
         sleep();
