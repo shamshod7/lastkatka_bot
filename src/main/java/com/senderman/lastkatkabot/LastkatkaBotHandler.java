@@ -489,8 +489,9 @@ public class LastkatkaBotHandler extends BotHandler {
                     .setText("Набор на дуэль! Жмите кнопку ниже\nДжойнулись:")
                     .setReplyMarkup(getMarkupForDuel());
 
-            int duelMessageId = sendMessage(sm).getMessageId();
-            var duel = new Duel(message, this);
+            var sentMessage = sendMessage(sm);
+            int duelMessageId = sentMessage.getMessageId();
+            var duel = new Duel(sentMessage, this);
             if (duels.containsKey(chatId)) {
                 duels.get(chatId).put(duelMessageId, duel);
             } else {
