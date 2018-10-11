@@ -29,6 +29,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
     private static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
     private static final String CALLBACK_PAY_RESPECTS = "pay_respects";
+    private static final String CALLBACK_JOIN_DUEL = "join_duel ";
 
     private static final String MONGODB = System.getenv("database");
     private final MongoClient client;
@@ -41,7 +42,7 @@ public class LastkatkaBotHandler extends BotHandler {
     private final Set<String> members;
     private final Set<Integer> membersIds;
     private final Set<Integer> blacklist;
-    final Map<Long, Duel> duels;
+    final Map<Long, Map<Integer, Duel>> duels;
     private boolean tournamentEnabled;
 
     LastkatkaBotHandler(BotConfig botConfig) {
@@ -244,6 +245,15 @@ public class LastkatkaBotHandler extends BotHandler {
         return markup;
     }
 
+    InlineKeyboardMarkup getMarkupForDuel(int messageId) {
+        var markup = new InlineKeyboardMarkup();
+        var row1 = List.of(new InlineKeyboardButton()
+                .setText("Присоединиться")
+                .setCallbackData(CALLBACK_JOIN_DUEL + messageId));
+        markup.setKeyboard(List.of(row1));
+        return markup;
+    }
+
     private void resetBlackList() {
         blacklist.clear();
         blacklistCollection.deleteMany(new Document());
@@ -310,20 +320,25 @@ public class LastkatkaBotHandler extends BotHandler {
                         .setCallbackQueryId(query.getId())
                         .setText("You've payed respects")
                         .setShowAlert(true);
-                EditMessageText emt = new EditMessageText()
+                var emt = new EditMessageText()
                         .setChatId(query.getMessage().getChatId())
                         .setMessageId(query.getMessage().getMessageId())
                         .setInlineMessageId(query.getInlineMessageId())
                         .setReplyMarkup(getMarkupForPayingRespects())
-                        .setParseMode(ParseMode.HTML)
                         .setText(query.getMessage().getText()
                                 + "\n" + query.getFrom().getFirstName() + " have payed respects");
                 try {
                     execute(emt);
                     execute(acq);
                 } catch (TelegramApiException e) {
-                    BotLogger.error("PAY_REPECTS", e.toString());
+                    BotLogger.error("PAY_RESPECTS", e.toString());
                 }
+            } else if (callbackData.startsWith(CALLBACK_JOIN_DUEL)) {
+                String name = query.getFrom().getFirstName();
+                int id = query.getFrom().getId();
+                int messageId = query.getMessage().getMessageId();
+                long chatId = query.getMessage().getChatId();
+                duels.get(chatId).get(messageId).addPlayer(id, name);
             }
 
             return null;
@@ -410,8 +425,7 @@ public class LastkatkaBotHandler extends BotHandler {
             delMessage(chatId, messageId);
             sendMessage(new SendMessage()
                     .setChatId(chatId)
-                    .setText("Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName()
-                            + "\n <b>Users who have payed respects:</b>")
+                    .setText("Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName())
                     .setReplyMarkup(getMarkupForPayingRespects()));
 
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
@@ -460,17 +474,20 @@ public class LastkatkaBotHandler extends BotHandler {
             sendMessage(botConfig.getLastvegan(), announce);
 
         } else if (text.startsWith("/duel") && !message.isUserMessage()) {
-            if (duels.containsKey(chatId)) {
-                return null;
-            }
-            duels.put(chatId, new Duel(chatId, this));
-            sendMessage(chatId, "Ну чо, выйдем раз на раз? Дуэль началась, жмите /joinduel");
+            var sm = new SendMessage()
+                    .setChatId(chatId)
+                    .setText("Набор на дуэль! Жмите кнопку ниже\nДжойнулись:")
+                    .setReplyMarkup(getMarkupForDuel(messageId));
 
-        } else if (text.startsWith("/joinduel") && !message.isUserMessage()) {
-            if (!duels.containsKey(chatId)) {
-                return null;
+            var duel = new Duel(message, this);
+            if (duels.containsKey(chatId)) {
+                duels.get(chatId).put(messageId, duel);
+            } else {
+                Map<Integer, Duel> duelMap = new HashMap<>();
+                duelMap.put(messageId, duel);
+                duels.put(chatId, duelMap);
             }
-            duels.get(chatId).addPlayer(message.getFrom().getId(), name);
+            sendMessage(sm);
 
         } else if (text.startsWith("/setup") && isFromAdmin(message)) {
             var params = text.split(" ");
