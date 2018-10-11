@@ -29,7 +29,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
     private static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
     private static final String CALLBACK_PAY_RESPECTS = "pay_respects";
-    private static final String CALLBACK_JOIN_DUEL = "join_duel ";
+    private static final String CALLBACK_JOIN_DUEL = "join_duel";
 
     private static final String MONGODB = System.getenv("database");
     private final MongoClient client;
@@ -249,7 +249,7 @@ public class LastkatkaBotHandler extends BotHandler {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
-                .setCallbackData(CALLBACK_JOIN_DUEL + messageId));
+                .setCallbackData(CALLBACK_JOIN_DUEL));
         markup.setKeyboard(List.of(row1));
         return markup;
     }
@@ -333,7 +333,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 } catch (TelegramApiException e) {
                     BotLogger.error("PAY_RESPECTS", e.toString());
                 }
-            } else if (callbackData.startsWith(CALLBACK_JOIN_DUEL)) {
+            } else if (callbackData.equals(CALLBACK_JOIN_DUEL)) {
                 String name = query.getFrom().getFirstName();
                 int id = query.getFrom().getId();
                 int messageId = query.getMessage().getMessageId();
