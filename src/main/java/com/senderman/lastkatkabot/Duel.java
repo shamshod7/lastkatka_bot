@@ -67,7 +67,7 @@ class Duel {
                     " успевает выстрелить в голову " + winner + "! Оба противника мертвы!";
             editMessage(messageText, null);
         } else {
-            messageText += "\n\n\uD83D\uDC51" + winner + " выиграл дуэль!\"";
+            messageText += "\n\n\uD83D\uDC51" + winner + " выиграл дуэль!";
             editMessage(messageText, null);
         }
         handler.duels.get(chatId).remove(messageId);

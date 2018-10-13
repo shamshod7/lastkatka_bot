@@ -30,7 +30,6 @@ public class LastkatkaBotHandler extends BotHandler {
     private static final String CALLBACK_PAY_RESPECTS = "pay_respects";
     private static final String CALLBACK_JOIN_DUEL = "join_duel";
 
-    private static final String MONGODB = System.getenv("database");
     private final MongoClient client;
     private final MongoDatabase lastkatkaDatabase;
     private final MongoCollection blacklistCollection;
@@ -75,7 +74,7 @@ public class LastkatkaBotHandler extends BotHandler {
         membersIds = new HashSet<>();
         tournamentEnabled = false;
 
-        client = MongoClients.create(MONGODB);
+        client = MongoClients.create(System.getenv("database"));
         lastkatkaDatabase = client.getDatabase("lastkatka");
         blacklistCollection = lastkatkaDatabase.getCollection("blacklist");
         blacklist = new HashSet<>();
@@ -406,7 +405,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");
 
-        if (text.startsWith("/pinlist") && !message.isUserMessage() && message.isReply() && isFromWwBot(message)) {
+        if (text.startsWith("/pinlist") && message.isReply() && !message.isUserMessage() && isFromWwBot(message)) {
             try {
                 execute(new PinChatMessage(chatId, message.getReplyToMessage().getMessageId())
                         .setDisableNotification(true));
