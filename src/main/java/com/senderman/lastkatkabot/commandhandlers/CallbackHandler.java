@@ -63,7 +63,18 @@ public class CallbackHandler {
     }
 
     public void joinDuel() {
-        handler.duels.get(chatId).get(messageId).addPlayer(query.getFrom().getId(), name);
+        try {
+            handler.duels.get(chatId).get(messageId).addPlayer(query.getFrom().getId(), name);
+        } catch (Exception e) {
+            var acq = new AnswerCallbackQuery()
+                    .setCallbackQueryId(id)
+                    .setText("Эта дуэль устарела!");
+            try {
+                handler.execute(acq);
+            } catch (TelegramApiException tae) {
+                BotLogger.error("FAILED DUEL", tae.toString());
+            }
+        }
     }
 
     public void registerInTournament() {

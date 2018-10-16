@@ -119,4 +119,10 @@ public class AdminHandler {
                 .replace("VOTE", params[5]);
         handler.sendMessage(handler.botConfig.getLastvegan(), announce);
     }
+
+    public void critical() {
+        setCurrentMessage();
+        handler.duels.clear();
+        handler.sendMessage(chatId, "Все неначатые дуэли были очищены!");
+    }
 }

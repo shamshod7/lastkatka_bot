@@ -253,7 +253,7 @@ public class LastkatkaBotHandler extends BotHandler {
         } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
             games.dice();
 
-        } else if (text.startsWith("/duel") && !message.isUserMessage()) {
+        } else if (text.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
             games.duel();
 
             // handle admin commands
@@ -269,6 +269,9 @@ public class LastkatkaBotHandler extends BotHandler {
         } else if (text.startsWith("/loveneko") && isFromAdmin(message)) {
             new AdminHandler(this).loveneko();
 
+        } else if (text.startsWith("/critical") && isFromAdmin(message)) {
+            new AdminHandler(this).critical();
+
         } else if (text.startsWith("/announce") && isFromAdmin(message)) {
             new AdminHandler(this).announce();
 
@@ -276,12 +279,12 @@ public class LastkatkaBotHandler extends BotHandler {
             tournament = new TournamentHandler(this);
             tournament.setup();
 
-        } else if (TournamentHandler.isEnabled) {
-            if (text.startsWith("/score") && isFromAdmin(message)) {
+        } else if (TournamentHandler.isEnabled && isFromAdmin(message)) {
+            if (text.startsWith("/score")) {
                 tournament.score();
-            } else if (text.startsWith("/win") && isFromAdmin(message)) {
+            } else if (text.startsWith("/win")) {
                 tournament.win();
-            } else if (text.startsWith("/rt") && isFromAdmin(message)) {
+            } else if (text.startsWith("/rt")) {
                 tournament.rt();
             }
         }
