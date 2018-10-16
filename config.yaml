@@ -1,8 +1,8 @@
 log-level: ERROR
 webhook:
-  enabled: true
+  enabled: env(webhook:false)
   port: env(PORT:8443)
-  externalUrl: https://0.0.0.0:$port
+  externalUrl: https://0.0.0.0:80
   internalUrl: https://0.0.0.0:$port
   certificatePublicKeyPath: cert/public_cert.pem
   certificateStorePath: cert/keystore.jks
