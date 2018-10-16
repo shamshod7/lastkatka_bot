@@ -1,17 +1,12 @@
 package com.senderman.lastkatkabot;
 
 import com.annimon.tgbotsmodule.BotHandler;
-import com.mongodb.client.*;
-import com.mongodb.client.model.Filters;
-import org.bson.Document;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import com.senderman.lastkatkabot.commandhandlers.*;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
-import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -22,30 +17,31 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class LastkatkaBotHandler extends BotHandler {
 
-    private static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
+    public static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
     private static final String CALLBACK_PAY_RESPECTS = "pay_respects";
     private static final String CALLBACK_JOIN_DUEL = "join_duel";
 
-    private final MongoClient client;
-    private final MongoDatabase lastkatkaDatabase;
-    private final MongoCollection blacklistCollection;
-
-    private final BotConfig botConfig;
+    public final BotConfig botConfig;
     private final Set<Integer> admins;
     private final Set<Long> allowedChats;
-    private final Set<String> members;
-    private final Set<Integer> membersIds;
-    private final Set<Integer> blacklist;
-    final Map<Long, Map<Integer, Duel>> duels;
-    private boolean tournamentEnabled;
+    public final Set<String> members;
+    public final Set<Integer> membersIds;
+    public final Set<Integer> blacklist;
+    public final Map<Long, Map<Integer, Duel>> duels;
+
+    private final UsercommandsHandler usercommands;
+    private final GamesHandler games;
+    private TournamentHandler tournament;
+
+    private Message message;
 
     LastkatkaBotHandler(BotConfig botConfig) {
         this.botConfig = botConfig;
 
+        // settings
         admins = new HashSet<>();
         String envAdmins = System.getenv("admins");
         if (envAdmins == null) {
@@ -70,15 +66,21 @@ public class LastkatkaBotHandler extends BotHandler {
 
         duels = new HashMap<>();
 
+        //tournament
         members = new HashSet<>();
         membersIds = new HashSet<>();
-        tournamentEnabled = false;
 
-        client = MongoClients.create(System.getenv("database"));
-        lastkatkaDatabase = client.getDatabase("lastkatka");
-        blacklistCollection = lastkatkaDatabase.getCollection("blacklist");
+        // handlers
+        usercommands = new UsercommandsHandler(this);
+        games = new GamesHandler(this);
+
+        // database
         blacklist = new HashSet<>();
-        updateBlacklist();
+
+        // notify all groups about launch
+        for (long chat : allowedChats) {
+            sendMessage(chat, "Бот был перезагружен!");
+        }
     }
 
     @Override
@@ -91,53 +93,11 @@ public class LastkatkaBotHandler extends BotHandler {
         return System.getenv("token");
     }
 
-    private void processTournament(Message message, String text) {
-
-        if (text.startsWith("/score") && isFromAdmin(message)) {
-            var params = text.split(" ");
-            if (params.length != 5) {
-                sendMessage(message.getChatId(), "Неверное количество аргументов!");
-                return;
-            }
-            String score = getScore(params);
-            sendMessage(new SendMessage()
-                    .setChatId(botConfig.getTourchannel())
-                    .setText(score));
-
-        } else if (text.startsWith("/win") && isFromAdmin(message)) {
-            var params = text.split(" ");
-            if (params.length != 6) {
-                sendMessage(message.getChatId(), "Неверное количество аргументов!");
-                return;
-            }
-            String score = getScore(params);
-            restrictMembers(botConfig.getTourgroup());
-            tournamentEnabled = false;
-            String goingTo = (params[5].equals("over")) ? " выиграл турнир" : " выходит в " + params[5].replace("_", " ");
-            var toChannel = new SendMessage()
-                    .setChatId(botConfig.getTourchannel())
-                    .setText(score + "\n\n" + params[1] + "<b>" + goingTo + "!</b>");
-            sendMessage(toChannel);
-
-            var toVegans = new SendMessage()
-                    .setChatId(botConfig.getLastvegan())
-                    .setText("<b>Раунд завершен.\n\nПобедитель:</b> "
-                            + params[1] + "\nБолельщики, посетите "
-                            + botConfig.getTourchannel() + ",  чтобы узнать подробности");
-            sendMessage(toVegans);
-        } else if (text.startsWith("/rt") && isFromAdmin(message)) {
-            restrictMembers(botConfig.getTourgroup());
-            tournamentEnabled = false;
-            sendMessage(new SendMessage(botConfig.getLastvegan(),
-                    "<b>Турнир отменен из-за непредвиденных обстоятельств!</b>"));
-        }
-    }
-
     private boolean isFromAdmin(Message message) {
         return admins.contains(message.getFrom().getId());
     }
 
-    private boolean isInBlacklist(Message message) {
+    public boolean isInBlacklist(Message message) {
         return blacklist.contains(message.getFrom().getId());
     }
 
@@ -150,32 +110,11 @@ public class LastkatkaBotHandler extends BotHandler {
                 message.getReplyToMessage().getText().contains("#players");
     }
 
-    private void restrictMembers(long groupId) {
-        for (Integer membersId : membersIds) {
-            try {
-                execute(new RestrictChatMember(groupId, membersId));
-            } catch (TelegramApiException e) {
-                BotLogger.error("RESTRICT", e);
-            }
-        }
-        members.clear();
-        membersIds.clear();
-    }
-
-    private String getScore(String[] params) {
-        String player1 = params[1];
-        String player2 = params[3];
-        return player1 + " - " +
-                player2 + "\n" +
-                params[2] + ":" +
-                params[4];
-    }
-
-    private Message sendMessage(Long chatId, String message) {
+    public Message sendMessage(Long chatId, String message) {
         return sendMessage(new SendMessage(chatId, message));
     }
 
-    private Message sendMessage(SendMessage message) {
+    public Message sendMessage(SendMessage message) {
         message.enableHtml(true);
         message.disableWebPagePreview();
         Message result = null;
@@ -187,11 +126,11 @@ public class LastkatkaBotHandler extends BotHandler {
         return result;
     }
 
-    private void delMessage(Long chatId, Integer messageId) {
+    public void delMessage(Long chatId, Integer messageId) {
         delMessage(new DeleteMessage(chatId, messageId));
     }
 
-    private void delMessage(DeleteMessage message) {
+    public void delMessage(DeleteMessage message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {
@@ -199,54 +138,16 @@ public class LastkatkaBotHandler extends BotHandler {
         }
     }
 
-    private void addToBlacklist(int id, String name) {
-        blacklistCollection.insertOne(new Document("id", id)
-                .append("name", name));
-        updateBlacklist();
-    }
-
-    private void removeFromBlacklist(int id) {
-        blacklistCollection.deleteOne(Filters.eq("id", id));
-        updateBlacklist();
-    }
-
-    private String getBlackList() {
-        StringBuilder result = new StringBuilder("<b>Список плохих кис:</b>\n\n");
-        try (MongoCursor cursor = blacklistCollection.find().iterator()) {
-            while (cursor.hasNext()) {
-                Document doc = (Document) cursor.next();
-                result.append("<a href=\"tg://user?id=")
-                        .append(doc.getInteger("id"))
-                        .append("\">")
-                        .append(doc.getString("name")
-                                .replace("<", "&lt;")
-                                .replace(">", "&gt;"))
-                        .append("</a>\n");
-            }
-        }
-        return result.toString();
-    }
-
-    private void updateBlacklist() {
-        blacklist.clear();
-        try (MongoCursor cursor = blacklistCollection.find().iterator()) {
-            while (cursor.hasNext()) {
-                Document doc = (Document) cursor.next();
-                blacklist.add(doc.getInteger("id"));
-            }
-        }
-    }
-
-    private InlineKeyboardMarkup getMarkupForPayingRespects() {
+    public InlineKeyboardMarkup getMarkupForPayingRespects() {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("F")
-                .setCallbackData(CALLBACK_PAY_RESPECTS));
+                .setCallbackData(LastkatkaBotHandler.CALLBACK_PAY_RESPECTS));
         markup.setKeyboard(List.of(row1));
         return markup;
     }
 
-    InlineKeyboardMarkup getMarkupForDuel() {
+    public InlineKeyboardMarkup getMarkupForDuel() {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
@@ -255,9 +156,14 @@ public class LastkatkaBotHandler extends BotHandler {
         return markup;
     }
 
-    private void resetBlackList() {
-        blacklist.clear();
-        blacklistCollection.deleteMany(new Document());
+    public Message getCurrentMessage() {
+        return message;
+    }
+
+    public static String getValidName(Message message) {
+        return message.getFrom().getFirstName()
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 
     @Override
@@ -265,91 +171,19 @@ public class LastkatkaBotHandler extends BotHandler {
 
         if (update.hasCallbackQuery()) {
             CallbackQuery query = update.getCallbackQuery();
-            String callbackData = query.getData();
-
-            switch (callbackData) {
-                case CALLBACK_REGISTER_IN_TOURNAMENT: {
-                    int id = query.getFrom().getId();
-                    if (members.contains(query.getFrom().getUserName()) && !membersIds.contains(id)) {
-                        membersIds.add(id);
-                        var rcm = new RestrictChatMember()
-                                .setChatId(botConfig.getTourgroup())
-                                .setUserId(id)
-                                .setCanSendMessages(true)
-                                .setCanSendMediaMessages(true)
-                                .setCanSendOtherMessages(true);
-                        var acq = new AnswerCallbackQuery()
-                                .setCallbackQueryId(query.getId())
-                                .setText("Вам даны права на отправку сообщений в группе турнира!")
-                                .setShowAlert(true);
-                        sendMessage(botConfig.getTourgroup(),
-                                query.getFrom().getFirstName()
-                                        .replace("<", "&lt")
-                                        .replace(">", "&gt")
-                                        + " <b>получил доступ к игре</b>");
-                        try {
-                            execute(acq);
-                            execute(rcm);
-                        } catch (TelegramApiException e) {
-                            BotLogger.error("UNBAN", "Failed to unban member");
-                        }
-                    } else {
-                        var acq = new AnswerCallbackQuery()
-                                .setCallbackQueryId(query.getId())
-                                .setText("Вы не являетесь участником текущего раунда!")
-                                .setShowAlert(true);
-                        try {
-                            execute(acq);
-                        } catch (TelegramApiException e) {
-                            BotLogger.fine("UNKNOWN MEMBER", "This error means nothing");
-                        }
-                    }
-
+            switch (query.getData()) {
+                case CALLBACK_REGISTER_IN_TOURNAMENT:
+                    new CallbackHandler(this, query).registerInTournament();
                     break;
-                }
 
                 case CALLBACK_PAY_RESPECTS:
-                    if (query.getMessage().getText().contains(query.getFrom().getFirstName())) {
-                        var acq = new AnswerCallbackQuery()
-                                .setCallbackQueryId(query.getId())
-                                .setText("You've already payed respects! (or you've tried to pay respects to yourself)")
-                                .setShowAlert(true);
-                        try {
-                            execute(acq);
-                        } catch (TelegramApiException e) {
-                            BotLogger.error("PAY_RESPECTS", e.toString());
-                        }
-                        return null;
-                    }
-                    var acq = new AnswerCallbackQuery()
-                            .setCallbackQueryId(query.getId())
-                            .setText("You've payed respects")
-                            .setShowAlert(true);
-                    var emt = new EditMessageText()
-                            .setChatId(query.getMessage().getChatId())
-                            .setMessageId(query.getMessage().getMessageId())
-                            .setInlineMessageId(query.getInlineMessageId())
-                            .setReplyMarkup(getMarkupForPayingRespects())
-                            .setText(query.getMessage().getText()
-                                    + "\n" + query.getFrom().getFirstName() + " have payed respects");
-                    try {
-                        execute(emt);
-                        execute(acq);
-                    } catch (TelegramApiException e) {
-                        BotLogger.error("PAY_RESPECTS", e.toString());
-                    }
+                    new CallbackHandler(this, query).payRespects();
                     break;
 
-                case CALLBACK_JOIN_DUEL: {
-                    String name = query.getFrom().getFirstName();
-                    int id = query.getFrom().getId();
-                    int messageId = query.getMessage().getMessageId();
-                    long chatId = query.getMessage().getChatId();
-                    duels.get(chatId).get(messageId).addPlayer(id, name);
+                case CALLBACK_JOIN_DUEL:
+                    new CallbackHandler(this, query).joinDuel();
                     break;
-                }
             }
-
             return null;
         }
 
@@ -357,16 +191,15 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
         }
 
-        final var message = update.getMessage();
+        message = update.getMessage();
 
-        // don't process old messages
+        // don't handle old messages
         long current = System.currentTimeMillis() / 1000;
         if (message.getDate() + 60 < current) {
             return null;
         }
 
         final long chatId = message.getChatId();
-        final int messageId = message.getMessageId();
 
         // restrict any user that not in tournament
         if (message.getChatId() == botConfig.getTourgroup() && !isFromAdmin(message)) {
@@ -387,6 +220,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 }
 
         }
+
         if (!message.isUserMessage() && !isAllowedChat(message)) { // leave from foreign groups
             sendMessage(chatId, "Какая-то левая конфа. СЛАВА ЛАСТКАТКЕ!");
             try {
@@ -400,144 +234,56 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
         }
 
+        // Handle user commands
         String text = message.getText();
-        String name = message.getFrom().getFirstName()
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
 
         if (text.startsWith("/pinlist") && message.isReply() && !message.isUserMessage() && isFromWwBot(message)) {
-            try {
-                execute(new PinChatMessage(chatId, message.getReplyToMessage().getMessageId())
-                        .setDisableNotification(true));
-            } catch (TelegramApiException e) {
-                BotLogger.error("PINMESSAGE", e);
-            }
-            delMessage(chatId, messageId);
+            usercommands.pinlist();
 
         } else if (text.startsWith("/action") && !message.isUserMessage()) {
-            delMessage(chatId, messageId);
-            if (isInBlacklist(message))
-                return null;
-
-            if (text.split(" ").length == 1) {
-                return null;
-            }
-
-            String action = text.replace("/action", "");
-            SendMessage sm = new SendMessage(chatId, name + action);
-            if (message.isReply()) {
-                sm.setReplyToMessageId(message.getReplyToMessage().getMessageId());
-            }
-            sendMessage(sm);
+            usercommands.action();
 
         } else if (text.startsWith("/f@" + getBotUsername()) && message.isReply()) {
-            delMessage(chatId, messageId);
-            sendMessage(new SendMessage()
-                    .setChatId(chatId)
-                    .setText("Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName())
-                    .setReplyMarkup(getMarkupForPayingRespects()));
-
-        } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-            addToBlacklist(message.getReplyToMessage().getFrom().getId(),
-                    message.getReplyToMessage().getFrom().getFirstName());
-            sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
-                    " - плохая киса!");
-
-        } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-            removeFromBlacklist(message.getReplyToMessage().getFrom().getId());
-            sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
-                    " хорошая киса!");
-
-        } else if (text.startsWith("/nekos") && isFromAdmin(message)) {
-            sendMessage(chatId, getBlackList());
-
-        } else if (text.startsWith("/loveneko") && isFromAdmin(message)) {
-            resetBlackList();
-            sendMessage(chatId, "Все кисы - хорошие!");
-
-        } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
-            int random = ThreadLocalRandom.current().nextInt(1, 7);
-            sendMessage(new SendMessage()
-                    .setChatId(chatId)
-                    .setText("Кубик брошен. Результат: " + random)
-                    .setReplyToMessageId(messageId));
+            usercommands.payRespects();
 
         } else if (text.startsWith("/help") && message.isUserMessage()) {
-            SendMessage sm = new SendMessage()
-                    .setChatId(chatId)
-                    .setText(botConfig.getHelp());
-            sendMessage(sm);
+            usercommands.help();
 
-        } else if (text.startsWith("/announce") && isFromAdmin(message)) {
-            String[] params = text.split("\n");
-            if (params.length != 6) {
-                sendMessage(chatId, "Неверное количество аргументов!");
-                return null;
-            }
-            String announce = botConfig.getAnnounce()
-                    .replace("DATE", params[1])
-                    .replace("UNTIL", params[2])
-                    .replace("AWARD", params[3])
-                    .replace("LINK", params[4])
-                    .replace("VOTE", params[5]);
-            sendMessage(botConfig.getLastvegan(), announce);
+            // handle games
+        } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
+            games.dice();
 
         } else if (text.startsWith("/duel") && !message.isUserMessage()) {
-            var sm = new SendMessage()
-                    .setChatId(chatId)
-                    .setText("Набор на дуэль! Жмите кнопку ниже\nДжойнулись:")
-                    .setReplyMarkup(getMarkupForDuel());
+            games.duel();
 
-            var sentMessage = sendMessage(sm);
-            int duelMessageId = sentMessage.getMessageId();
-            var duel = new Duel(sentMessage, this);
-            if (duels.containsKey(chatId)) {
-                duels.get(chatId).put(duelMessageId, duel);
-            } else {
-                Map<Integer, Duel> duelMap = new HashMap<>();
-                duelMap.put(duelMessageId, duel);
-                duels.put(chatId, duelMap);
-            }
+            // handle admin commands
+        } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
+            new AdminHandler(this).badneko();
+
+        } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
+            new AdminHandler(this).goodneko();
+
+        } else if (text.startsWith("/nekos") && isFromAdmin(message)) {
+            new AdminHandler(this).nekos();
+
+        } else if (text.startsWith("/loveneko") && isFromAdmin(message)) {
+            new AdminHandler(this).loveneko();
+
+        } else if (text.startsWith("/announce") && isFromAdmin(message)) {
+            new AdminHandler(this).announce();
 
         } else if (text.startsWith("/setup") && isFromAdmin(message)) {
-            var params = text.split(" ");
-            if (params.length != 4) {
-                sendMessage(chatId, "Неверное количество аргументов!");
-                return null;
+            tournament = new TournamentHandler(this);
+            tournament.setup();
+
+        } else if (TournamentHandler.isEnabled) {
+            if (text.startsWith("/score") && isFromAdmin(message)) {
+                tournament.score();
+            } else if (text.startsWith("/win") && isFromAdmin(message)) {
+                tournament.win();
+            } else if (text.startsWith("/rt") && isFromAdmin(message)) {
+                tournament.rt();
             }
-            members.clear();
-            membersIds.clear();
-            members.add(params[1].replace("@", ""));
-            members.add(params[2].replace("@", ""));
-            tournamentEnabled = true;
-
-            var markup = new InlineKeyboardMarkup();
-            var row1 = List.of(
-                    new InlineKeyboardButton()
-                            .setText("Снять ограничения")
-                            .setCallbackData(CALLBACK_REGISTER_IN_TOURNAMENT)
-            );
-            var row2 = List.of(
-                    new InlineKeyboardButton()
-                            .setText("Группа турнира")
-                            .setUrl("https://t.me/" + botConfig.getTourgroupname().replace("@", "")));
-            markup.setKeyboard(List.of(row1, row2));
-            var toVegans = new SendMessage()
-                    .setChatId(botConfig.getLastvegan())
-                    .setText("<b>Турнир активирован!</b>\n\n"
-                            + String.join(", ", params[1], params[2],
-                            "нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n"))
-                    .setReplyMarkup(markup);
-            sendMessage(toVegans);
-
-            var toChannel = new SendMessage()
-                    .setChatId(botConfig.getTourchannel())
-                    .setText("<b>" + params[3].replace("_", " ") + "</b>\n\n"
-                            + params[1] + " vs " + params[2]);
-            sendMessage(toChannel);
-
-        } else if (tournamentEnabled) {
-            processTournament(message, text);
         }
 
         return null;

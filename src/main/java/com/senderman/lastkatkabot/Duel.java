@@ -11,14 +11,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-class Duel {
+public class Duel {
     private final long chatId;
     private final int messageId;
     private final Map<Integer, String> players;
     private final LastkatkaBotHandler handler;
     private String messageText;
 
-    Duel(Message message, LastkatkaBotHandler handler) {
+    public Duel(Message message, LastkatkaBotHandler handler) {
         this.chatId = message.getChatId();
         this.messageId = message.getMessageId();
         this.messageText = message.getText();
@@ -26,7 +26,7 @@ class Duel {
         players = new HashMap<>();
     }
 
-    void addPlayer(int id, String name) {
+    public void addPlayer(int id, String name) {
         if (players.containsKey(id) || players.size() == 2) {
             return;
         }
