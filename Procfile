@@ -1,1 +1,1 @@
-web: java -jar build/libs/lastkatkabot-1.0-all.jar
+worker: java -jar build/libs/lastkatkabot-1.0-all.jar
