@@ -3,7 +3,7 @@ webhook:
   enabled: env(webhook:false)
   port: env(PORT:8443)
   externalUrl: https://54.171.11.209:80
-  internalUrl: https://54.171.11.209:$port
+  internalUrl: https://127.0.0.1:$port
   certificatePublicKeyPath: cert/public_cert.pem
   certificateStorePath: cert/keystore.jks
   certificateStorePassword: env(STORE_PASSWORD)
