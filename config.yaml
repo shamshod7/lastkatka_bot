@@ -2,10 +2,10 @@ log-level: ERROR
 webhook:
   enabled: env(webhook:false)
   port: env(PORT:8443)
-  externalUrl: https://54.171.11.209:8443
-  internalUrl: https://127.0.0.1:$port
-  certificatePublicKeyPath: cert/public_cert.pem
-  certificateStorePath: cert/keystore.jks
-  certificateStorePassword: env(STORE_PASSWORD)
+  externalUrl: https://lastkatkabot.herokuapp.com
+  internalUrl: 0.0.0.0:$port
+  certificatePublicKeyPath: none
+  certificateStorePath: none
+  certificateStorePassword: none
 modules:
   - com.senderman.lastkatkabot.LastkatkaBot
