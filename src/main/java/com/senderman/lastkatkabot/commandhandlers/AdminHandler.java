@@ -140,12 +140,10 @@ public class AdminHandler {
         try {
             Process pr = run.exec(cmd);
             BufferedReader buffer = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-            var result = new StringBuilder();
             String line = "";
             while ((line = buffer.readLine()) != null) {
-                result.append(line).append("\n");
+                handler.sendMessage(chatId, line);
             }
-            handler.sendMessage(chatId, result.toString());
         } catch (IOException e) {
             handler.sendMessage(chatId, "Фиговый из тебя линуксоид");
         }
