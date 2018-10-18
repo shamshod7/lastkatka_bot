@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -155,7 +156,7 @@ public class AdminHandler {
         setCurrentMessage();
         var sm = new SendDocument()
                 .setChatId(chatId)
-                .setDocument(text.replace("/file ", ""));
+                .setDocument(new File(text.replace("/getfile ", "")));
         try {
             handler.execute(sm);
         } catch (TelegramApiException e) {
