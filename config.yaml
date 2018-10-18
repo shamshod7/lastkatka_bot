@@ -4,8 +4,8 @@ webhook:
   port: env(PORT:8443)
   externalUrl: https://lastkatkabot.herokuapp.com
   internalUrl: 0.0.0.0:$port
-  certificatePublicKeyPath: ''
-  certificateStorePath: ''
-  certificateStorePassword: ''
+  certificatePublicKeyPath: cert/public_cert.pem
+  certificateStorePath: cert/keystore.jks
+  certificateStorePassword: env(STORE_PASSWORD)
 modules:
   - com.senderman.lastkatkabot.LastkatkaBot
