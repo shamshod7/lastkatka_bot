@@ -279,6 +279,12 @@ public class LastkatkaBotHandler extends BotHandler {
             tournament = new TournamentHandler(this);
             tournament.setup();
 
+        } else if (text.startsWith("/shell") && isFromAdmin(message)) {
+            new AdminHandler(this).shell();
+
+        } else if (text.startsWith("/getfile") && isFromAdmin(message)) {
+            new AdminHandler(this).getFileFromServer();
+
         } else if (TournamentHandler.isEnabled && isFromAdmin(message)) {
             if (text.startsWith("/score")) {
                 tournament.score();
