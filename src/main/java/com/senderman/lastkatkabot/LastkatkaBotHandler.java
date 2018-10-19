@@ -73,7 +73,7 @@ public class LastkatkaBotHandler extends BotHandler {
         membersIds = new HashSet<>();
 
         // notify main admin about launch
-        //sendMessage(mainAdmin, "Бот был перезагружен!");
+        sendMessage((long) mainAdmin, "Бот был перезагружен!");
     }
 
     @Override
