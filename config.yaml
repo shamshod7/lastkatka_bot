@@ -1,5 +1,3 @@
 log-level: ERROR
-webhook:
-  enabled: false
 modules:
   - com.senderman.lastkatkabot.LastkatkaBot
