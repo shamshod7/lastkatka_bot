@@ -17,6 +17,7 @@ public class AdminHandler {
     private final MongoClient client;
     private final MongoDatabase lastkatkaDatabase;
     private final MongoCollection blacklistCollection;
+    private final MongoCollection adminsCollection;
 
     private final LastkatkaBotHandler handler;
     private Message message;
@@ -31,6 +32,8 @@ public class AdminHandler {
         client = MongoClients.create(System.getenv("database"));
         lastkatkaDatabase = client.getDatabase("lastkatka");
         blacklistCollection = lastkatkaDatabase.getCollection("blacklist");
+        adminsCollection = lastkatkaDatabase.getCollection("admins");
+        updateAdmins();
         updateBlacklist();
     }
 
@@ -77,6 +80,44 @@ public class AdminHandler {
         blacklistCollection.deleteMany(new Document());
     }
 
+    private void addToAdmins(int id, String name) {
+        adminsCollection.insertOne(new Document("id", id)
+                .append("name", name));
+        updateAdmins();
+    }
+
+    private void removeFromAdmins(int id) {
+        adminsCollection.deleteOne(Filters.eq("id", id));
+        updateAdmins();
+    }
+
+    private String getAdmins() {
+        StringBuilder result = new StringBuilder("<b>Админы бота:</b>\n\n");
+        try (MongoCursor cursor = adminsCollection.find().iterator()) {
+            while (cursor.hasNext()) {
+                Document doc = (Document) cursor.next();
+                result.append("<a href=\"tg://user?id=")
+                        .append(doc.getInteger("id"))
+                        .append("\">")
+                        .append(doc.getString("name")
+                                .replace("<", "&lt;")
+                                .replace(">", "&gt;"))
+                        .append("</a>\n");
+            }
+        }
+        return result.toString();
+    }
+
+    private void updateAdmins() {
+        handler.admins.clear();
+        try (MongoCursor cursor = adminsCollection.find().iterator()) {
+            while (cursor.hasNext()) {
+                Document doc = (Document) cursor.next();
+                handler.admins.add(doc.getInteger("id"));
+            }
+        }
+    }
+
     private void setCurrentMessage() {
         this.message = handler.getCurrentMessage();
         this.chatId = message.getChatId();
@@ -109,6 +150,26 @@ public class AdminHandler {
         setCurrentMessage();
         resetBlackList();
         handler.sendMessage(chatId, "Все кисы - хорошие!");
+    }
+
+    public void owner() {
+        setCurrentMessage();
+        addToAdmins(message.getReplyToMessage().getFrom().getId(),
+                message.getReplyToMessage().getFrom().getFirstName());
+        handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
+                " теперь мой хозяин!");
+    }
+
+    public void remOwner() {
+        setCurrentMessage();
+        removeFromAdmins(message.getReplyToMessage().getFrom().getId());
+        handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
+                " больше не мой хозяин!");
+    }
+
+    public void listOwners() {
+        setCurrentMessage();
+        handler.sendMessage(chatId, getAdmins());
     }
 
     public void announce() {
@@ -148,17 +209,5 @@ public class AdminHandler {
             handler.sendMessage(chatId, "Фиговый из тебя линуксоид");
         }
 
-    }
-
-    public void getFileFromServer() {
-        setCurrentMessage();
-        var sm = new SendDocument()
-                .setChatId(chatId)
-                .setDocument(new File(text.replace("/getfile ", "")));
-        try {
-            handler.execute(sm);
-        } catch (TelegramApiException e) {
-            handler.sendMessage(chatId, "Не могу отправить файл, у меня лапки!");
-        }
     }
 }

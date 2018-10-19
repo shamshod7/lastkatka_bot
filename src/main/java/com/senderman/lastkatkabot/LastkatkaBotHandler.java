@@ -25,7 +25,8 @@ public class LastkatkaBotHandler extends BotHandler {
     private static final String CALLBACK_JOIN_DUEL = "join_duel";
 
     public final BotConfig botConfig;
-    private final Set<Integer> admins;
+    private final int mainAdmin;
+    public final Set<Integer> admins;
     private final Set<Long> allowedChats;
     public final Set<String> members;
     public final Set<Integer> membersIds;
@@ -35,6 +36,7 @@ public class LastkatkaBotHandler extends BotHandler {
     private final UsercommandsHandler usercommands;
     private final GamesHandler games;
     private TournamentHandler tournament;
+    private AdminHandler adminPanel;
 
     private Message message;
 
@@ -42,15 +44,10 @@ public class LastkatkaBotHandler extends BotHandler {
         this.botConfig = botConfig;
 
         // settings
+
+        mainAdmin = Integer.valueOf(System.getenv("main_admin"));
         admins = new HashSet<>();
-        String envAdmins = System.getenv("admins");
-        if (envAdmins == null) {
-            admins.add(94197300);
-        } else {
-            for (String envAdmin : envAdmins.split(" ")) {
-                admins.add((Integer.valueOf(envAdmin)));
-            }
-        }
+        blacklist = new HashSet<>();
 
         allowedChats = new HashSet<>(List.of(
                 botConfig.getLastkatka(),
@@ -64,23 +61,19 @@ public class LastkatkaBotHandler extends BotHandler {
             }
         }
 
+        // handlers
+        usercommands = new UsercommandsHandler(this);
+        games = new GamesHandler(this);
+        adminPanel = new AdminHandler(this);
+
         duels = new HashMap<>();
 
         //tournament
         members = new HashSet<>();
         membersIds = new HashSet<>();
 
-        // handlers
-        usercommands = new UsercommandsHandler(this);
-        games = new GamesHandler(this);
-
-        // database
-        blacklist = new HashSet<>();
-
-        // notify all groups about launch
-        for (long chat : allowedChats) {
-            sendMessage(chat, "Бот был перезагружен!");
-        }
+        // notify main admin about launch
+        //sendMessage(mainAdmin, "Бот был перезагружен!");
     }
 
     @Override
@@ -99,10 +92,6 @@ public class LastkatkaBotHandler extends BotHandler {
 
     public boolean isInBlacklist(Message message) {
         return blacklist.contains(message.getFrom().getId());
-    }
-
-    private boolean isAllowedChat(Message message) {
-        return allowedChats.contains(message.getChatId());
     }
 
     private boolean isFromWwBot(Message message) {
@@ -221,7 +210,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         }
 
-        if (!message.isUserMessage() && !isAllowedChat(message)) { // leave from foreign groups
+        if (!message.isUserMessage() && !allowedChats.contains(message.getChatId())) { // leave from foreign groups
             sendMessage(chatId, "Какая-то левая конфа. СЛАВА ЛАСТКАТКЕ!");
             try {
                 execute(new LeaveChat().setChatId(chatId));
@@ -257,33 +246,39 @@ public class LastkatkaBotHandler extends BotHandler {
             games.duel();
 
             // handle admin commands
+        } else if (text.startsWith("/owner") && message.getFrom().getId() == mainAdmin) {
+            adminPanel.owner();
+
+        } else if (text.startsWith("/remowner") && message.getFrom().getId() == mainAdmin) {
+            adminPanel.remOwner();
+
+        } else if (text.startsWith("/listowners") && message.getFrom().getId() == mainAdmin) {
+            adminPanel.listOwners();
+
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-            new AdminHandler(this).badneko();
+            adminPanel.badneko();
 
         } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-            new AdminHandler(this).goodneko();
+            adminPanel.goodneko();
 
         } else if (text.startsWith("/nekos") && isFromAdmin(message)) {
-            new AdminHandler(this).nekos();
+            adminPanel.nekos();
 
         } else if (text.startsWith("/loveneko") && isFromAdmin(message)) {
-            new AdminHandler(this).loveneko();
+            adminPanel.loveneko();
 
         } else if (text.startsWith("/critical") && isFromAdmin(message)) {
-            new AdminHandler(this).critical();
+            adminPanel.critical();
 
         } else if (text.startsWith("/announce") && isFromAdmin(message)) {
-            new AdminHandler(this).announce();
+            adminPanel.announce();
 
         } else if (text.startsWith("/setup") && isFromAdmin(message)) {
             tournament = new TournamentHandler(this);
             tournament.setup();
 
         } else if (text.startsWith("/shell") && isFromAdmin(message)) {
-            new AdminHandler(this).shell();
-
-        } else if (text.startsWith("/getfile") && isFromAdmin(message)) {
-            new AdminHandler(this).getFileFromServer();
+            adminPanel.shell();
 
         } else if (TournamentHandler.isEnabled && isFromAdmin(message)) {
             if (text.startsWith("/score")) {
