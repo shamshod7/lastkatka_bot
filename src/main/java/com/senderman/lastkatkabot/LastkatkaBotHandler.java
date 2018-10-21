@@ -225,7 +225,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         // Handle user commands
         String text = message.getText();
-        String command = text.substring(0, text.indexOf("@") - 1);
+        String command = text.substring(0, text.indexOf("@"));
 
         if (command.equals("/pinlist") && message.isReply() && !message.isUserMessage() && isFromWwBot(message)) {
             usercommands.pinlist();
