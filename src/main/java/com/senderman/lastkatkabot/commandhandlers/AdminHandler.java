@@ -4,14 +4,7 @@ import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.bson.Document;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class AdminHandler {
     private final MongoClient client;
@@ -192,22 +185,5 @@ public class AdminHandler {
         setCurrentMessage();
         handler.duels.clear();
         handler.sendMessage(chatId, "Все неначатые дуэли были очищены!");
-    }
-
-    public void shell() {
-        setCurrentMessage();
-        String cmd = text.replace("/shell ", "");
-        Runtime run = Runtime.getRuntime();
-        try {
-            Process pr = run.exec(cmd);
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-            String line = "";
-            while ((line = buffer.readLine()) != null) {
-                handler.sendMessage(chatId, line);
-            }
-        } catch (IOException e) {
-            handler.sendMessage(chatId, "Фиговый из тебя линуксоид");
-        }
-
     }
 }
