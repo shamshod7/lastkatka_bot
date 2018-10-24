@@ -7,10 +7,6 @@ import org.bson.Document;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 public class AdminHandler {
-    private final MongoClient client;
-    private final MongoDatabase lastkatkaDatabase;
-    private final MongoCollection blacklistCollection;
-    private final MongoCollection adminsCollection;
 
     private final LastkatkaBotHandler handler;
     private Message message;
@@ -19,13 +15,13 @@ public class AdminHandler {
     private String text;
     private String name;
 
+    private final MongoCollection adminsCollection;
+    public final MongoCollection blacklistCollection;
+
     public AdminHandler(LastkatkaBotHandler handler) {
         this.handler = handler;
-
-        client = MongoClients.create(System.getenv("database"));
-        lastkatkaDatabase = client.getDatabase("lastkatka");
-        blacklistCollection = lastkatkaDatabase.getCollection("blacklist");
-        adminsCollection = lastkatkaDatabase.getCollection("admins");
+        adminsCollection = handler.lastkatkaDatabase.getCollection("admins");
+        blacklistCollection = handler.lastkatkaDatabase.getCollection("blacklist");
         updateAdmins();
         updateBlacklist();
     }
@@ -149,14 +145,14 @@ public class AdminHandler {
         setCurrentMessage();
         addToAdmins(message.getReplyToMessage().getFrom().getId(),
                 message.getReplyToMessage().getFrom().getFirstName());
-        handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
+        handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getFirstName() +
                 " теперь мой хозяин!");
     }
 
     public void remOwner() {
         setCurrentMessage();
         removeFromAdmins(message.getReplyToMessage().getFrom().getId());
-        handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
+        handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getFirstName() +
                 " больше не мой хозяин!");
     }
 

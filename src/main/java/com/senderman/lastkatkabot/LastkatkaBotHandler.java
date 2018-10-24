@@ -1,6 +1,10 @@
 package com.senderman.lastkatkabot;
 
 import com.annimon.tgbotsmodule.BotHandler;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.senderman.lastkatkabot.commandhandlers.*;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
@@ -33,6 +37,9 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Integer> blacklist;
     public final Map<Long, Map<Integer, Duel>> duels;
 
+    public final MongoClient client;
+    public final MongoDatabase lastkatkaDatabase;
+
     private final UsercommandsHandler usercommands;
     private final GamesHandler games;
     private TournamentHandler tournament;
@@ -60,6 +67,10 @@ public class LastkatkaBotHandler extends BotHandler {
                 allowedChats.add(Long.valueOf(envAllow));
             }
         }
+
+        // database
+        client = MongoClients.create(System.getenv("database"));
+        lastkatkaDatabase = client.getDatabase("lastkatka");
 
         // handlers
         usercommands = new UsercommandsHandler(this);
@@ -241,6 +252,9 @@ public class LastkatkaBotHandler extends BotHandler {
             // handle games
         } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
             games.dice();
+
+        } else if (text.startsWith("/dstats")) {
+            games.dstats();
 
         } else if (text.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
             games.duel();
