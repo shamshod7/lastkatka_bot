@@ -100,8 +100,10 @@ public class Duel {
             initStats(id);
         }
         var updateDoc = new Document()
-                .append("$inc", new Document("total", 1))
                 .append("$inc", new Document("wins", 1));
+        duelstats.updateOne(Filters.eq("id", id), updateDoc);
+        updateDoc = new Document()
+                .append("$inc", new Document("total", 1));
         duelstats.updateOne(Filters.eq("id", id), updateDoc);
     }
 
