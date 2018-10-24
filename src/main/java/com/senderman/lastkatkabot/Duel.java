@@ -59,12 +59,12 @@ public class Duel {
                     .append(loser.name).append(" успевает выстрелить в голову ").append(winner.name).append("! ")
                     .append(winner.name).append(" падает замертво!")
                     .append("\n\n<b>Дуэль окончилась ничьей!</b<");
-            loserToStats(player1.id, player1.name);
-            loserToStats(player1.id, player2.name);
+            loserToStats(player1.id);
+            loserToStats(player1.id);
         } else {
             messageText.append(winner.name).append(" выиграл дуэль!");
-            winnerToStats(winner.id, winner.name);
-            loserToStats(loser.id, loser.name);
+            winnerToStats(winner.id);
+            loserToStats(loser.id);
         }
         editMessage(messageText.toString(), null);
 
@@ -94,25 +94,23 @@ public class Duel {
         duelstats.insertOne(doc);
     }
 
-    private void winnerToStats(int id, String name) {
+    private void winnerToStats(int id) {
         Document doc = (Document) duelstats.find(Filters.eq("id", id)).first();
         if (doc == null) {
             initStats(id);
         }
         var updateDoc = new Document()
-                .append("$set", new Document("name", name))
                 .append("$inc", new Document("wins", 1))
                 .append("$inc", new Document("total", 1));
         duelstats.updateOne(Filters.eq("id", id), updateDoc);
     }
 
-    private void loserToStats(int id, String name) {
+    private void loserToStats(int id) {
         Document doc = (Document) duelstats.find(Filters.eq("id", id)).first();
         if (doc == null) {
             initStats(id);
         }
         var updateDoc = new Document()
-                .append("$set", new Document("name", name))
                 .append("$inc", new Document("total", 1));
         duelstats.updateOne(Filters.eq("id", id), updateDoc);
     }

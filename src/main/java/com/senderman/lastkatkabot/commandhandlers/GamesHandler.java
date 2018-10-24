@@ -5,7 +5,6 @@ import com.mongodb.client.model.Filters;
 import com.senderman.lastkatkabot.Duel;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
