@@ -6,70 +6,58 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Duel {
+
     private final long chatId;
     private final int messageId;
-    private final Map<Integer, String> players;
     private final LastkatkaBotHandler handler;
     private String messageText;
+    private DuelPlayer player1;
+    private DuelPlayer player2;
 
     public Duel(Message message, LastkatkaBotHandler handler) {
         this.chatId = message.getChatId();
         this.messageId = message.getMessageId();
         this.messageText = message.getText();
         this.handler = handler;
-        players = new HashMap<>();
     }
 
     public void addPlayer(int id, String name) {
-        if (players.containsKey(id) || players.size() == 2) {
+        if (player1 != null && player1.id == id) {
             return;
         }
-        players.put(id, name);
-        editMessage(messageText + "\n" + name, handler.getMarkupForDuel());
-
-        if (players.size() == 2) {
+        if (player1 == null) {
+            player1 = new DuelPlayer(id, name);
+            editMessage(messageText + "\n" + name, handler.getMarkupForDuel());
+        } else {
+            player2 = new DuelPlayer(id, name);
             new Thread(this::start).start();
         }
     }
 
     private void start() {
-        Iterator<String> i = players.values().iterator();
-        String player1 = i.next();
-        String player2 = i.next();
-        messageText = player1 + " vs " + player2;
-        messageText += "\n\nДуэль началась!";
-        editMessage(messageText, null);
-        sleep();
-
-        messageText += "\n\nПротивники взяли пистолеты и расходятся в разные стороны...";
-        editMessage(messageText, null);
-        sleep();
-
-        messageText += "\n\nПротивники встали лицом к лицу...";
-        editMessage(messageText, null);
-        sleep();
-
-        int random = ThreadLocalRandom.current().nextInt(0, 100);
-        String winner = (random < 50) ? player1 : player2;
-        String loser = (random < 50) ? player2 : player1;
-        messageText += "\n\n\uD83D\uDCA5Выстрел! " + winner + " победно смотрит на медленно умирающего " + loser + "!";
-        editMessage(messageText, null);
-        sleep();
-
-        if (ThreadLocalRandom.current().nextInt(0, 100) < 21) {
-            messageText += "\n\n\uD83D\uDCA5Умирая, " + loser +
-                    " успевает выстрелить в голову " + winner + "! Оба противника мертвы!";
-            editMessage(messageText, null);
+        var random = ThreadLocalRandom.current();
+        int randomInt = random.nextInt(0, 100);
+        String winner = (randomInt < 50) ? player1.name : player2.name;
+        String loser = (randomInt < 50) ? player2.name : player1.name;
+        StringBuilder messageText = new StringBuilder();
+        messageText.append("<b>Дуэль</b>\n")
+                .append(player1.name).append(" vs ").append(player2.name)
+                .append("\n\nПротивники разошлись в разные стороны, развернулись лицом друг к другу, и ")
+                .append(winner).append(" выстрелил первым! ")
+                .append(loser).append(" лежит на земле, истекая кровью!");
+        if (random.nextInt(0, 100) < 21) {
+            messageText.append("\nНо, умирая, ")
+                    .append(loser).append(" успевает выстрелить в голову ").append(winner).append("! ")
+                    .append(winner).append(" падает замертво!")
+                    .append("\n\n<b>Дуэль окончилась ничьей!</b<");
         } else {
-            messageText += "\n\n\uD83D\uDC51" + winner + " выиграл дуэль!";
-            editMessage(messageText, null);
+            messageText.append(winner).append(" выиграл дуэль!");
         }
+        editMessage(messageText.toString(), null);
+
         handler.duels.get(chatId).remove(messageId);
     }
 
@@ -87,12 +75,14 @@ public class Duel {
             BotLogger.error("EDIT_DUEL", e.toString());
         }
     }
+}
 
-    private void sleep() {
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            BotLogger.error("DUEL THREAD", e.toString());
-        }
+class DuelPlayer {
+    final String name;
+    final int id;
+
+    DuelPlayer(int id, String name) {
+        this.id = id;
+        this.name = name;
     }
 }

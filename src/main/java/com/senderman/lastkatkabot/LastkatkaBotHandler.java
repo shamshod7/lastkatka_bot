@@ -225,65 +225,64 @@ public class LastkatkaBotHandler extends BotHandler {
 
         // Handle user commands
         String text = message.getText();
-        String command = text.substring(0, text.indexOf("@"));
 
-        if (command.equals("/pinlist") && message.isReply() && !message.isUserMessage() && isFromWwBot(message)) {
+        if (text.startsWith("/pinlist") && message.isReply() && !message.isUserMessage() && isFromWwBot(message)) {
             usercommands.pinlist();
 
-        } else if (command.equals("/action") && !message.isUserMessage()) {
+        } else if (text.startsWith("/action") && !message.isUserMessage()) {
             usercommands.action();
 
-        } else if (command.equals("/f") && message.isReply()) {
+        } else if (text.startsWith("/f@" + getBotUsername()) && message.isReply()) {
             usercommands.payRespects();
 
-        } else if (command.equals("/help") && message.isUserMessage()) {
+        } else if (text.startsWith("/help") && message.isUserMessage()) {
             usercommands.help();
 
             // handle games
-        } else if (command.equals("/dice") && !blacklist.contains(message.getFrom().getId())) {
+        } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
             games.dice();
 
-        } else if (command.equals("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
+        } else if (text.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
             games.duel();
 
             // handle admin commands
-        } else if (command.equals("/owner") && message.getFrom().getId() == mainAdmin) {
+        } else if (text.startsWith("/owner") && message.getFrom().getId() == mainAdmin) {
             adminPanel.owner();
 
-        } else if (command.equals("/remowner") && message.getFrom().getId() == mainAdmin) {
+        } else if (text.startsWith("/remowner") && message.getFrom().getId() == mainAdmin) {
             adminPanel.remOwner();
 
-        } else if (command.equals("/listowners") && message.getFrom().getId() == mainAdmin) {
+        } else if (text.startsWith("/listowners") && message.getFrom().getId() == mainAdmin) {
             adminPanel.listOwners();
 
-        } else if (command.equals("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
+        } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
             adminPanel.badneko();
 
-        } else if (command.equals("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
+        } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
             adminPanel.goodneko();
 
-        } else if (command.equals("/nekos") && isFromAdmin(message)) {
+        } else if (text.startsWith("/nekos") && isFromAdmin(message)) {
             adminPanel.nekos();
 
-        } else if (command.equals("/loveneko") && isFromAdmin(message)) {
+        } else if (text.startsWith("/loveneko") && isFromAdmin(message)) {
             adminPanel.loveneko();
 
-        } else if (command.equals("/critical") && isFromAdmin(message)) {
+        } else if (text.startsWith("/critical") && isFromAdmin(message)) {
             adminPanel.critical();
 
-        } else if (command.equals("/announce") && isFromAdmin(message)) {
+        } else if (text.startsWith("/announce") && isFromAdmin(message)) {
             adminPanel.announce();
 
-        } else if (command.equals("/setup") && isFromAdmin(message)) {
+        } else if (text.startsWith("/setup") && isFromAdmin(message)) {
             tournament = new TournamentHandler(this);
             tournament.setup();
 
         } else if (TournamentHandler.isEnabled && isFromAdmin(message)) {
-            if (command.equals("/score")) {
+            if (text.startsWith("/score")) {
                 tournament.score();
-            } else if (command.equals("/win")) {
+            } else if (text.startsWith("/win")) {
                 tournament.win();
-            } else if (command.equals("/rt")) {
+            } else if (text.startsWith("/rt")) {
                 tournament.rt();
             }
         }
