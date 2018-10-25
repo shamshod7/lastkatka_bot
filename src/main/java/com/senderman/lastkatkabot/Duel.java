@@ -44,17 +44,16 @@ public class Duel {
     }
 
     private void start() {
-        var random = ThreadLocalRandom.current();
-        int randomInt = random.nextInt(0, 100);
-        var winner = (randomInt < 50) ? player1 : player2;
-        var loser = (randomInt < 50) ? player2 : player1;
+        int randomInt = ThreadLocalRandom.current().nextInt(0, 100);
+        DuelPlayer winner = (randomInt < 50) ? player1 : player2;
+        DuelPlayer loser = (randomInt < 50) ? player2 : player1;
         var messageText = new StringBuilder();
         messageText.append("<b>Дуэль</b>\n")
                 .append(player1.name).append(" vs ").append(player2.name)
                 .append("\n\nПротивники разошлись в разные стороны, развернулись лицом друг к другу, и ")
                 .append(winner.name).append(" выстрелил первым!\n")
                 .append(loser.name).append(" лежит на земле, истекая кровью!\n");
-        if (random.nextInt(0, 100) < 21) {
+        if (ThreadLocalRandom.current().nextInt(0, 100) < 21) {
             messageText.append("\nНо, умирая, ")
                     .append(loser.name).append(" успевает выстрелить в голову ").append(winner.name).append("! ")
                     .append(winner.name).append(" падает замертво!")
@@ -62,7 +61,9 @@ public class Duel {
             loserToStats(player1.id);
             loserToStats(player1.id);
         } else {
-            messageText.append(winner.name).append(" выиграл дуэль!");
+            messageText
+                    .append("\n\n<b>")
+                    .append(winner.name).append(" выиграл дуэль!</b>");
             winnerToStats(winner.id);
             loserToStats(loser.id);
         }

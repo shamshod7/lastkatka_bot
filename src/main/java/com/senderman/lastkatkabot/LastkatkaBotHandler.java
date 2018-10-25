@@ -53,6 +53,7 @@ public class LastkatkaBotHandler extends BotHandler {
         // settings
 
         mainAdmin = Integer.valueOf(System.getenv("main_admin"));
+        sendMessage((long) mainAdmin, "Инициализация...");
         admins = new HashSet<>();
         blacklist = new HashSet<>();
 
@@ -84,7 +85,7 @@ public class LastkatkaBotHandler extends BotHandler {
         membersIds = new HashSet<>();
 
         // notify main admin about launch
-        sendMessage((long) mainAdmin, "Бот был перезагружен!");
+        sendMessage((long) mainAdmin, "Бот готов к работе!");
     }
 
     @Override

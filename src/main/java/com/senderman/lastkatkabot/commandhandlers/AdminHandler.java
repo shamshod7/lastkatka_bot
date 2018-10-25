@@ -117,6 +117,9 @@ public class AdminHandler {
 
     public void badneko() {
         setCurrentMessage();
+        if (handler.blacklist.contains(message.getReplyToMessage().getFrom().getId())) {
+            return;
+        }
         addToBlacklist(message.getReplyToMessage().getFrom().getId(),
                 message.getReplyToMessage().getFrom().getFirstName());
         handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
@@ -143,6 +146,9 @@ public class AdminHandler {
 
     public void owner() {
         setCurrentMessage();
+        if (handler.admins.contains(message.getReplyToMessage().getFrom().getId())) {
+            return;
+        }
         addToAdmins(message.getReplyToMessage().getFrom().getId(),
                 message.getReplyToMessage().getFrom().getFirstName());
         handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getFirstName() +
