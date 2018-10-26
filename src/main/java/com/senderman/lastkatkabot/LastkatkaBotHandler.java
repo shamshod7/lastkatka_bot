@@ -3,7 +3,6 @@ package com.senderman.lastkatkabot;
 import com.annimon.tgbotsmodule.BotHandler;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.senderman.lastkatkabot.commandhandlers.*;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -15,8 +14,6 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
@@ -25,8 +22,10 @@ import java.util.*;
 public class LastkatkaBotHandler extends BotHandler {
 
     public static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
-    private static final String CALLBACK_PAY_RESPECTS = "pay_respects";
-    private static final String CALLBACK_JOIN_DUEL = "join_duel";
+    public static final String CALLBACK_PAY_RESPECTS = "pay_respects";
+    public static final String CALLBACK_JOIN_DUEL = "join_duel";
+    public static final String CALLBACK_CAKE_OK = "cake ok";
+    public static final String CALLBACK_CAKE_NOT = "cake not";
 
     public final BotConfig botConfig;
     private final int mainAdmin;
@@ -37,7 +36,6 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Integer> blacklist;
     public final Map<Long, Map<Integer, Duel>> duels;
 
-    public final MongoClient client;
     public final MongoDatabase lastkatkaDatabase;
 
     private final UsercommandsHandler usercommands;
@@ -70,7 +68,7 @@ public class LastkatkaBotHandler extends BotHandler {
         }
 
         // database
-        client = MongoClients.create(System.getenv("database"));
+        MongoClient client = MongoClients.create(System.getenv("database"));
         lastkatkaDatabase = client.getDatabase("lastkatka");
 
         // handlers
@@ -111,8 +109,8 @@ public class LastkatkaBotHandler extends BotHandler {
                 message.getReplyToMessage().getText().contains("#players");
     }
 
-    public Message sendMessage(Long chatId, String message) {
-        return sendMessage(new SendMessage(chatId, message));
+    public void sendMessage(Long chatId, String message) {
+        sendMessage(new SendMessage(chatId, message));
     }
 
     public Message sendMessage(SendMessage message) {
@@ -131,30 +129,12 @@ public class LastkatkaBotHandler extends BotHandler {
         delMessage(new DeleteMessage(chatId, messageId));
     }
 
-    public void delMessage(DeleteMessage message) {
+    private void delMessage(DeleteMessage message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {
             BotLogger.error("DELETE", e);
         }
-    }
-
-    public InlineKeyboardMarkup getMarkupForPayingRespects() {
-        var markup = new InlineKeyboardMarkup();
-        var row1 = List.of(new InlineKeyboardButton()
-                .setText("F")
-                .setCallbackData(LastkatkaBotHandler.CALLBACK_PAY_RESPECTS));
-        markup.setKeyboard(List.of(row1));
-        return markup;
-    }
-
-    public InlineKeyboardMarkup getMarkupForDuel() {
-        var markup = new InlineKeyboardMarkup();
-        var row1 = List.of(new InlineKeyboardButton()
-                .setText("Присоединиться")
-                .setCallbackData(CALLBACK_JOIN_DUEL));
-        markup.setKeyboard(List.of(row1));
-        return markup;
     }
 
     public Message getCurrentMessage() {
@@ -183,6 +163,12 @@ public class LastkatkaBotHandler extends BotHandler {
 
                 case CALLBACK_JOIN_DUEL:
                     new CallbackHandler(this, query).joinDuel();
+                    break;
+                case CALLBACK_CAKE_OK:
+                    new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_OK);
+                    break;
+                case CALLBACK_CAKE_NOT:
+                    new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_NOT);
                     break;
             }
             return null;
@@ -253,6 +239,9 @@ public class LastkatkaBotHandler extends BotHandler {
             // handle games
         } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
             games.dice();
+
+        } else if (text.startsWith("/cake")) {
+            usercommands.cake();
 
         } else if (text.startsWith("/dstats")) {
             games.dstats();

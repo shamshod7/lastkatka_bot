@@ -7,9 +7,11 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Duel {
@@ -36,7 +38,7 @@ public class Duel {
         }
         if (player1 == null) {
             player1 = new DuelPlayer(id, name);
-            editMessage(messageText + "\n" + name, handler.getMarkupForDuel());
+            editMessage(messageText + "\n" + name, getMarkupForDuel());
         } else {
             player2 = new DuelPlayer(id, name);
             new Thread(this::start).start();
@@ -86,6 +88,15 @@ public class Duel {
         } catch (TelegramApiException e) {
             BotLogger.error("EDIT_DUEL", e.toString());
         }
+    }
+
+    public InlineKeyboardMarkup getMarkupForDuel() {
+        var markup = new InlineKeyboardMarkup();
+        var row1 = List.of(new InlineKeyboardButton()
+                .setText("Присоединиться")
+                .setCallbackData(LastkatkaBotHandler.CALLBACK_JOIN_DUEL));
+        markup.setKeyboard(List.of(row1));
+        return markup;
     }
 
     private void initStats(int id) {

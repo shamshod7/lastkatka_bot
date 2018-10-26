@@ -4,8 +4,12 @@ import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
+
+import java.util.List;
 
 public class UsercommandsHandler {
     private final LastkatkaBotHandler handler;
@@ -25,6 +29,15 @@ public class UsercommandsHandler {
         this.messageId = message.getMessageId();
         this.text = message.getText();
         this.name = LastkatkaBotHandler.getValidName(message);
+    }
+
+    static InlineKeyboardMarkup getMarkupForPayingRespects() {
+        var markup = new InlineKeyboardMarkup();
+        var row1 = List.of(new InlineKeyboardButton()
+                .setText("F")
+                .setCallbackData(LastkatkaBotHandler.CALLBACK_PAY_RESPECTS));
+        markup.setKeyboard(List.of(row1));
+        return markup;
     }
 
     public void action() { // /action
@@ -51,7 +64,27 @@ public class UsercommandsHandler {
         handler.sendMessage(new SendMessage()
                 .setChatId(chatId)
                 .setText("Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName())
-                .setReplyMarkup(handler.getMarkupForPayingRespects()));
+                .setReplyMarkup(getMarkupForPayingRespects()));
+    }
+
+    public void cake() {
+        setCurrentMessage();
+        var markup = new InlineKeyboardMarkup();
+        var row1 = List.of(new InlineKeyboardButton()
+                .setText("Принять тортик")
+                .setCallbackData(LastkatkaBotHandler.CALLBACK_CAKE_OK));
+        var row2 = List.of(new InlineKeyboardButton()
+                .setText("Отказаться")
+                .setCallbackData(LastkatkaBotHandler.CALLBACK_CAKE_NOT));
+        markup.setKeyboard(List.of(row1, row2));
+        handler.delMessage(chatId, messageId);
+        handler.sendMessage(new SendMessage()
+                .setChatId(chatId)
+                .setText(message.getReplyToMessage().getFrom().getFirstName()
+                        + ", пользователь " + message.getFrom().getFirstName()
+                        + " подарил вам тортик c" + text.replace("/cake", ""))
+                .setReplyToMessageId(message.getReplyToMessage().getMessageId())
+                .setReplyMarkup(markup));
     }
 
     public void pinlist() { // /pinlist

@@ -7,8 +7,11 @@ import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.bson.Document;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -42,6 +45,15 @@ public class GamesHandler {
         duelstats.insertOne(doc);
     }
 
+    public InlineKeyboardMarkup getMarkupForDuel() {
+        var markup = new InlineKeyboardMarkup();
+        var row1 = List.of(new InlineKeyboardButton()
+                .setText("Присоединиться")
+                .setCallbackData(LastkatkaBotHandler.CALLBACK_JOIN_DUEL));
+        markup.setKeyboard(List.of(row1));
+        return markup;
+    }
+
     public void dice() {
         setCurrentMessage();
         int random = ThreadLocalRandom.current().nextInt(1, 7);
@@ -56,7 +68,7 @@ public class GamesHandler {
         var sm = new SendMessage()
                 .setChatId(chatId)
                 .setText("Набор на дуэль! Жмите кнопку ниже\nДжойнулись:")
-                .setReplyMarkup(handler.getMarkupForDuel());
+                .setReplyMarkup(getMarkupForDuel());
 
         var sentMessage = handler.sendMessage(sm);
         int duelMessageId = sentMessage.getMessageId();

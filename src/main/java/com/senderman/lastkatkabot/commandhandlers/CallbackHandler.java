@@ -13,6 +13,7 @@ public class CallbackHandler {
     private final LastkatkaBotHandler handler;
     private CallbackQuery query;
     private String id;
+    private Message message;
     private long chatId;
     private int messageId;
     private String text;
@@ -22,7 +23,7 @@ public class CallbackHandler {
         this.handler = handler;
         this.query = query;
         this.id = query.getId();
-        Message message = query.getMessage();
+        this.message = query.getMessage();
         this.chatId = message.getChatId();
         this.messageId = message.getMessageId();
         this.text = message.getText();
@@ -30,6 +31,8 @@ public class CallbackHandler {
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");
     }
+
+    public enum CAKE_ACTIONS {CAKE_OK, CAKE_NOT}
 
     public void payRespects() {
         if (text.contains(query.getFrom().getFirstName())) {
@@ -50,15 +53,50 @@ public class CallbackHandler {
                 .setShowAlert(true);
         var emt = new EditMessageText()
                 .setChatId(chatId)
-                .setMessageId(query.getMessage().getMessageId())
+                .setMessageId(message.getMessageId())
                 .setInlineMessageId(query.getInlineMessageId())
-                .setReplyMarkup(handler.getMarkupForPayingRespects())
+                .setReplyMarkup(UsercommandsHandler.getMarkupForPayingRespects())
                 .setText(text + "\n" + query.getFrom().getFirstName() + " have payed respects");
         try {
             handler.execute(emt);
             handler.execute(acq);
         } catch (TelegramApiException e) {
             BotLogger.error("PAY_RESPECTS", e.toString());
+        }
+    }
+
+    public void cake(CAKE_ACTIONS actions) {
+        if (!query.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) {
+            var acq = new AnswerCallbackQuery()
+                    .setCallbackQueryId(id)
+                    .setText("Этот тортик не вам!")
+                    .setShowAlert(true);
+            try {
+                handler.execute(acq);
+            } catch (TelegramApiException e) {
+                BotLogger.error("WRONG CAKE", e.toString());
+            }
+            return;
+        }
+        var acq = new AnswerCallbackQuery()
+                .setCallbackQueryId(id);
+        var emt = new EditMessageText()
+                .setChatId(chatId)
+                .setMessageId(messageId)
+                .setInlineMessageId(query.getInlineMessageId())
+                .setReplyMarkup(null);
+        if (actions == CAKE_ACTIONS.CAKE_OK) {
+            acq.setText("Приятного аппетита!");
+            emt.setText(name + " принял тортик!");
+        } else {
+            acq.setText("Ну и ладно");
+            emt.setText(name + " отказался от тортика :(");
+        }
+        try {
+            handler.execute(emt);
+            handler.execute(acq);
+        } catch (TelegramApiException e) {
+            BotLogger.error("Eat_Cake", e.toString());
         }
     }
 
