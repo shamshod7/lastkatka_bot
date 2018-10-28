@@ -23,7 +23,7 @@ public class GamesHandler {
     private String text;
     private String name;
 
-    private MongoCollection duelstats;
+    private MongoCollection<Document> duelstats;
 
     public GamesHandler(LastkatkaBotHandler handler) {
         this.handler = handler;
@@ -45,7 +45,7 @@ public class GamesHandler {
         duelstats.insertOne(doc);
     }
 
-    public InlineKeyboardMarkup getMarkupForDuel() {
+    private InlineKeyboardMarkup getMarkupForDuel() {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
@@ -86,7 +86,7 @@ public class GamesHandler {
         setCurrentMessage();
         String playername = message.getFrom().getFirstName();
         int total = 0, wins = 0, winrate = 0;
-        Document doc = (Document) duelstats.find(Filters.eq("id", message.getFrom().getId())).first();
+        Document doc = duelstats.find(Filters.eq("id", message.getFrom().getId())).first();
         if (doc == null) {
             initStats(message.getFrom().getId());
         } else {
@@ -94,16 +94,15 @@ public class GamesHandler {
             wins = doc.getInteger("wins");
             winrate = 100 * wins / total;
         }
-            var stats = new StringBuilder()
-                    .append(playername)
-                    .append("\nВыиграно игр: ")
-                    .append(wins)
-                    .append("\nВсего игр: ")
-                    .append(total)
-                    .append("\nВинрейт: ")
-                    .append(winrate)
-                    .append("%");
-            handler.sendMessage(chatId, stats.toString());
+        String stats = playername +
+                "\nВыиграно игр: " +
+                wins +
+                "\nВсего игр: " +
+                total +
+                "\nВинрейт: " +
+                winrate +
+                "%";
+        handler.sendMessage(chatId, stats);
 
     }
 }

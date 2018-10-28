@@ -19,12 +19,12 @@ public class Duel {
     private final long chatId;
     private final int messageId;
     private final LastkatkaBotHandler handler;
+    private final MongoCollection<Document> duelstats;
     private String messageText;
     private DuelPlayer player1;
     private DuelPlayer player2;
-    private final MongoCollection duelstats;
 
-    public Duel(Message message, LastkatkaBotHandler handler, MongoCollection duelstats) {
+    public Duel(Message message, LastkatkaBotHandler handler, MongoCollection<Document> duelstats) {
         this.chatId = message.getChatId();
         this.messageId = message.getMessageId();
         this.messageText = message.getText();
@@ -41,7 +41,8 @@ public class Duel {
             editMessage(messageText + "\n" + name, getMarkupForDuel());
         } else {
             player2 = new DuelPlayer(id, name);
-            new Thread(this::start).start();
+            handler.duels.get(chatId).remove(messageId);
+            start();
         }
     }
 
@@ -70,8 +71,6 @@ public class Duel {
             loserToStats(loser.id);
         }
         editMessage(messageText.toString(), null);
-
-        handler.duels.get(chatId).remove(messageId);
     }
 
     private void editMessage(String text, InlineKeyboardMarkup markup) {
@@ -90,7 +89,7 @@ public class Duel {
         }
     }
 
-    public InlineKeyboardMarkup getMarkupForDuel() {
+    private InlineKeyboardMarkup getMarkupForDuel() {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
@@ -107,7 +106,7 @@ public class Duel {
     }
 
     private void winnerToStats(int id) {
-        Document doc = (Document) duelstats.find(Filters.eq("id", id)).first();
+        Document doc = duelstats.find(Filters.eq("id", id)).first();
         if (doc == null) {
             initStats(id);
         }
@@ -120,7 +119,7 @@ public class Duel {
     }
 
     private void loserToStats(int id) {
-        Document doc = (Document) duelstats.find(Filters.eq("id", id)).first();
+        Document doc = duelstats.find(Filters.eq("id", id)).first();
         if (doc == null) {
             initStats(id);
         }

@@ -2,7 +2,6 @@ package com.senderman.lastkatkabot;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.validation.constraints.NotBlank;
 import java.util.Set;
 
 public class BotConfig {
@@ -25,9 +24,6 @@ public class BotConfig {
 
     @JsonProperty
     private String help;
-
-    @JsonProperty
-    private String announce;
 
     public long getLastkatka() {
         return lastkatka;
@@ -85,25 +81,17 @@ public class BotConfig {
         this.help = help;
     }
 
-    public String getAnnounce() {
-        return announce;
-    }
-
-    public void setAnnounce(String announce) {
-        this.announce = announce;
-    }
-
     @Override
     public String toString() {
-        return "BotConfig{" +
-                "lastkatka=" + lastkatka +
-                ", lastvegan=" + lastvegan +
-                ", tourgroup=" + tourgroup +
-                ", tourchannel='" + tourchannel + '\'' +
-                ", tourgroupname='" + tourgroupname + '\'' +
-                ", wwBots=" + wwBots +
-                ", help='" + help + '\'' +
-                ", announce='" + announce + '\'' +
-                '}';
+        final StringBuilder sb = new StringBuilder("BotConfig{");
+        sb.append("lastkatka=").append(lastkatka);
+        sb.append(", lastvegan=").append(lastvegan);
+        sb.append(", tourgroup=").append(tourgroup);
+        sb.append(", tourchannel='").append(tourchannel).append('\'');
+        sb.append(", tourgroupname='").append(tourgroupname).append('\'');
+        sb.append(", wwBots=").append(wwBots);
+        sb.append(", help='").append(help).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

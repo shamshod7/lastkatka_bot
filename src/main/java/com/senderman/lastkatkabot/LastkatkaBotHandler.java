@@ -28,16 +28,14 @@ public class LastkatkaBotHandler extends BotHandler {
     public static final String CALLBACK_CAKE_NOT = "cake not";
 
     public final BotConfig botConfig;
-    private final int mainAdmin;
     public final Set<Integer> admins;
-    private final Set<Long> allowedChats;
+    public final Set<Long> allowedChats;
     public final Set<String> members;
     public final Set<Integer> membersIds;
     public final Set<Integer> blacklist;
     public final Map<Long, Map<Integer, Duel>> duels;
-
     public final MongoDatabase lastkatkaDatabase;
-
+    private final int mainAdmin;
     private final UsercommandsHandler usercommands;
     private final GamesHandler games;
     private TournamentHandler tournament;
@@ -84,6 +82,12 @@ public class LastkatkaBotHandler extends BotHandler {
 
         // notify main admin about launch
         sendMessage((long) mainAdmin, "Бот готов к работе!");
+    }
+
+    public static String getValidName(Message message) {
+        return message.getFrom().getFirstName()
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 
     @Override
@@ -139,12 +143,6 @@ public class LastkatkaBotHandler extends BotHandler {
 
     public Message getCurrentMessage() {
         return message;
-    }
-
-    public static String getValidName(Message message) {
-        return message.getFrom().getFirstName()
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
     }
 
     @Override
@@ -274,8 +272,8 @@ public class LastkatkaBotHandler extends BotHandler {
         } else if (text.startsWith("/critical") && isFromAdmin(message)) {
             adminPanel.critical();
 
-        } else if (text.startsWith("/announce") && isFromAdmin(message)) {
-            adminPanel.announce();
+        } else if (text.startsWith("/update") && isFromAdmin(message)) {
+            adminPanel.update();
 
         } else if (text.startsWith("/setup") && isFromAdmin(message)) {
             tournament = new TournamentHandler(this);

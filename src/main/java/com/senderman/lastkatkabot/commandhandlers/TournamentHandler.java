@@ -12,14 +12,13 @@ import org.telegram.telegrambots.meta.logging.BotLogger;
 import java.util.List;
 
 public class TournamentHandler {
+    public static boolean isEnabled = false;
     private final LastkatkaBotHandler handler;
     private Message message;
     private long chatId;
     private int messageId;
     private String text;
     private String name;
-
-    public static boolean isEnabled = false;
 
     public TournamentHandler(LastkatkaBotHandler handler) {
         this.handler = handler;

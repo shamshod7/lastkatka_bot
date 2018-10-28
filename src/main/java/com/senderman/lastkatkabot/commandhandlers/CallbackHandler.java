@@ -32,8 +32,6 @@ public class CallbackHandler {
                 .replace(">", "&gt;");
     }
 
-    public enum CAKE_ACTIONS {CAKE_OK, CAKE_NOT}
-
     public void payRespects() {
         if (text.contains(query.getFrom().getFirstName())) {
             var acq = new AnswerCallbackQuery()
@@ -152,4 +150,6 @@ public class CallbackHandler {
             }
         }
     }
+
+    public enum CAKE_ACTIONS {CAKE_OK, CAKE_NOT}
 }

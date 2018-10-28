@@ -23,14 +23,6 @@ public class UsercommandsHandler {
         this.handler = handler;
     }
 
-    private void setCurrentMessage() {
-        this.message = handler.getCurrentMessage();
-        this.chatId = message.getChatId();
-        this.messageId = message.getMessageId();
-        this.text = message.getText();
-        this.name = LastkatkaBotHandler.getValidName(message);
-    }
-
     static InlineKeyboardMarkup getMarkupForPayingRespects() {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
@@ -38,6 +30,14 @@ public class UsercommandsHandler {
                 .setCallbackData(LastkatkaBotHandler.CALLBACK_PAY_RESPECTS));
         markup.setKeyboard(List.of(row1));
         return markup;
+    }
+
+    private void setCurrentMessage() {
+        this.message = handler.getCurrentMessage();
+        this.chatId = message.getChatId();
+        this.messageId = message.getMessageId();
+        this.text = message.getText();
+        this.name = LastkatkaBotHandler.getValidName(message);
     }
 
     public void action() { // /action
