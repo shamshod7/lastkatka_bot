@@ -174,9 +174,9 @@ public class AdminHandler {
             handler.sendMessage(chatId, "Неверное количество аргументов!");
             return;
         }
-        var update = new StringBuilder().append("<b>ВАЖНОЕ ОБНОВЛЕНИЕ: ");
+        var update = new StringBuilder().append("<b>ВАЖНОЕ ОБНОВЛЕНИЕ: \n\n");
         for (int i = 1; i < params.length; i++) {
-            update.append("* ").append(params[i]);
+            update.append("* ").append(params[i]).append("\n");
         }
         update.append("</b>");
         for (long chat : handler.allowedChats) {
