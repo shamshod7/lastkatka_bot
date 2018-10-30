@@ -179,8 +179,8 @@ public class LastkatkaBotHandler extends BotHandler {
         message = update.getMessage();
 
         // don't handle old messages
-        long current = System.currentTimeMillis() / 1000;
-        if (message.getDate() + 60 < current) {
+        long currentTime = System.currentTimeMillis() / 1000;
+        if (message.getDate() + 60 < currentTime) {
             return null;
         }
 
@@ -188,7 +188,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         // restrict any user that not in tournament
         if (message.getChatId() == botConfig.getLastvegan() && !isFromAdmin(message)) {
-            List<User> news = message.getNewChatMembers();
+            var news = message.getNewChatMembers();
             if (news != null)
                 for (User user : news) {
                     if (!membersIds.contains(user.getId())) {
@@ -209,7 +209,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         }
 
-        if (!message.isUserMessage() && !allowedChats.contains(message.getChatId())) { // leave from foreign groups
+        if (!message.isUserMessage() && !allowedChats.contains(chatId)) { // leave from foreign groups
             sendMessage(chatId, "Какая-то левая конфа. СЛАВА ЛАСТКАТКЕ!");
             try {
                 execute(new LeaveChat().setChatId(chatId));
