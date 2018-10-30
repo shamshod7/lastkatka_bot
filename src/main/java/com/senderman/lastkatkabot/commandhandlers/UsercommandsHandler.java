@@ -51,8 +51,8 @@ public class UsercommandsHandler {
             return;
         }
 
-        String action = text.replace("/action", "");
-        SendMessage sm = new SendMessage(chatId, name + action);
+        var action = text.replace("/action", "");
+        var sm = new SendMessage(chatId, name + action);
         if (message.isReply()) {
             sm.setReplyToMessageId(message.getReplyToMessage().getMessageId());
         }
@@ -102,7 +102,7 @@ public class UsercommandsHandler {
     public void help() { // /help
         setCurrentMessage();
         if (message.isUserMessage()) {
-            SendMessage sm = new SendMessage()
+            var sm = new SendMessage()
                     .setChatId(chatId)
                     .setText(handler.botConfig.getHelp());
             handler.sendMessage(sm);

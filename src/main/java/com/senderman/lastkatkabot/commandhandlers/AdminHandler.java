@@ -38,10 +38,10 @@ public class AdminHandler {
     }
 
     private String getBlackList() {
-        StringBuilder result = new StringBuilder("<b>Список плохих кис:</b>\n\n");
+        var result = new StringBuilder("<b>Список плохих кис:</b>\n\n");
         try (MongoCursor<Document> cursor = blacklistCollection.find().iterator()) {
             while (cursor.hasNext()) {
-                Document doc = cursor.next();
+                var doc = cursor.next();
                 result.append("<a href=\"tg://user?id=")
                         .append(doc.getInteger("id"))
                         .append("\">")
@@ -58,7 +58,7 @@ public class AdminHandler {
         handler.blacklist.clear();
         try (MongoCursor<Document> cursor = blacklistCollection.find().iterator()) {
             while (cursor.hasNext()) {
-                Document doc = cursor.next();
+                var doc = cursor.next();
                 handler.blacklist.add(doc.getInteger("id"));
             }
         }
@@ -81,10 +81,10 @@ public class AdminHandler {
     }
 
     private String getAdmins() {
-        StringBuilder result = new StringBuilder("<b>Админы бота:</b>\n\n");
+        var result = new StringBuilder("<b>Админы бота:</b>\n\n");
         try (MongoCursor<Document> cursor = adminsCollection.find().iterator()) {
             while (cursor.hasNext()) {
-                Document doc = cursor.next();
+                var doc = cursor.next();
                 result.append("<a href=\"tg://user?id=")
                         .append(doc.getInteger("id"))
                         .append("\">")
@@ -101,7 +101,7 @@ public class AdminHandler {
         handler.admins.clear();
         try (MongoCursor<Document> cursor = adminsCollection.find().iterator()) {
             while (cursor.hasNext()) {
-                Document doc = cursor.next();
+                var doc = cursor.next();
                 handler.admins.add(doc.getInteger("id"));
             }
         }

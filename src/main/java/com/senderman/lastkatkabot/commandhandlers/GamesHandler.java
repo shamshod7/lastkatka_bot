@@ -84,9 +84,9 @@ public class GamesHandler {
 
     public void dstats() {
         setCurrentMessage();
-        String playername = message.getFrom().getFirstName();
+        var playername = message.getFrom().getFirstName();
         int total = 0, wins = 0, winrate = 0;
-        Document doc = duelstats.find(Filters.eq("id", message.getFrom().getId())).first();
+        var doc = duelstats.find(Filters.eq("id", message.getFrom().getId())).first();
         if (doc == null) {
             initStats(message.getFrom().getId());
         } else {

@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
+import java.util.HashSet;
 import java.util.List;
 
 public class TournamentHandler {
@@ -22,6 +23,44 @@ public class TournamentHandler {
 
     public TournamentHandler(LastkatkaBotHandler handler) {
         this.handler = handler;
+        handler.members = new HashSet<>();
+        handler.membersIds = new HashSet<>();
+        setCurrentMessage();
+        var params = text.split(" ");
+        if (params.length != 4) {
+            handler.sendMessage(chatId, "Неверное количество аргументов!");
+            return;
+        }
+        handler.members.clear();
+        handler.membersIds.clear();
+        handler.members.add(params[1].replace("@", ""));
+        handler.members.add(params[2].replace("@", ""));
+
+        var markup = new InlineKeyboardMarkup();
+        var row1 = List.of(
+                new InlineKeyboardButton()
+                        .setText("Снять ограничения")
+                        .setCallbackData(LastkatkaBotHandler.CALLBACK_REGISTER_IN_TOURNAMENT)
+        );
+        var row2 = List.of(
+                new InlineKeyboardButton()
+                        .setText("Группа турнира")
+                        .setUrl("https://t.me/" + handler.botConfig.getTourgroupname().replace("@", "")));
+        markup.setKeyboard(List.of(row1, row2));
+        var toVegans = new SendMessage()
+                .setChatId(handler.botConfig.getLastvegan())
+                .setText("<b>Турнир активирован!</b>\n\n"
+                        + String.join(", ", params[1], params[2],
+                        "нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n"))
+                .setReplyMarkup(markup);
+        handler.sendMessage(toVegans);
+
+        var toChannel = new SendMessage()
+                .setChatId(handler.botConfig.getTourchannel())
+                .setText("<b>" + params[3].replace("_", " ") + "</b>\n\n"
+                        + params[1] + " vs " + params[2]);
+        handler.sendMessage(toChannel);
+        isEnabled = true;
     }
 
     private void setCurrentMessage() {
@@ -53,45 +92,6 @@ public class TournamentHandler {
         handler.membersIds.clear();
     }
 
-    public void setup() {
-        setCurrentMessage();
-        var params = text.split(" ");
-        if (params.length != 4) {
-            handler.sendMessage(chatId, "Неверное количество аргументов!");
-            return;
-        }
-        handler.members.clear();
-        handler.membersIds.clear();
-        handler.members.add(params[1].replace("@", ""));
-        handler.members.add(params[2].replace("@", ""));
-        isEnabled = true;
-
-        var markup = new InlineKeyboardMarkup();
-        var row1 = List.of(
-                new InlineKeyboardButton()
-                        .setText("Снять ограничения")
-                        .setCallbackData(LastkatkaBotHandler.CALLBACK_REGISTER_IN_TOURNAMENT)
-        );
-        var row2 = List.of(
-                new InlineKeyboardButton()
-                        .setText("Группа турнира")
-                        .setUrl("https://t.me/" + handler.botConfig.getTourgroupname().replace("@", "")));
-        markup.setKeyboard(List.of(row1, row2));
-        var toVegans = new SendMessage()
-                .setChatId(handler.botConfig.getLastvegan())
-                .setText("<b>Турнир активирован!</b>\n\n"
-                        + String.join(", ", params[1], params[2],
-                        "нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n"))
-                .setReplyMarkup(markup);
-        handler.sendMessage(toVegans);
-
-        var toChannel = new SendMessage()
-                .setChatId(handler.botConfig.getTourchannel())
-                .setText("<b>" + params[3].replace("_", " ") + "</b>\n\n"
-                        + params[1] + " vs " + params[2]);
-        handler.sendMessage(toChannel);
-    }
-
     public void score() {
         setCurrentMessage();
         var params = text.split(" ");
@@ -112,7 +112,7 @@ public class TournamentHandler {
             handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
             return;
         }
-        String score = getScore(params);
+        var score = getScore(params);
         restrictMembers(handler.botConfig.getTourgroup());
         isEnabled = false;
         String goingTo = (params[5].equals("over")) ? " выиграл турнир" : " выходит в " + params[5].replace("_", " ");

@@ -1,7 +1,6 @@
 package com.senderman.lastkatkabot;
 
 import com.annimon.tgbotsmodule.BotHandler;
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.senderman.lastkatkabot.commandhandlers.*;
@@ -30,14 +29,14 @@ public class LastkatkaBotHandler extends BotHandler {
     public final BotConfig botConfig;
     public final Set<Integer> admins;
     public final Set<Long> allowedChats;
-    public final Set<String> members;
-    public final Set<Integer> membersIds;
     public final Set<Integer> blacklist;
     public final Map<Long, Map<Integer, Duel>> duels;
     public final MongoDatabase lastkatkaDatabase;
     private final int mainAdmin;
     private final UsercommandsHandler usercommands;
     private final GamesHandler games;
+    public Set<String> members;
+    public Set<Integer> membersIds;
     private TournamentHandler tournament;
     private AdminHandler adminPanel;
 
@@ -58,15 +57,15 @@ public class LastkatkaBotHandler extends BotHandler {
                 botConfig.getLastvegan(),
                 botConfig.getTourgroup()
         ));
-        String envAllowed = System.getenv("allowed_chats");
+        var envAllowed = System.getenv("allowed_chats");
         if (envAllowed != null) {
-            for (String envAllow : envAllowed.split(" ")) {
-                allowedChats.add(Long.valueOf(envAllow));
+            for (String allowedChat : envAllowed.split(" ")) {
+                allowedChats.add(Long.valueOf(allowedChat));
             }
         }
 
         // database
-        MongoClient client = MongoClients.create(System.getenv("database"));
+        var client = MongoClients.create(System.getenv("database"));
         lastkatkaDatabase = client.getDatabase("lastkatka");
 
         // handlers
@@ -77,8 +76,8 @@ public class LastkatkaBotHandler extends BotHandler {
         duels = new HashMap<>();
 
         //tournament
-        members = new HashSet<>();
-        membersIds = new HashSet<>();
+        //members = new HashSet<>();
+        //membersIds = new HashSet<>();
 
         // notify main admin about launch
         sendMessage((long) mainAdmin, "Бот готов к работе!");
@@ -154,15 +153,13 @@ public class LastkatkaBotHandler extends BotHandler {
                 case CALLBACK_REGISTER_IN_TOURNAMENT:
                     new CallbackHandler(this, query).registerInTournament();
                     break;
-
                 case CALLBACK_PAY_RESPECTS:
                     new CallbackHandler(this, query).payRespects();
                     break;
-
                 case CALLBACK_JOIN_DUEL:
                     new CallbackHandler(this, query).joinDuel();
                     break;
-                case CALLBACK_CAKE_OK:
+                case CALLBACK_CAKE_OK: //TODO тортик с чем
                     new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_OK);
                     break;
                 case CALLBACK_CAKE_NOT:
@@ -172,9 +169,8 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
         }
 
-        if (!update.hasMessage()) {
+        if (!update.hasMessage())
             return null;
-        }
 
         message = update.getMessage();
 
@@ -186,11 +182,22 @@ public class LastkatkaBotHandler extends BotHandler {
 
         final long chatId = message.getChatId();
 
-        // restrict any user that not in tournament
-        if (message.getChatId() == botConfig.getTourgroup()  && !isFromAdmin(message)) {
-            List<User> news = message.getNewChatMembers();
-            if (news != null)
-                for (User user : news) {
+        // leave from groups that not in list
+        if (!message.isUserMessage() && !allowedChats.contains(chatId)) {
+            sendMessage(chatId, "Какая-то левая конфа. СЛАВА ЛАСТКАТКЕ!");
+            try {
+                execute(new LeaveChat().setChatId(chatId));
+            } catch (TelegramApiException e) {
+                BotLogger.error("LEAVE", e);
+            }
+            return null;
+        }
+
+        // restrict any user that not in tournament, and say hello to new groups
+        List<User> newMembers = message.getNewChatMembers();
+        if (newMembers != null) {
+            if (message.getChatId() == botConfig.getTourgroup()) {
+                for (User user : newMembers) {
                     if (!membersIds.contains(user.getId())) {
                         var rcm = new RestrictChatMember()
                                 .setChatId(botConfig.getTourgroup())
@@ -203,26 +210,21 @@ public class LastkatkaBotHandler extends BotHandler {
                         }
                     }
                 }
-
-        }
-
-        if (!message.isUserMessage() && !allowedChats.contains(chatId)) { // leave from foreign groups
-            sendMessage(chatId, "Какая-то левая конфа. СЛАВА ЛАСТКАТКЕ!");
-            try {
-                execute(new LeaveChat().setChatId(chatId));
-            } catch (TelegramApiException e) {
-                BotLogger.error("LEAVE", e);
+            } else {
+                if (newMembers.get(0).getUserName().equalsIgnoreCase(getBotUsername())) {
+                    sendMessage(chatId, "Этот чат находится в списке разрешенных. Бот готов к работе здесь.");
+                }
             }
             return null;
-
-        } else if (!message.hasText()) {
-            return null;
         }
 
-        // Handle user commands
-        String text = message.getText();
+        if (!message.hasText())
+            return null;
 
-        if (text.startsWith("/pinlist") && message.isReply() && !message.isUserMessage() && isFromWwBot(message)) {
+        var text = message.getText();
+
+        // Handle user commands
+        if (text.startsWith("/pinlist") && message.isReply() && isFromWwBot(message)) {
             usercommands.pinlist();
 
         } else if (text.startsWith("/action") && !message.isUserMessage()) {
@@ -235,10 +237,10 @@ public class LastkatkaBotHandler extends BotHandler {
             usercommands.help();
 
             // handle games
-        } else if (text.startsWith("/dice") && !blacklist.contains(message.getFrom().getId())) {
+        } else if (text.startsWith("/dice") && !isInBlacklist(message)) {
             games.dice();
 
-        } else if (text.startsWith("/cake")) {
+        } else if (text.startsWith("/cake") && !isInBlacklist(message)) {
             usercommands.cake();
 
         } else if (text.startsWith("/dstats")) {
@@ -277,7 +279,6 @@ public class LastkatkaBotHandler extends BotHandler {
 
         } else if (text.startsWith("/setup") && isFromAdmin(message)) {
             tournament = new TournamentHandler(this);
-            tournament.setup();
 
         } else if (TournamentHandler.isEnabled && isFromAdmin(message)) {
             if (text.startsWith("/score")) {

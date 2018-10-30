@@ -48,15 +48,15 @@ public class Duel {
 
     private void start() {
         int randomInt = ThreadLocalRandom.current().nextInt(0, 100);
-        DuelPlayer winner = (randomInt < 50) ? player1 : player2;
-        DuelPlayer loser = (randomInt < 50) ? player2 : player1;
+        var winner = (randomInt < 50) ? player1 : player2;
+        var loser = (randomInt < 50) ? player2 : player1;
         var messageText = new StringBuilder();
         messageText.append("<b>Дуэль</b>\n")
                 .append(player1.name).append(" vs ").append(player2.name)
                 .append("\n\nПротивники разошлись в разные стороны, развернулись лицом друг к другу, и ")
                 .append(winner.name).append(" выстрелил первым!\n")
                 .append(loser.name).append(" лежит на земле, истекая кровью!\n");
-        if (ThreadLocalRandom.current().nextInt(0, 100) < 21) {
+        if (ThreadLocalRandom.current().nextInt(0, 100) < 25) {
             messageText.append("\nНо, умирая, ")
                     .append(loser.name).append(" успевает выстрелить в голову ").append(winner.name).append("! ")
                     .append(winner.name).append(" падает замертво!")
@@ -106,7 +106,7 @@ public class Duel {
     }
 
     private void winnerToStats(int id) {
-        Document doc = duelstats.find(Filters.eq("id", id)).first();
+        var doc = duelstats.find(Filters.eq("id", id)).first();
         if (doc == null) {
             initStats(id);
         }
@@ -119,7 +119,7 @@ public class Duel {
     }
 
     private void loserToStats(int id) {
-        Document doc = duelstats.find(Filters.eq("id", id)).first();
+        var doc = duelstats.find(Filters.eq("id", id)).first();
         if (doc == null) {
             initStats(id);
         }
