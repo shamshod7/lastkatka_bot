@@ -1,6 +1,7 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -100,9 +101,22 @@ public class UsercommandsHandler {
 
     public void help() { // /help
         setCurrentMessage();
-        SendMessage sm = new SendMessage()
-                .setChatId(chatId)
-                .setText(handler.botConfig.getHelp());
-        handler.sendMessage(sm);
+        if (message.isUserMessage()) {
+            SendMessage sm = new SendMessage()
+                    .setChatId(chatId)
+                    .setText(handler.botConfig.getHelp());
+            handler.sendMessage(sm);
+        } else { // attempt to send help to PM
+            try {
+                handler.execute(new SendMessage((long) message.getFrom().getId(), handler.botConfig.getHelp())
+                        .setParseMode(ParseMode.HTML));
+            } catch (TelegramApiException e) {
+                handler.sendMessage(new SendMessage(chatId, "Пожалуйста, начните диалог со мной в лс, чтобы я мог отправить вам помощь")
+                        .setReplyToMessageId(messageId));
+                return;
+            }
+            handler.sendMessage(new SendMessage(chatId, "Помощь была отправлена вам в лс")
+                    .setReplyToMessageId(messageId));
+        }
     }
 }
