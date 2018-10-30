@@ -101,7 +101,7 @@ public class UsercommandsHandler {
 
     public void help() { // /help
         setCurrentMessage();
-        if (!message.isSuperGroupMessage()) {
+        if (message.isUserMessage()) {
             SendMessage sm = new SendMessage()
                     .setChatId(chatId)
                     .setText(handler.botConfig.getHelp());
