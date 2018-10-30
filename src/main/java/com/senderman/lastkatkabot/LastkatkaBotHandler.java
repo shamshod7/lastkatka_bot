@@ -187,8 +187,8 @@ public class LastkatkaBotHandler extends BotHandler {
         final long chatId = message.getChatId();
 
         // restrict any user that not in tournament
-        if (message.getChatId() == botConfig.getLastvegan() && !isFromAdmin(message)) {
-            var news = message.getNewChatMembers();
+        if (message.getChatId() == botConfig.getTourgroup()  && !isFromAdmin(message)) {
+            List<User> news = message.getNewChatMembers();
             if (news != null)
                 for (User user : news) {
                     if (!membersIds.contains(user.getId())) {
@@ -198,9 +198,6 @@ public class LastkatkaBotHandler extends BotHandler {
                                 .setCanSendMessages(false);
                         try {
                             execute(rcm);
-                            sendMessage(botConfig.getLastvegan(), user.getUserName() +
-                                    " <b>ВНИМАНИЕ! ЭТА КОНФА ПЕРЕЗЖАЕТ В @lastvegans! Эта устарела по решению администрации. все участники будут тут забанены. распространяйте ссылку на новую конфу\n" +
-                                    "Ваш любимый ластбот скоро свалит отсюда и перейдет туда, так что переезжаем!</b>");
                         } catch (TelegramApiException e) {
                             BotLogger.error("RESTRICT", e);
                         }
