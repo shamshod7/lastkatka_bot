@@ -185,6 +185,11 @@ public class AdminHandler {
             handler.sendMessage(chat, update.toString());
         }
     }
+    
+    public void getinfo() {
+    	setCurrentMessage();
+    	handler.sendMessage(chatId, message.getReplyToMessage().toString());
+    }
 
     public void announce() {
         setCurrentMessage();

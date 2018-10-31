@@ -220,13 +220,13 @@ public class LastkatkaBotHandler extends BotHandler {
         var text = message.getText();
 
         // Handle user commands
-        if (text.startsWith("/pinlist") && message.isReply() && isFromWwBot(message)) {
+        if (text.startsWith("/pinlist") && isFromWwBot(message)) {
             usercommands.pinlist();
 
-        } else if (text.startsWith("/action") && !message.isUserMessage()) {
+        } else if (text.startsWith("/action")) {
             usercommands.action();
 
-        } else if (text.startsWith("/f@" + getBotUsername()) && message.isReply()) {
+        } else if (text.startsWith("/f@" + getBotUsername())) {
             usercommands.payRespects();
 
         } else if (text.startsWith("/help")) {
@@ -271,6 +271,9 @@ public class LastkatkaBotHandler extends BotHandler {
         } else if (text.startsWith("/loveneko") && isFromAdmin(message)) {
             adminPanel.loveneko();
 
+        } else if (text.startsWith("/getinfo") && isFromAdmin(message)) {
+        	adminPanel.getinfo();
+        	
         } else if (text.startsWith("/critical") && isFromAdmin(message)) {
             adminPanel.critical();
 
