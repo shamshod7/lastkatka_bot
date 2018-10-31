@@ -246,7 +246,7 @@ public class LastkatkaBotHandler extends BotHandler {
             games.duel();
 
         } else if (text.startsWith("/start duel")) {
-            String[] params = text.split(" ");
+            String[] params = text.replace("ZZZ", " ").split(" ");
             games.joinDuel(Long.valueOf(params[2]), Integer.valueOf(params[3]));
 
             // handle admin commands

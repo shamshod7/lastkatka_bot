@@ -85,11 +85,11 @@ public class CallbackHandler {
                 .setReplyMarkup(null);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("n p u я m н o r o  a n n e m u m a");
-            emt.setText(name + " принял тортик с "
+            emt.setText(name + " принял тортик "
                     + query.getData().replace(LastkatkaBotHandler.CALLBACK_CAKE_OK, "") + "!");
         } else {
             acq.setText("Ну и ладно");
-            emt.setText(name + " отказался от тортика с "
+            emt.setText(name + " отказался от тортика "
             + query.getData().replace(LastkatkaBotHandler.CALLBACK_CAKE_NOT, "") + " :(");
         }
         try {

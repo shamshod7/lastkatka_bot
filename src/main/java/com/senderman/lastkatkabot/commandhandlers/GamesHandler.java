@@ -53,9 +53,9 @@ public class GamesHandler {
         String url = "https://t.me/" +
                 handler.getBotUsername() +
                 "?start=duel" +
-                " " +
+                "ZZZ" +
                 chatId +
-                " " +
+                "ZZZ" +
                 messageId;
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
