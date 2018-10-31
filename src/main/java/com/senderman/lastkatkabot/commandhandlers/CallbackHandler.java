@@ -84,32 +84,19 @@ public class CallbackHandler {
                 .setInlineMessageId(query.getInlineMessageId())
                 .setReplyMarkup(null);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
-            acq.setText("Приятного аппетита!");
-            emt.setText(name + " принял тортик!");
+            acq.setText("n p u я m н o r o  a n n e m u m a");
+            emt.setText(name + " принял тортик с "
+                    + query.getData().replace(LastkatkaBotHandler.CALLBACK_CAKE_OK, "") + "!");
         } else {
             acq.setText("Ну и ладно");
-            emt.setText(name + " отказался от тортика :(");
+            emt.setText(name + " отказался от тортика с "
+            + query.getData().replace(LastkatkaBotHandler.CALLBACK_CAKE_NOT, "") + " :(");
         }
         try {
             handler.execute(emt);
             handler.execute(acq);
         } catch (TelegramApiException e) {
             BotLogger.error("Eat_Cake", e.toString());
-        }
-    }
-
-    public void joinDuel() {
-        try {
-            handler.duels.get(chatId).get(messageId).addPlayer(query.getFrom().getId(), name);
-        } catch (Exception e) {
-            var acq = new AnswerCallbackQuery()
-                    .setCallbackQueryId(id)
-                    .setText("Эта дуэль устарела!");
-            try {
-                handler.execute(acq);
-            } catch (TelegramApiException tae) {
-                BotLogger.error("FAILED DUEL", tae.toString());
-            }
         }
     }
 

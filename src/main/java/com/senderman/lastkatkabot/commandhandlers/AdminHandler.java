@@ -9,7 +9,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 
 public class AdminHandler {
 
-    public final MongoCollection<Document> blacklistCollection;
+    private final MongoCollection<Document> blacklistCollection;
+    private final MongoCollection<Document> duelstats;
     private final LastkatkaBotHandler handler;
     private final MongoCollection<Document> adminsCollection;
     private Message message;
@@ -22,6 +23,7 @@ public class AdminHandler {
         this.handler = handler;
         adminsCollection = handler.lastkatkaDatabase.getCollection("admins");
         blacklistCollection = handler.lastkatkaDatabase.getCollection("blacklist");
+        duelstats = handler.lastkatkaDatabase.getCollection("duelstats");
         updateAdmins();
         updateBlacklist();
     }
@@ -182,6 +184,17 @@ public class AdminHandler {
         for (long chat : handler.allowedChats) {
             handler.sendMessage(chat, update.toString());
         }
+    }
+
+    public void announce() {
+        setCurrentMessage();
+        try (MongoCursor<Document> cursor = duelstats.find().iterator()) {
+            while (cursor.hasNext()) {
+                var doc = cursor.next();
+                handler.sendMessage((long) doc.getInteger("id"), text.replace("/announce", ""));
+            }
+        }
+        handler.sendMessage(chatId, "Объявелние разослано!");
     }
 
     public void critical() {

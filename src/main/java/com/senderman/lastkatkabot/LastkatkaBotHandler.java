@@ -22,7 +22,6 @@ public class LastkatkaBotHandler extends BotHandler {
 
     public static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
     public static final String CALLBACK_PAY_RESPECTS = "pay_respects";
-    public static final String CALLBACK_JOIN_DUEL = "join_duel";
     public static final String CALLBACK_CAKE_OK = "cake ok";
     public static final String CALLBACK_CAKE_NOT = "cake not";
 
@@ -32,7 +31,7 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Integer> blacklist;
     public final Map<Long, Map<Integer, Duel>> duels;
     public final MongoDatabase lastkatkaDatabase;
-    private final int mainAdmin;
+    private final int mainAdmin = Integer.valueOf(System.getenv("main_admin"));
     private final UsercommandsHandler usercommands;
     private final GamesHandler games;
     public Set<String> members;
@@ -47,7 +46,6 @@ public class LastkatkaBotHandler extends BotHandler {
 
         // settings
 
-        mainAdmin = Integer.valueOf(System.getenv("main_admin"));
         sendMessage((long) mainAdmin, "Инициализация...");
         admins = new HashSet<>();
         blacklist = new HashSet<>();
@@ -149,22 +147,20 @@ public class LastkatkaBotHandler extends BotHandler {
 
         if (update.hasCallbackQuery()) {
             CallbackQuery query = update.getCallbackQuery();
-            switch (query.getData()) {
-                case CALLBACK_REGISTER_IN_TOURNAMENT:
-                    new CallbackHandler(this, query).registerInTournament();
-                    break;
-                case CALLBACK_PAY_RESPECTS:
-                    new CallbackHandler(this, query).payRespects();
-                    break;
-                case CALLBACK_JOIN_DUEL:
-                    new CallbackHandler(this, query).joinDuel();
-                    break;
-                case CALLBACK_CAKE_OK: //TODO тортик с чем
-                    new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_OK);
-                    break;
-                case CALLBACK_CAKE_NOT:
-                    new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_NOT);
-                    break;
+            String data = query.getData();
+            if (data.startsWith(CALLBACK_CAKE_OK)) {
+                new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_OK);
+            } else if (data.startsWith(CALLBACK_CAKE_NOT)) {
+                new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_NOT);
+            } else {
+                switch (data) {
+                    case CALLBACK_REGISTER_IN_TOURNAMENT:
+                        new CallbackHandler(this, query).registerInTournament();
+                        break;
+                    case CALLBACK_PAY_RESPECTS:
+                        new CallbackHandler(this, query).payRespects();
+                        break;
+                }
             }
             return null;
         }
@@ -249,6 +245,10 @@ public class LastkatkaBotHandler extends BotHandler {
         } else if (text.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
             games.duel();
 
+        } else if (text.startsWith("/start duel")) {
+            String[] params = text.split(" ");
+            games.joinDuel(Long.valueOf(params[2]), Integer.valueOf(params[3]));
+
             // handle admin commands
         } else if (text.startsWith("/owner") && message.getFrom().getId() == mainAdmin) {
             adminPanel.owner();
@@ -276,6 +276,9 @@ public class LastkatkaBotHandler extends BotHandler {
 
         } else if (text.startsWith("/update") && isFromAdmin(message)) {
             adminPanel.update();
+
+        } else if (text.startsWith("/announce") && isFromAdmin(message)) {
+            adminPanel.announce();
 
         } else if (text.startsWith("/setup") && isFromAdmin(message)) {
             tournament = new TournamentHandler(this);

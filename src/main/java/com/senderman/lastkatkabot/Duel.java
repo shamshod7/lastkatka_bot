@@ -32,7 +32,7 @@ public class Duel {
         this.duelstats = duelstats;
     }
 
-    public void addPlayer(int id, String name) {
+    public void addPlayer(int id, String name) { //TODO убрать костыли
         if (player1 != null && player1.id == id) {
             return;
         }
@@ -91,9 +91,16 @@ public class Duel {
 
     private InlineKeyboardMarkup getMarkupForDuel() {
         var markup = new InlineKeyboardMarkup();
+        String url = "https://t.me/" +
+                handler.getBotUsername() +
+                "?start=duel" +
+                " " +
+                chatId +
+                " " +
+                messageId;
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
-                .setCallbackData(LastkatkaBotHandler.CALLBACK_JOIN_DUEL));
+                .setUrl(url));
         markup.setKeyboard(List.of(row1));
         return markup;
     }

@@ -6,9 +6,12 @@ import com.senderman.lastkatkabot.Duel;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.bson.Document;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,11 +48,18 @@ public class GamesHandler {
         duelstats.insertOne(doc);
     }
 
-    private InlineKeyboardMarkup getMarkupForDuel() {
+    private InlineKeyboardMarkup getMarkupForDuel(long chatId, int messageId) {
         var markup = new InlineKeyboardMarkup();
+        String url = "https://t.me/" +
+                handler.getBotUsername() +
+                "?start=duel" +
+                " " +
+                chatId +
+                " " +
+                messageId;
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
-                .setCallbackData(LastkatkaBotHandler.CALLBACK_JOIN_DUEL));
+                .setUrl(url));
         markup.setKeyboard(List.of(row1));
         return markup;
     }
@@ -67,8 +77,7 @@ public class GamesHandler {
         setCurrentMessage();
         var sm = new SendMessage()
                 .setChatId(chatId)
-                .setText("Набор на дуэль! Жмите кнопку ниже\nДжойнулись:")
-                .setReplyMarkup(getMarkupForDuel());
+                .setText("Набор на дуэль! Жмите кнопку ниже\nДжойнулись:");
 
         var sentMessage = handler.sendMessage(sm);
         int duelMessageId = sentMessage.getMessageId();
@@ -79,6 +88,25 @@ public class GamesHandler {
             Map<Integer, Duel> duelMap = new HashMap<>();
             duelMap.put(duelMessageId, duel);
             handler.duels.put(chatId, duelMap);
+        }
+        joinDuel(chatId, duelMessageId);
+        var em = new EditMessageReplyMarkup()
+                .setChatId(chatId)
+                .setMessageId(duelMessageId)
+                .setReplyMarkup(getMarkupForDuel(chatId, duelMessageId));
+        try {
+            handler.execute(em);
+        } catch (TelegramApiException e) {
+            BotLogger.error("CREATE DUEL", e.toString());
+        }
+    }
+
+    public void joinDuel(long duelchat, int msgDuel) {
+        setCurrentMessage();
+        try {
+            handler.duels.get(duelchat).get(msgDuel).addPlayer(message.getFrom().getId(), name);
+        } catch (Exception e) {
+            handler.sendMessage(chatId, "Эта дуэль устарела!");
         }
     }
 
