@@ -31,7 +31,7 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Integer> blacklist;
     public final Map<Long, Map<Integer, Duel>> duels;
     public final MongoDatabase lastkatkaDatabase;
-    private static final int mainAdmin = Integer.valueOf(System.getenv("main_admin"));
+    public static final int mainAdmin = Integer.valueOf(System.getenv("main_admin"));
     private final UsercommandsHandler usercommands;
     private final GamesHandler games;
     public Set<String> members;
