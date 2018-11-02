@@ -12,7 +12,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
-import com.google.common.base.Throwables;
 
 import java.util.HashMap;
 import java.util.List;
@@ -104,13 +103,25 @@ public class GamesHandler {
 
     public void joinDuel(long duelchat, int msgDuel) {
         setCurrentMessage();
-        try {
+        var messageDuelMap = handler.duels.get(duelchat);
+        if (messageDuelMap == null) {
+            handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, "messageMapDuel is null");
+        } else {
+            var d = messageDuelMap.get(msgDuel);
+            if (d == null) {
+                handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, "d is null");
+            } else {
+                d.addPlayer(message.getFrom().getId(), name);
+                handler.sendMessage((long) message.getFrom().getId(), "Успешно!");
+            }
+        }
+        /*try {
             handler.duels.get(duelchat).get(msgDuel).addPlayer(message.getFrom().getId(), name);
             handler.sendMessage(chatId, "Вы успешно присоединились к дуэли!");
         } catch (Exception e) {
             handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, Throwables.getStackTraceAsString(e));
             handler.sendMessage(chatId, "Ошибка, репорт отправлен разрабу");
-        }
+        }*/
     }
 
     public void dstats() {
