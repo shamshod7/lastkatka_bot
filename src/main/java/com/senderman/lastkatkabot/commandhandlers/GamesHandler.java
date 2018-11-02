@@ -105,8 +105,9 @@ public class GamesHandler {
         setCurrentMessage();
         try {
             handler.duels.get(duelchat).get(msgDuel).addPlayer(message.getFrom().getId(), name);
+            handler.sendMessage(chatId, "Вы успешно присоединились к дуэли!");
         } catch (Exception e) {
-            handler.sendMessage(chatId, "Эта дуэль устарела!");
+            handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, ExceptionUtil.getStackTrace(e));
         }
     }
 
