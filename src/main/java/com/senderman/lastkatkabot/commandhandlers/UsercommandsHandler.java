@@ -109,7 +109,7 @@ public class UsercommandsHandler {
             .append(name)
             .append("</a>\n\n")
             .append(text.replace("/feedback", ""));
-        handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, sb.toString());p
+        handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, sb.toString());
     }
 
     public void help() { // /help
