@@ -31,7 +31,7 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Integer> blacklist;
     public final Map<Long, Map<Integer, Duel>> duels;
     public final MongoDatabase lastkatkaDatabase;
-    private final int mainAdmin = Integer.valueOf(System.getenv("main_admin"));
+    private static final int mainAdmin = Integer.valueOf(System.getenv("main_admin"));
     private final UsercommandsHandler usercommands;
     private final GamesHandler games;
     public Set<String> members;
@@ -239,6 +239,9 @@ public class LastkatkaBotHandler extends BotHandler {
         } else if (text.startsWith("/cake") && !isInBlacklist(message)) {
             usercommands.cake();
 
+        } else if (text.startsWith("/feedback") && isInBlacklist(message)) {
+        	usercommands.feedback();
+        	
         } else if (text.startsWith("/dstats")) {
             games.dstats();
 

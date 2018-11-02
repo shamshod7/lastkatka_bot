@@ -98,6 +98,19 @@ public class UsercommandsHandler {
         }
         handler.delMessage(chatId, messageId);
     }
+    
+    public void feedback() {
+    	setCurrentMessage();
+    	var sb = new StringBuilder()
+    		.append("<b>Багрепорт</b>\n\nОт: ")
+    		.append("<a href=\"tg://user?id=")
+    		.append(message.getFrom().getId())
+            .append("\">")
+            .append(name)
+            .append("</a>\n\n")
+            .append(text.replace("/feedback", ""));
+        handler.sendMessage((long) LastKatkaBotHandler.mainAdmin, sb.toString());
+    }
 
     public void help() { // /help
         setCurrentMessage();
