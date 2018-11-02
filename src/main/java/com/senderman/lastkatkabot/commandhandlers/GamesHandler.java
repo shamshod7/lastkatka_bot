@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
+import com.google.common.base.Throwables;
 
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +108,7 @@ public class GamesHandler {
             handler.duels.get(duelchat).get(msgDuel).addPlayer(message.getFrom().getId(), name);
             handler.sendMessage(chatId, "Вы успешно присоединились к дуэли!");
         } catch (Exception e) {
-            handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, e.toString());
+            handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, Throwables.getStackTraceAsString(e));
             handler.sendMessage(chatId, "Ошибка, репорт отправлен разрабу");
         }
     }
