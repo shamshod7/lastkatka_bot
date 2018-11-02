@@ -239,7 +239,7 @@ public class LastkatkaBotHandler extends BotHandler {
         } else if (text.startsWith("/cake") && !isInBlacklist(message)) {
             usercommands.cake();
 
-        } else if (text.startsWith("/feedback") && isInBlacklist(message)) {
+        } else if (text.startsWith("/feedback") && !isInBlacklist(message)) {
         	usercommands.feedback();
         	
         } else if (text.startsWith("/dstats")) {
