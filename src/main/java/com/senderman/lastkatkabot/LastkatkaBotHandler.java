@@ -1,8 +1,6 @@
 package com.senderman.lastkatkabot;
 
 import com.annimon.tgbotsmodule.BotHandler;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
 import com.senderman.lastkatkabot.commandhandlers.*;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
@@ -24,7 +22,6 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Integer> admins;
     public final Set<Long> allowedChats;
     public final Set<Integer> blacklist;
-    public final MongoDatabase lastkatkaDatabase;
     private final UsercommandsHandler usercommands;
     private final GamesHandler games;
     private final DuelController duelController;
@@ -55,10 +52,6 @@ public class LastkatkaBotHandler extends BotHandler {
                 allowedChats.add(Long.valueOf(allowedChat));
             }
         }
-
-        // database
-        var client = MongoClients.create(System.getenv("database"));
-        lastkatkaDatabase = client.getDatabase("lastkatka");
 
         // handlers
         usercommands = new UsercommandsHandler(this);

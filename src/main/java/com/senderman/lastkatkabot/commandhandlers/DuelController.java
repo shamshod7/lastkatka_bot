@@ -1,9 +1,7 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
-import org.bson.Document;
+import com.senderman.lastkatkabot.ServiceHolder;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -24,12 +22,10 @@ public class DuelController {
 
     private final LastkatkaBotHandler handler;
     private final Map<Long, ChatDuels> duels;
-    private final MongoCollection<Document> duelstats;
 
     public DuelController(LastkatkaBotHandler handler) {
         this.handler = handler;
         duels = new ConcurrentHashMap<>();
-        duelstats = handler.lastkatkaDatabase.getCollection("duelstats");
     }
 
     public void createNewDuel(long chatId, User player1) {
@@ -61,7 +57,7 @@ public class DuelController {
             return;
         }
 
-        duel.player2 = player2; // TODO конечно же тут setter'ы нужны
+        duel.player2 = player2;
         handler.sendMessage(player2Chat, "Вы успешно присоединились к дуэли!");
         startDuel(duel);
         chatDuels.removeDuel(duelMessageId);
@@ -86,14 +82,14 @@ public class DuelController {
                     .append(loserName).append(" успевает выстрелить в голову ").append(winnerName).append("! ")
                     .append(winnerName).append(" падает замертво!")
                     .append("\n\n<b>Дуэль окончилась ничьей!</b>");
-            loserToStats(winner.getId());
-            loserToStats(loser.getId());
+            ServiceHolder.db().loserToStats(winner.getId());
+            ServiceHolder.db().loserToStats(loser.getId());
         } else {
             messageText
                     .append("\n\n<b>")
                     .append(winnerName).append(" выиграл дуэль!</b>");
-            winnerToStats(winner.getId());
-            loserToStats(loser.getId());
+            ServiceHolder.db().winnerToStats(winner.getId());
+            ServiceHolder.db().loserToStats(loser.getId());
         }
         editDuelMessage(duel, messageText.toString());
 
@@ -155,36 +151,6 @@ public class DuelController {
             duels.put(chatId, chatDuels);
             return chatDuels;
         }
-    }
-
-    private void initStats(int id) {
-        var doc = new Document("id", id)
-                .append("total", 0)
-                .append("wins", 0);
-        duelstats.insertOne(doc);
-    }
-
-    private void winnerToStats(int id) {
-        var doc = duelstats.find(Filters.eq("id", id)).first();
-        if (doc == null) {
-            initStats(id);
-        }
-        var updateDoc = new Document()
-                .append("$inc", new Document("wins", 1));
-        duelstats.updateOne(Filters.eq("id", id), updateDoc);
-        updateDoc = new Document()
-                .append("$inc", new Document("total", 1));
-        duelstats.updateOne(Filters.eq("id", id), updateDoc);
-    }
-
-    private void loserToStats(int id) {
-        var doc = duelstats.find(Filters.eq("id", id)).first();
-        if (doc == null) {
-            initStats(id);
-        }
-        var updateDoc = new Document()
-                .append("$inc", new Document("total", 1));
-        duelstats.updateOne(Filters.eq("id", id), updateDoc);
     }
 
     static class ChatDuels extends HashMap<Integer, Duel> {

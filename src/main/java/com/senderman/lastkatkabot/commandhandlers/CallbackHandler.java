@@ -82,7 +82,7 @@ public class CallbackHandler {
         var emt = new EditMessageText()
                 .setChatId(chatId)
                 .setMessageId(messageId)
-                .setInlineMessageId(query.getInlineMessageId())
+                // TODO чекнуть нужно ли .setInlineMessageId(query.getInlineMessageId())
                 .setReplyMarkup(null);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("n p u я m н o r o  a n n e m u m a");

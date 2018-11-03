@@ -1,9 +1,7 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
-import org.bson.Document;
+import com.senderman.lastkatkabot.ServiceHolder;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -17,11 +15,9 @@ public class GamesHandler {
     private String text;
     private String name;
 
-    private MongoCollection<Document> duelstats;
 
     public GamesHandler(LastkatkaBotHandler handler) {
         this.handler = handler;
-        duelstats = handler.lastkatkaDatabase.getCollection("duelstats");
     }
 
     private void setCurrentMessage() {
@@ -30,13 +26,6 @@ public class GamesHandler {
         this.messageId = message.getMessageId();
         this.text = message.getText();
         this.name = LastkatkaBotHandler.getValidName(message);
-    }
-
-    private void initStats(int id) {
-        var doc = new Document("id", id)
-                .append("total", 0)
-                .append("wins", 0);
-        duelstats.insertOne(doc);
     }
 
     public void dice() {
@@ -50,25 +39,8 @@ public class GamesHandler {
 
     public void dstats() {
         setCurrentMessage();
-        var playername = message.getFrom().getFirstName();
-        int total = 0, wins = 0, winrate = 0;
-        var doc = duelstats.find(Filters.eq("id", message.getFrom().getId())).first();
-        if (doc == null) {
-            initStats(message.getFrom().getId());
-        } else {
-            total = doc.getInteger("total");
-            wins = doc.getInteger("wins");
-            winrate = 100 * wins / total;
-        }
-        String stats = playername +
-                "\nВыиграно игр: " +
-                wins +
-                "\nВсего игр: " +
-                total +
-                "\nВинрейт: " +
-                winrate +
-                "%";
-        handler.sendMessage(chatId, stats);
+        var player = message.getFrom().getFirstName();
+        handler.sendMessage(chatId, ServiceHolder.db().getStats(message.getFrom().getId(), player));
 
     }
 }
