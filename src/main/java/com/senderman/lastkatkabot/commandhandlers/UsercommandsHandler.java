@@ -1,5 +1,6 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
+import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
@@ -28,7 +29,7 @@ public class UsercommandsHandler {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("F")
-                .setCallbackData(LastkatkaBotHandler.CALLBACK_PAY_RESPECTS));
+                .setCallbackData(LastkatkaBot.CALLBACK_PAY_RESPECTS));
         markup.setKeyboard(List.of(row1));
         return markup;
     }
@@ -41,7 +42,7 @@ public class UsercommandsHandler {
         this.name = LastkatkaBotHandler.getValidName(message);
     }
 
-    public void action() { // /action
+    public void action() {
         setCurrentMessage();
         handler.delMessage(chatId, messageId);
         if (handler.isInBlacklist(message))
@@ -73,10 +74,10 @@ public class UsercommandsHandler {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                         .setText("Принять")
-                        .setCallbackData(LastkatkaBotHandler.CALLBACK_CAKE_OK + text.replace("/cake ", "")),
+                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_OK + text.replace("/cake ", "")),
                 new InlineKeyboardButton()
                         .setText("Отказаться")
-                        .setCallbackData(LastkatkaBotHandler.CALLBACK_CAKE_NOT + text.replace("/cake ", "")));
+                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_NOT + text.replace("/cake ", "")));
         markup.setKeyboard(List.of(row1));
         handler.delMessage(chatId, messageId);
         handler.sendMessage(new SendMessage()
@@ -88,7 +89,7 @@ public class UsercommandsHandler {
                 .setReplyMarkup(markup));
     }
 
-    public void pinlist() { // /pinlist
+    public void pinlist() {
         setCurrentMessage();
         try {
             handler.execute(new PinChatMessage(chatId, message.getReplyToMessage().getMessageId())
@@ -101,23 +102,26 @@ public class UsercommandsHandler {
     
     public void feedback() {
     	setCurrentMessage();
-    	var sb = new StringBuilder()
-    		.append("<b>Багрепорт</b>\n\nОт: ")
-    		.append("<a href=\"tg://user?id=")
-    		.append(message.getFrom().getId())
-            .append("\">")
-            .append(name)
-            .append("</a>\n\n")
-            .append(text.replace("/feedback", ""));
-        handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, sb.toString());
+        String sb = "<b>Багрепорт</b>\n\nОт: " +
+                "<a href=\"tg://user?id=" +
+                message.getFrom().getId() +
+                "\">" +
+                name +
+                "</a>\n\n" +
+                text.replace("/feedback ", "");
+        handler.sendMessage((long) LastkatkaBot.mainAdmin, sb);
     }
 
-    public void help() { // /help
+    public void help() {
         setCurrentMessage();
         if (message.isUserMessage()) {
+            var sb = new StringBuilder(handler.botConfig.getHelp());
+            if (handler.admins.contains(message.getFrom().getId())) { // admins want to get extra help
+                sb.append(handler.botConfig.getAdminhelp());
+            }
             var sm = new SendMessage()
                     .setChatId(chatId)
-                    .setText(handler.botConfig.getHelp());
+                    .setText(sb.toString());
             handler.sendMessage(sm);
         } else { // attempt to send help to PM
             try {

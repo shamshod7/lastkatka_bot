@@ -25,6 +25,9 @@ public class BotConfig {
     @JsonProperty
     private String help;
 
+    @JsonProperty
+    private String adminhelp;
+
     public long getLastkatka() {
         return lastkatka;
     }
@@ -81,6 +84,14 @@ public class BotConfig {
         this.help = help;
     }
 
+    public String getAdminhelp() {
+        return adminhelp;
+    }
+
+    public void setAdminhelp(String adminhelp) {
+        this.adminhelp = adminhelp;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("BotConfig{");
@@ -91,6 +102,7 @@ public class BotConfig {
         sb.append(", tourgroupname='").append(tourgroupname).append('\'');
         sb.append(", wwBots=").append(wwBots);
         sb.append(", help='").append(help).append('\'');
+        sb.append(", adminhelp='").append(adminhelp).append('\'');
         sb.append('}');
         return sb.toString();
     }

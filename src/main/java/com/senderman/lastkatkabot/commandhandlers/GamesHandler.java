@@ -2,20 +2,11 @@ package com.senderman.lastkatkabot.commandhandlers;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.senderman.lastkatkabot.Duel;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.bson.Document;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GamesHandler {
@@ -48,22 +39,6 @@ public class GamesHandler {
         duelstats.insertOne(doc);
     }
 
-    private InlineKeyboardMarkup getMarkupForDuel(long chatId, int messageId) {
-        var markup = new InlineKeyboardMarkup();
-        String url = "https://t.me/" +
-                handler.getBotUsername() +
-                "?start=duel" +
-                "ZZZ" +
-                chatId +
-                "ZZZ" +
-                messageId;
-        var row1 = List.of(new InlineKeyboardButton()
-                .setText("Присоединиться")
-                .setUrl(url));
-        markup.setKeyboard(List.of(row1));
-        return markup;
-    }
-
     public void dice() {
         setCurrentMessage();
         int random = ThreadLocalRandom.current().nextInt(1, 7);
@@ -71,57 +46,6 @@ public class GamesHandler {
                 .setChatId(chatId)
                 .setText("Кубик брошен. Результат: " + random)
                 .setReplyToMessageId(messageId));
-    }
-
-    public void duel() {
-        setCurrentMessage();
-        var sm = new SendMessage()
-                .setChatId(chatId)
-                .setText("Набор на дуэль! Жмите кнопку ниже\nДжойнулись:");
-
-        var sentMessage = handler.sendMessage(sm);
-        int duelMessageId = sentMessage.getMessageId();
-        var duel = new Duel(sentMessage, handler, duelstats);
-        if (handler.duels.containsKey(chatId)) {
-            handler.duels.get(chatId).put(duelMessageId, duel);
-        } else {
-            Map<Integer, Duel> duelMap = new HashMap<>();
-            duelMap.put(duelMessageId, duel);
-            handler.duels.put(chatId, duelMap);
-        }
-        joinDuel(chatId, duelMessageId);
-        var em = new EditMessageReplyMarkup()
-                .setChatId(chatId)
-                .setMessageId(duelMessageId)
-                .setReplyMarkup(getMarkupForDuel(chatId, duelMessageId));
-        try {
-            handler.execute(em);
-        } catch (TelegramApiException e) {
-            BotLogger.error("CREATE DUEL", e.toString());
-        }
-    }
-
-    public void joinDuel(long duelchat, int msgDuel) {
-        setCurrentMessage();
-        var messageDuelMap = handler.duels.get(duelchat);
-        if (messageDuelMap == null) {
-            handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, "messageMapDuel is null");
-        } else {
-            var d = messageDuelMap.get(msgDuel);
-            if (d == null) {
-                handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, "d is null");
-            } else {
-                d.addPlayer(message.getFrom().getId(), name);
-                handler.sendMessage((long) message.getFrom().getId(), "Успешно!");
-            }
-        }
-        /*try {
-            handler.duels.get(duelchat).get(msgDuel).addPlayer(message.getFrom().getId(), name);
-            handler.sendMessage(chatId, "Вы успешно присоединились к дуэли!");
-        } catch (Exception e) {
-            handler.sendMessage((long) LastkatkaBotHandler.mainAdmin, Throwables.getStackTraceAsString(e));
-            handler.sendMessage(chatId, "Ошибка, репорт отправлен разрабу");
-        }*/
     }
 
     public void dstats() {

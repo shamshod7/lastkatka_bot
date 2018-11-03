@@ -1,5 +1,6 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
+import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
@@ -86,11 +87,11 @@ public class CallbackHandler {
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("n p u я m н o r o  a n n e m u m a");
             emt.setText(name + " принял тортик "
-                    + query.getData().replace(LastkatkaBotHandler.CALLBACK_CAKE_OK, "") + "!");
+                    + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, "") + "!");
         } else {
             acq.setText("Ну и ладно");
             emt.setText(name + " отказался от тортика "
-            + query.getData().replace(LastkatkaBotHandler.CALLBACK_CAKE_NOT, "") + " :(");
+            + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_NOT, "") + " :(");
         }
         try {
             handler.execute(emt);

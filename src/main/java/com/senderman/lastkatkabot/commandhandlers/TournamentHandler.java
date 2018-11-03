@@ -1,5 +1,6 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
+import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -40,7 +41,7 @@ public class TournamentHandler {
         var row1 = List.of(
                 new InlineKeyboardButton()
                         .setText("Снять ограничения")
-                        .setCallbackData(LastkatkaBotHandler.CALLBACK_REGISTER_IN_TOURNAMENT)
+                        .setCallbackData(LastkatkaBot.CALLBACK_REGISTER_IN_TOURNAMENT)
         );
         var row2 = List.of(
                 new InlineKeyboardButton()

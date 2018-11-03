@@ -5,7 +5,11 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.bson.Document;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.logging.BotLogger;
 
 public class AdminHandler {
 
@@ -176,11 +180,10 @@ public class AdminHandler {
             handler.sendMessage(chatId, "Неверное количество аргументов!");
             return;
         }
-        var update = new StringBuilder().append("<b>ВАЖНОЕ ОБНОВЛЕНИЕ: \n\n");
+        var update = new StringBuilder().append("<b>ВАЖНОЕ ОБНОВЛЕНИЕ:</b> \n\n");
         for (int i = 1; i < params.length; i++) {
             update.append("* ").append(params[i]).append("\n");
         }
-        update.append("</b>");
         for (long chat : handler.allowedChats) {
             handler.sendMessage(chat, update.toString());
         }
@@ -193,18 +196,23 @@ public class AdminHandler {
 
     public void announce() {
         setCurrentMessage();
+        int counter = 0;
+        handler.sendMessage(chatId, "Рассылка запущена. На время рассылки бот будет недоступен");
         try (MongoCursor<Document> cursor = duelstats.find().iterator()) {
             while (cursor.hasNext()) {
                 var doc = cursor.next();
-                handler.sendMessage((long) doc.getInteger("id"), text.replace("/announce", ""));
+                handler.execute(new SendMessage((long) doc.getInteger("id"), text.replace("/announce ", "")));
+                counter++;
             }
+        } catch (TelegramApiException e) {
+            BotLogger.error("ANNOUNCE", e.toString());
         }
-        handler.sendMessage(chatId, "Объявелние разослано!");
+        handler.sendMessage(chatId, "Объявелние получили " + counter + " человек");
     }
 
     public void critical() {
         setCurrentMessage();
-        handler.duels.clear();
+        //TODO очистка дуэлей
         handler.sendMessage(chatId, "Все неначатые дуэли были очищены!");
     }
 }

@@ -20,20 +20,14 @@ import java.util.*;
 
 public class LastkatkaBotHandler extends BotHandler {
 
-    public static final String CALLBACK_REGISTER_IN_TOURNAMENT = "register_in_tournament";
-    public static final String CALLBACK_PAY_RESPECTS = "pay_respects";
-    public static final String CALLBACK_CAKE_OK = "cake ok";
-    public static final String CALLBACK_CAKE_NOT = "cake not";
-
     public final BotConfig botConfig;
     public final Set<Integer> admins;
     public final Set<Long> allowedChats;
     public final Set<Integer> blacklist;
-    public final Map<Long, Map<Integer, Duel>> duels;
     public final MongoDatabase lastkatkaDatabase;
-    public static final int mainAdmin = Integer.valueOf(System.getenv("main_admin"));
     private final UsercommandsHandler usercommands;
     private final GamesHandler games;
+    private final DuelController duelController;
     public Set<String> members;
     public Set<Integer> membersIds;
     private TournamentHandler tournament;
@@ -46,7 +40,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         // settings
 
-        sendMessage((long) mainAdmin, "Инициализация...");
+        sendMessage((long) LastkatkaBot.mainAdmin, "Инициализация...");
         admins = new HashSet<>();
         blacklist = new HashSet<>();
 
@@ -70,15 +64,10 @@ public class LastkatkaBotHandler extends BotHandler {
         usercommands = new UsercommandsHandler(this);
         games = new GamesHandler(this);
         adminPanel = new AdminHandler(this);
-
-        duels = new HashMap<>();
-
-        //tournament
-        //members = new HashSet<>();
-        //membersIds = new HashSet<>();
+        duelController = new DuelController(this);
 
         // notify main admin about launch
-        sendMessage((long) mainAdmin, "Бот готов к работе!");
+        sendMessage((long) LastkatkaBot.mainAdmin, "Бот готов к работе!");
     }
 
     public static String getValidName(Message message) {
@@ -148,16 +137,16 @@ public class LastkatkaBotHandler extends BotHandler {
         if (update.hasCallbackQuery()) {
             CallbackQuery query = update.getCallbackQuery();
             String data = query.getData();
-            if (data.startsWith(CALLBACK_CAKE_OK)) {
+            if (data.startsWith(LastkatkaBot.CALLBACK_CAKE_OK)) {
                 new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_OK);
-            } else if (data.startsWith(CALLBACK_CAKE_NOT)) {
+            } else if (data.startsWith(LastkatkaBot.CALLBACK_CAKE_NOT)) {
                 new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_NOT);
             } else {
                 switch (data) {
-                    case CALLBACK_REGISTER_IN_TOURNAMENT:
+                    case LastkatkaBot.CALLBACK_REGISTER_IN_TOURNAMENT:
                         new CallbackHandler(this, query).registerInTournament();
                         break;
-                    case CALLBACK_PAY_RESPECTS:
+                    case LastkatkaBot.CALLBACK_PAY_RESPECTS:
                         new CallbackHandler(this, query).payRespects();
                         break;
                 }
@@ -246,20 +235,20 @@ public class LastkatkaBotHandler extends BotHandler {
             games.dstats();
 
         } else if (text.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
-            games.duel();
+            duelController.createNewDuel(chatId, message.getFrom());
 
         } else if (text.startsWith("/start duel")) {
             String[] params = text.replace("ZZZ", " ").split(" ");
-            games.joinDuel(Long.valueOf(params[2]), Integer.valueOf(params[3]));
+            duelController.joinDuel(Long.parseLong(params[2]), Integer.parseInt(params[3]), message.getFrom());
 
             // handle admin commands
-        } else if (text.startsWith("/owner") && message.getFrom().getId() == mainAdmin) {
+        } else if (text.startsWith("/owner") && message.getFrom().getId() == LastkatkaBot.mainAdmin) {
             adminPanel.owner();
 
-        } else if (text.startsWith("/remowner") && message.getFrom().getId() == mainAdmin) {
+        } else if (text.startsWith("/remowner") && message.getFrom().getId() == LastkatkaBot.mainAdmin) {
             adminPanel.remOwner();
 
-        } else if (text.startsWith("/listowners") && message.getFrom().getId() == mainAdmin) {
+        } else if (text.startsWith("/listowners") && message.getFrom().getId() == LastkatkaBot.mainAdmin) {
             adminPanel.listOwners();
 
         } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
