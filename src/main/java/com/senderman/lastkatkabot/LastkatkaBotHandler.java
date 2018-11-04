@@ -25,7 +25,6 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Long> allowedChats;
     public final Set<Integer> blacklist;
     private final UsercommandsHandler usercommands;
-    private final GamesHandler games;
     private final DuelController duelController;
     public Set<String> members;
     public Set<Integer> membersIds;
@@ -58,7 +57,6 @@ public class LastkatkaBotHandler extends BotHandler {
         // handlers
         ServiceHolder.setDbService(new MongoDBHandler());
         usercommands = new UsercommandsHandler(this);
-        games = new GamesHandler(this);
         adminPanel = new AdminHandler(this);
         duelController = new DuelController(this);
 
@@ -217,9 +215,8 @@ public class LastkatkaBotHandler extends BotHandler {
         } else if (text.startsWith("/help")) {
             usercommands.help();
 
-            // handle games
         } else if (text.startsWith("/dice") && !isInBlacklist(message)) {
-            games.dice();
+            usercommands.dice();
 
         } else if (text.startsWith("/cake") && !isInBlacklist(message)) {
             usercommands.cake();
@@ -228,7 +225,7 @@ public class LastkatkaBotHandler extends BotHandler {
         	usercommands.feedback();
         	
         } else if (text.startsWith("/dstats")) {
-            games.dstats();
+            usercommands.dstats();
 
         } else if (text.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
             duelController.createNewDuel(chatId, message.getFrom());

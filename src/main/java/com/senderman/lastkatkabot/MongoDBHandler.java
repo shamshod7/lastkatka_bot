@@ -54,7 +54,8 @@ public class MongoDBHandler implements DBService {
             wins = doc.getInteger("wins");
             winrate = 100 * wins / total;
         }
-        return player +
+        return "\uD83D\uDCCA Статистика " +
+                player +
                 "\nВыиграно игр: " +
                 wins +
                 "\nВсего игр: " +
@@ -76,7 +77,7 @@ public class MongoDBHandler implements DBService {
     }
 
     public String getBlackList() {
-        var result = new StringBuilder("<b>Список плохих кис:</b>\n\n");
+        var result = new StringBuilder("\uD83D\uDE3E <b>Список плохих кис:</b>\n\n");
         try (MongoCursor<Document> cursor = blacklist.find().iterator()) {
             while (cursor.hasNext()) {
                 var doc = cursor.next();
@@ -119,7 +120,7 @@ public class MongoDBHandler implements DBService {
     }
 
     public String getAdmins() {
-        var result = new StringBuilder("<b>Админы бота:</b>\n\n");
+        var result = new StringBuilder("\uD83D\uDE0E <b>Админы бота:</b>\n\n");
         try (MongoCursor<Document> cursor = admins.find().iterator()) {
             while (cursor.hasNext()) {
                 var doc = cursor.next();

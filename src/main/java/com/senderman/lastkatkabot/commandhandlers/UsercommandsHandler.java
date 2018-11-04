@@ -2,6 +2,7 @@ package com.senderman.lastkatkabot.commandhandlers;
 
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
+import com.senderman.lastkatkabot.ServiceHolder;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -12,6 +13,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class UsercommandsHandler {
     private final LastkatkaBotHandler handler;
@@ -65,7 +67,7 @@ public class UsercommandsHandler {
         handler.delMessage(chatId, messageId);
         handler.sendMessage(new SendMessage()
                 .setChatId(chatId)
-                .setText("Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName())
+                .setText("\uD83D\uDD6F Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName())
                 .setReplyMarkup(getMarkupForPayingRespects()));
     }
 
@@ -87,6 +89,22 @@ public class UsercommandsHandler {
                         + " подарил вам тортик" + text.replace("/cake", ""))
                 .setReplyToMessageId(message.getReplyToMessage().getMessageId())
                 .setReplyMarkup(markup));
+    }
+
+    public void dice() {
+        setCurrentMessage();
+        int random = ThreadLocalRandom.current().nextInt(1, 7);
+        handler.sendMessage(new SendMessage()
+                .setChatId(chatId)
+                .setText("\uD83C\uDFB2 Кубик брошен. Результат: " + random)
+                .setReplyToMessageId(messageId));
+    }
+
+    public void dstats() {
+        setCurrentMessage();
+        var player = message.getFrom().getFirstName();
+        handler.sendMessage(chatId, ServiceHolder.db().getStats(message.getFrom().getId(), player));
+
     }
 
     public void pinlist() {
@@ -132,7 +150,7 @@ public class UsercommandsHandler {
                         .setReplyToMessageId(messageId));
                 return;
             }
-            handler.sendMessage(new SendMessage(chatId, "Помощь была отправлена вам в лс")
+            handler.sendMessage(new SendMessage(chatId, "✅ Помощь была отправлена вам в лс")
                     .setReplyToMessageId(messageId));
         }
     }

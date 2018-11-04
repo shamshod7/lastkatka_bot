@@ -31,7 +31,7 @@ public class DuelController {
     public void createNewDuel(long chatId, User player1) {
         var sm = new SendMessage()
                 .setChatId(chatId)
-                .setText("Набор на дуэль! Жмите кнопку ниже\nДжойнулись:\n" + player1.getFirstName());
+                .setText("\uD83C\uDFAF Набор на дуэль! Жмите кнопку ниже\nДжойнулись:\n" + player1.getFirstName());
         var duelMessageId = handler.sendMessage(sm).getMessageId();
         var duel = new Duel(chatId, duelMessageId);
         duel.player1 = player1;
@@ -43,22 +43,22 @@ public class DuelController {
         var chatDuels = getChatDuels(chatId);
         var player2Chat = player2.getId().longValue();
         if (!chatDuels.hasDuel(duelMessageId)) {
-            handler.sendMessage(player2Chat, "Дуэль устарела");
+            handler.sendMessage(player2Chat, "⏰ Дуэль устарела");
             return;
         }
 
         var duel = chatDuels.getDuel(duelMessageId);
         if (duel.player2 != null) {
-            handler.sendMessage(player2Chat, "Дуэлянтов уже набрали, увы");
+            handler.sendMessage(player2Chat, "\uD83D\uDEAB Дуэлянтов уже набрали, увы");
             return;
         }
         if (duel.player1.getId().equals(player2.getId())) {
-            handler.sendMessage(player2Chat, "Я думаю, что тебе стоит сходить к психологу! Ты вызываешь на дуэль самого себя.");
+            handler.sendMessage(player2Chat, "\uD83D\uDC7A Я думаю, что тебе стоит сходить к психологу! Ты вызываешь на дуэль самого себя.");
             return;
         }
 
         duel.player2 = player2;
-        handler.sendMessage(player2Chat, "Вы успешно присоединились к дуэли!");
+        handler.sendMessage(player2Chat, "✅ Вы успешно присоединились к дуэли!");
         startDuel(duel);
         chatDuels.removeDuel(duelMessageId);
     }
@@ -81,12 +81,12 @@ public class DuelController {
             messageText.append("\nНо, умирая, ")
                     .append(loserName).append(" успевает выстрелить в голову ").append(winnerName).append("! ")
                     .append(winnerName).append(" падает замертво!")
-                    .append("\n\n<b>Дуэль окончилась ничьей!</b>");
+                    .append("\n\n\uD83D\uDC51 <b>Дуэль окончилась ничьей!</b>");
             ServiceHolder.db().loserToStats(winner.getId());
             ServiceHolder.db().loserToStats(loser.getId());
         } else {
             messageText
-                    .append("\n\n<b>")
+                    .append("\n\n\uD83D\uDC51 <b>")
                     .append(winnerName).append(" выиграл дуэль!</b>");
             ServiceHolder.db().winnerToStats(winner.getId());
             ServiceHolder.db().loserToStats(loser.getId());
@@ -97,7 +97,7 @@ public class DuelController {
 
     public void critical(long chatId) {
         duels.clear();
-        handler.sendMessage(chatId, "Все неначатые дуэли были очищены!");
+        handler.sendMessage(chatId, "✅ Все неначатые дуэли были очищены!");
     }
 
     private String name(User user) {

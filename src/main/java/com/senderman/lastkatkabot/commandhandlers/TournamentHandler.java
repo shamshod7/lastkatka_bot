@@ -50,7 +50,7 @@ public class TournamentHandler {
         markup.setKeyboard(List.of(row1, row2));
         var toVegans = new SendMessage()
                 .setChatId(handler.botConfig.getLastvegan())
-                .setText("<b>Турнир активирован!</b>\n\n"
+                .setText("\uD83D\uDCE3 <b>Турнир активирован!</b>\n\n"
                         + String.join(", ", params[1], params[2],
                         "нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n"))
                 .setReplyMarkup(markup);
@@ -124,7 +124,7 @@ public class TournamentHandler {
 
         var toVegans = new SendMessage()
                 .setChatId(handler.botConfig.getLastvegan())
-                .setText("<b>Раунд завершен.\n\nПобедитель:</b> "
+                .setText("\uD83D\uDCE3 <b>Раунд завершен.\n\nПобедитель:</b> "
                         + params[1] + "\nБолельщики, посетите "
                         + handler.botConfig.getTourchannel() + ",  чтобы узнать подробности");
         handler.sendMessage(toVegans);
@@ -135,6 +135,6 @@ public class TournamentHandler {
         restrictMembers(handler.botConfig.getTourgroup());
         isEnabled = false;
         handler.sendMessage(new SendMessage(handler.botConfig.getLastvegan(),
-                "<b>Турнир отменен из-за непредвиденных обстоятельств!</b>"));
+                "\uD83D\uDEAB <b>Турнир отменен из-за непредвиденных обстоятельств!</b>"));
     }
 }

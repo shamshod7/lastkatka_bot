@@ -110,7 +110,7 @@ public class AdminHandler {
     public void announce() {
         setCurrentMessage();
         handler.sendMessage(chatId, "Рассылка запущена. На время рассылки бот будет недоступен");
-        text = text.replace("/announce ", "");
+        text = "\uD83D\uDCE3 <b>Объявление</b>\n\n" + text.replace("/announce ", "");
         var players = ServiceHolder.db().getPlayersIds();
         int counter = 0;
         for (long player : players) {

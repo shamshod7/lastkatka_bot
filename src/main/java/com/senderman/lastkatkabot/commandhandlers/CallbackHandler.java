@@ -86,11 +86,11 @@ public class CallbackHandler {
                 .setReplyMarkup(null);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("n p u я m н o r o  a n n e m u m a");
-            emt.setText(name + " принял тортик "
+            emt.setText("\uD83C\uDF82" + name + " принял тортик "
                     + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, "") + "!");
         } else {
             acq.setText("Ну и ладно");
-            emt.setText(name + " отказался от тортика "
+            emt.setText("\uD83D\uDEAB \uD83C\uDF82" + name + " отказался от тортика "
             + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_NOT, "") + " :(");
         }
         try {
@@ -116,7 +116,8 @@ public class CallbackHandler {
                     .setText("Вам даны права на отправку сообщений в группе турнира!")
                     .setShowAlert(true);
             handler.sendMessage(handler.botConfig.getTourgroup(),
-                    query.getFrom().getFirstName()
+                    "✅ " +
+                            query.getFrom().getFirstName()
                             .replace("<", "&lt")
                             .replace(">", "&gt")
                             + " <b>получил доступ к игре</b>");
