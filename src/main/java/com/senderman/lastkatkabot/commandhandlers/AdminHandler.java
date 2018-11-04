@@ -36,7 +36,7 @@ public class AdminHandler {
         ServiceHolder.db().addToBlacklist(message.getReplyToMessage().getFrom().getId(),
                 message.getReplyToMessage().getFrom().getFirstName(),
                 handler.blacklist);
-        handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
+        handler.sendMessage(chatId, "\uD83D\uDE3E" + message.getReplyToMessage().getFrom().getUserName() +
                 " - плохая киса!");
     }
 
@@ -44,7 +44,7 @@ public class AdminHandler {
         setCurrentMessage();
         ServiceHolder.db().removeFromBlacklist(message.getReplyToMessage().getFrom().getId(),
                 handler.blacklist);
-        handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getUserName() +
+        handler.sendMessage(chatId, "\uD83D\uDE38" + message.getReplyToMessage().getFrom().getUserName() +
                 " хорошая киса!");
     }
 
@@ -56,7 +56,7 @@ public class AdminHandler {
     public void loveneko() {
         setCurrentMessage();
         ServiceHolder.db().resetBlackList(handler.blacklist);
-        handler.sendMessage(chatId, "Все кисы - хорошие!");
+        handler.sendMessage(chatId, "❤️ Все кисы - хорошие!");
     }
 
     public void owner() {
@@ -67,7 +67,7 @@ public class AdminHandler {
         ServiceHolder.db().addToAdmins(message.getReplyToMessage().getFrom().getId(),
                 message.getReplyToMessage().getFrom().getFirstName(),
                 handler.admins);
-        handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getFirstName() +
+        handler.sendMessage(chatId, "✅" + message.getReplyToMessage().getFrom().getFirstName() +
                 " теперь мой хозяин!");
     }
 
@@ -75,7 +75,7 @@ public class AdminHandler {
         setCurrentMessage();
         ServiceHolder.db().removeFromAdmins(message.getReplyToMessage().getFrom().getId(),
                 handler.admins);
-        handler.sendMessage(chatId, message.getReplyToMessage().getFrom().getFirstName() +
+        handler.sendMessage(chatId, "\uD83D\uDEAB" + message.getReplyToMessage().getFrom().getFirstName() +
                 " больше не мой хозяин!");
     }
 
