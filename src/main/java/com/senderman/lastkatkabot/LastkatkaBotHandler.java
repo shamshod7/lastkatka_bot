@@ -40,6 +40,9 @@ public class LastkatkaBotHandler extends BotHandler {
         sendMessage((long) LastkatkaBot.mainAdmin, "Инициализация...");
         admins = new HashSet<>();
         blacklist = new HashSet<>();
+        ServiceHolder.setDBService(new MongoDBHandler());
+        ServiceHolder.db().updateAdmins(admins);
+        ServiceHolder.db().updateBlacklist(blacklist);
 
         allowedChats = new HashSet<>(List.of(
                 botConfig.getLastkatka(),
@@ -54,9 +57,6 @@ public class LastkatkaBotHandler extends BotHandler {
         }
 
         // handlers
-        ServiceHolder.setDBService(new MongoDBHandler());
-        ServiceHolder.db().updateAdmins(admins);
-        ServiceHolder.db().updateBlacklist(blacklist);
         adminPanel = new AdminHandler(this);
         usercommands = new UsercommandsHandler(this);
         duelController = new DuelController(this);
@@ -153,6 +153,9 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
 
         message = update.getMessage();
+
+        //tempfeature: logger
+        ServiceHolder.db().getStats(message.getFrom().getId(), "");
 
         // don't handle old messages
         long currentTime = System.currentTimeMillis() / 1000;

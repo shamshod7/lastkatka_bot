@@ -132,18 +132,18 @@ public class UsercommandsHandler {
 
     public void help() {
         setCurrentMessage();
+        var sb = new StringBuilder(handler.botConfig.getHelp());
+        if (handler.admins.contains(message.getFrom().getId())) { // admins want to get extra help
+            sb.append(handler.botConfig.getAdminhelp());
+        }
         if (message.isUserMessage()) {
-            var sb = new StringBuilder(handler.botConfig.getHelp());
-            if (handler.admins.contains(message.getFrom().getId())) { // admins want to get extra help
-                sb.append(handler.botConfig.getAdminhelp());
-            }
             var sm = new SendMessage()
                     .setChatId(chatId)
                     .setText(sb.toString());
             handler.sendMessage(sm);
         } else { // attempt to send help to PM
             try {
-                handler.execute(new SendMessage((long) message.getFrom().getId(), handler.botConfig.getHelp())
+                handler.execute(new SendMessage((long) message.getFrom().getId(), sb.toString())
                         .setParseMode(ParseMode.HTML));
             } catch (TelegramApiException e) {
                 handler.sendMessage(new SendMessage(chatId, "Пожалуйста, начните диалог со мной в лс, чтобы я мог отправить вам помощь")

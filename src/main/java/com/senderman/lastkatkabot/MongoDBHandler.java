@@ -8,11 +8,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MongoDBHandler implements DBService {
-    private static final MongoClient client = MongoClients.create(System.getenv("database"));
-    private static final MongoDatabase database = client.getDatabase("lastkatka");
-    private static final MongoCollection<Document> admins = database.getCollection("admins");
-    private static final MongoCollection<Document> blacklist = database.getCollection("blacklist");
-    private static final MongoCollection<Document> duelstats = database.getCollection("duelstats");
+    private final MongoClient client = MongoClients.create(System.getenv("database"));
+    private final MongoDatabase database = client.getDatabase("lastkatka");
+    private final MongoCollection<Document> admins = database.getCollection("admins");
+    private final MongoCollection<Document> blacklist = database.getCollection("blacklist");
+    private final MongoCollection<Document> duelstats = database.getCollection("duelstats");
 
     public void initStats(int id) {
         var doc = new Document("id", id)
