@@ -14,7 +14,9 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class LastkatkaBotHandler extends BotHandler {
 
@@ -54,6 +56,7 @@ public class LastkatkaBotHandler extends BotHandler {
         }
 
         // handlers
+        ServiceHolder.setDbService(new MongoDBHandler());
         usercommands = new UsercommandsHandler(this);
         games = new GamesHandler(this);
         adminPanel = new AdminHandler(this);
@@ -260,7 +263,7 @@ public class LastkatkaBotHandler extends BotHandler {
         	adminPanel.getinfo();
         	
         } else if (text.startsWith("/critical") && isFromAdmin(message)) {
-            adminPanel.critical();
+            duelController.critical(chatId);
 
         } else if (text.startsWith("/update") && isFromAdmin(message)) {
             adminPanel.update();

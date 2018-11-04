@@ -123,10 +123,4 @@ public class AdminHandler {
         }
         handler.sendMessage(chatId, "Объявление получили " + counter + " человек");
     }
-
-    public void critical() {
-        setCurrentMessage();
-        //TODO очистка дуэлей
-        handler.sendMessage(chatId, "Все неначатые дуэли были очищены!");
-    }
 }

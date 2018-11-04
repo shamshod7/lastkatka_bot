@@ -95,6 +95,11 @@ public class DuelController {
 
     }
 
+    public void critical(long chatId) {
+        duels.clear();
+        handler.sendMessage(chatId, "Все неначатые дуэли были очищены!");
+    }
+
     private String name(User user) {
         return user.getFirstName()
                 .replace("<", "&lt;")
