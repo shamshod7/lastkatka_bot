@@ -18,8 +18,6 @@ public class AdminHandler {
 
     public AdminHandler(LastkatkaBotHandler handler) {
         this.handler = handler;
-        ServiceHolder.db().updateAdmins(handler.admins);
-        ServiceHolder.db().updateBlacklist(handler.admins);
     }
 
     private void setCurrentMessage() {
@@ -93,7 +91,7 @@ public class AdminHandler {
             handler.sendMessage(chatId, "Неверное количество аргументов!");
             return;
         }
-        var update = new StringBuilder().append("<b>ВАЖНОЕ ОБНОВЛЕНИЕ:</b> \n\n");
+        var update = new StringBuilder().append("\uD83D\uDCE3 <b>ВАЖНОЕ ОБНОВЛЕНИЕ:</b> \n\n");
         for (int i = 1; i < params.length; i++) {
             update.append("* ").append(params[i]).append("\n");
         }

@@ -37,7 +37,6 @@ public class LastkatkaBotHandler extends BotHandler {
         this.botConfig = botConfig;
 
         // settings
-
         sendMessage((long) LastkatkaBot.mainAdmin, "Инициализация...");
         admins = new HashSet<>();
         blacklist = new HashSet<>();
@@ -55,9 +54,11 @@ public class LastkatkaBotHandler extends BotHandler {
         }
 
         // handlers
-        ServiceHolder.setDbService(new MongoDBHandler());
-        usercommands = new UsercommandsHandler(this);
+        ServiceHolder.setDBService(new MongoDBHandler());
+        ServiceHolder.db().updateAdmins(admins);
+        ServiceHolder.db().updateBlacklist(blacklist);
         adminPanel = new AdminHandler(this);
+        usercommands = new UsercommandsHandler(this);
         duelController = new DuelController(this);
 
         // notify main admin about launch
@@ -172,7 +173,7 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
         }
 
-        // restrict any user that not in tournament, and say hello to new groups
+        // restrict any user that not in tournament
         List<User> newMembers = message.getNewChatMembers();
         if (newMembers != null) {
             if (message.getChatId() == botConfig.getTourgroup()) {
@@ -189,7 +190,7 @@ public class LastkatkaBotHandler extends BotHandler {
                         }
                     }
                 }
-            } else {
+            } else { // Say hello to new groups
                 if (newMembers.get(0).getUserName().equalsIgnoreCase(getBotUsername())) {
                     sendMessage(chatId, "Этот чат находится в списке разрешенных. Бот готов к работе здесь.");
                 }

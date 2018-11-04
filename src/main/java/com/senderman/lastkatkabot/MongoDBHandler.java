@@ -146,8 +146,8 @@ public class MongoDBHandler implements DBService {
         }
     }
 
-    public HashSet<Long> getPlayersIds() {
-        HashSet<Long> players = new HashSet<>();
+    public Set<Long> getPlayersIds() {
+        Set<Long> players = new HashSet<>();
         try (MongoCursor<Document> cursor = duelstats.find().iterator()) {
             while (cursor.hasNext()) {
                 var doc = cursor.next();

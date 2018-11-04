@@ -8,7 +8,7 @@ public class ServiceHolder {
         return db;
     }
 
-    static void setDbService(DBService db) {
+    static void setDBService(DBService db) {
         ServiceHolder.db = db;
     }
 }
