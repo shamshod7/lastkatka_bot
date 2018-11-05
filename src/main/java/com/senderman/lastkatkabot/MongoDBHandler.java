@@ -52,7 +52,7 @@ public class MongoDBHandler implements DBService {
         } else {
             total = doc.getInteger("total");
             wins = doc.getInteger("wins");
-            winrate = 100 * wins / total;
+            winrate = (total == 0) ? 0 : 100 * wins / total;
         }
         return "\uD83D\uDCCA Статистика " +
                 player +
