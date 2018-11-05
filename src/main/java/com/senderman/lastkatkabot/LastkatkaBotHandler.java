@@ -86,7 +86,11 @@ public class LastkatkaBotHandler extends BotHandler {
     }
 
     public boolean isInBlacklist(Message message) {
-        return blacklist.contains(message.getFrom().getId());
+        boolean result = blacklist.contains(message.getFrom().getId());
+        if (result) {
+            delMessage(message.getChatId(), message.getMessageId());
+        }
+        return result;
     }
 
     private boolean isFromWwBot(Message message) {
@@ -153,9 +157,6 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
 
         message = update.getMessage();
-
-        //tempfeature: logger
-        ServiceHolder.db().getStats(message.getFrom().getId(), "");
 
         // don't handle old messages
         long currentTime = System.currentTimeMillis() / 1000;
