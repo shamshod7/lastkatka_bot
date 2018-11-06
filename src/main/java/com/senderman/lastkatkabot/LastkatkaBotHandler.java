@@ -214,7 +214,7 @@ public class LastkatkaBotHandler extends BotHandler {
         } else if (text.startsWith("/action")) {
             usercommands.action();
 
-        } else if (text.startsWith("/f@" + getBotUsername())) {
+        } else if (text.equalsIgnoreCase("/f")) {
             usercommands.payRespects();
 
         } else if (text.startsWith("/help")) {
