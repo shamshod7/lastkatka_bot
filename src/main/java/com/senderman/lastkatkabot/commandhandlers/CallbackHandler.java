@@ -82,15 +82,14 @@ public class CallbackHandler {
         var emt = new EditMessageText()
                 .setChatId(chatId)
                 .setMessageId(messageId)
-                // TODO чекнуть нужно ли .setInlineMessageId(query.getInlineMessageId())
                 .setReplyMarkup(null);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("n p u я m н o r o  a n n e m u m a");
-            emt.setText("\uD83C\uDF82" + name + " принял тортик "
+            emt.setText("\uD83C\uDF82 " + name + " принял тортик "
                     + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, "") + "!");
         } else {
             acq.setText("Ну и ладно");
-            emt.setText("\uD83D\uDEAB \uD83C\uDF82" + name + " отказался от тортика "
+            emt.setText("\uD83D\uDEAB \uD83C\uDF82 " + name + " отказался от тортика "
             + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_NOT, "") + " :(");
         }
         try {
@@ -113,7 +112,7 @@ public class CallbackHandler {
                     .setCanSendOtherMessages(true);
             var acq = new AnswerCallbackQuery()
                     .setCallbackQueryId(id)
-                    .setText("Вам даны права на отправку сообщений в группе турнира!")
+                    .setText("✅ Вам даны права на отправку сообщений в группе турнира!")
                     .setShowAlert(true);
             handler.sendMessage(handler.botConfig.getTourgroup(),
                     "✅ " +
@@ -130,7 +129,7 @@ public class CallbackHandler {
         } else {
             var acq = new AnswerCallbackQuery()
                     .setCallbackQueryId(id)
-                    .setText("Вы не являетесь участником текущего раунда!")
+                    .setText("\uD83D\uDEAB Вы не являетесь участником текущего раунда!")
                     .setShowAlert(true);
             try {
                 handler.execute(acq);

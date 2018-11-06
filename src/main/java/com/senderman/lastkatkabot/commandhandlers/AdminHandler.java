@@ -36,7 +36,7 @@ public class AdminHandler {
         ServiceHolder.db().addToBlacklist(message.getReplyToMessage().getFrom().getId(),
                 message.getReplyToMessage().getFrom().getFirstName(),
                 handler.blacklist);
-        handler.sendMessage(chatId, "\uD83D\uDE3E" + message.getReplyToMessage().getFrom().getUserName() +
+        handler.sendMessage(chatId, "\uD83D\uDE3E " + message.getReplyToMessage().getFrom().getUserName() +
                 " - плохая киса!");
     }
 
@@ -44,7 +44,7 @@ public class AdminHandler {
         setCurrentMessage();
         ServiceHolder.db().removeFromBlacklist(message.getReplyToMessage().getFrom().getId(),
                 handler.blacklist);
-        handler.sendMessage(chatId, "\uD83D\uDE38" + message.getReplyToMessage().getFrom().getUserName() +
+        handler.sendMessage(chatId, "\uD83D\uDE38 " + message.getReplyToMessage().getFrom().getUserName() +
                 " хорошая киса!");
     }
 
@@ -75,7 +75,7 @@ public class AdminHandler {
         setCurrentMessage();
         ServiceHolder.db().removeFromAdmins(message.getReplyToMessage().getFrom().getId(),
                 handler.admins);
-        handler.sendMessage(chatId, "\uD83D\uDEAB" + message.getReplyToMessage().getFrom().getFirstName() +
+        handler.sendMessage(chatId, "\uD83D\uDEAB " + message.getReplyToMessage().getFrom().getFirstName() +
                 " больше не мой хозяин!");
     }
 
@@ -113,7 +113,7 @@ public class AdminHandler {
         int counter = 0;
         for (long player : players) {
             try {
-                handler.execute(new SendMessage(player, text));
+                handler.execute(new SendMessage(player, text).enableHtml(true));
                 counter++;
             } catch (TelegramApiException e) {
                 BotLogger.error("ANNOUNCE", e.toString());

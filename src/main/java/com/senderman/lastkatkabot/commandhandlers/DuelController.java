@@ -81,7 +81,7 @@ public class DuelController {
             messageText.append("\nНо, умирая, ")
                     .append(loserName).append(" успевает выстрелить в голову ").append(winnerName).append("! ")
                     .append(winnerName).append(" падает замертво!")
-                    .append("\n\n\uD83D\uDC51 <b>Дуэль окончилась ничьей!</b>");
+                    .append("\n\n\uD83D\uDC80 <b>Дуэль окончилась ничьей!</b>");
             ServiceHolder.db().loserToStats(winner.getId());
             ServiceHolder.db().loserToStats(loser.getId());
         } else {
