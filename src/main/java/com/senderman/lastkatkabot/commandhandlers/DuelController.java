@@ -1,11 +1,14 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
+import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import com.senderman.lastkatkabot.ServiceHolder;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -36,29 +39,30 @@ public class DuelController {
         var duel = new Duel(chatId, duelMessageId);
         duel.player1 = player1;
         getChatDuels(chatId).createDuel(duelMessageId, duel);
-        editReplyMarkup(chatId, duelMessageId);
+        setReplyMarkup(chatId, duelMessageId);
     }
 
-    public void joinDuel(long chatId, int duelMessageId, User player2) {
-        var chatDuels = getChatDuels(chatId);
-        var player2Chat = player2.getId().longValue();
+    public void joinDuel(CallbackQuery query) {
+        var duelMessageId = query.getMessage().getMessageId();
+        var chatDuels = getChatDuels(query.getMessage().getChatId());
+        var player2 = query.getFrom();
         if (!chatDuels.hasDuel(duelMessageId)) {
-            handler.sendMessage(player2Chat, "⏰ Дуэль устарела");
+            answerCallbackQuery(query, "⏰ Дуэль устарела", true);
             return;
         }
 
         var duel = chatDuels.getDuel(duelMessageId);
         if (duel.player2 != null) {
-            handler.sendMessage(player2Chat, "\uD83D\uDEAB Дуэлянтов уже набрали, увы");
+            answerCallbackQuery(query, "\uD83D\uDEAB Дуэлянтов уже набрали, увы", true);
             return;
         }
         if (duel.player1.getId().equals(player2.getId())) {
-            handler.sendMessage(player2Chat, "\uD83D\uDC7A Я думаю, что тебе стоит сходить к психологу! Ты вызываешь на дуэль самого себя.");
+            answerCallbackQuery(query, "\uD83D\uDC7A Я думаю, что тебе стоит сходить к психологу! Ты вызываешь на дуэль самого себя", true);
             return;
         }
 
         duel.player2 = player2;
-        handler.sendMessage(player2Chat, "✅ Вы успешно присоединились к дуэли!");
+        answerCallbackQuery(query, "✅ Вы успешно присоединились к дуэли!", false);
         startDuel(duel);
         chatDuels.removeDuel(duelMessageId);
     }
@@ -106,11 +110,11 @@ public class DuelController {
                 .replace(">", "&gt;");
     }
 
-    private void editReplyMarkup(long chatId, int duelMessageId) {
+    private void setReplyMarkup(long chatId, int duelMessageId) {
         var em = new EditMessageReplyMarkup()
                 .setChatId(chatId)
                 .setMessageId(duelMessageId)
-                .setReplyMarkup(getMarkupForDuel(chatId, duelMessageId));
+                .setReplyMarkup(getMarkupForDuel());
         try {
             handler.execute(em);
         } catch (TelegramApiException e) {
@@ -131,22 +135,26 @@ public class DuelController {
         }
     }
 
-    private InlineKeyboardMarkup getMarkupForDuel(long chatId, int messageId) {
+    private InlineKeyboardMarkup getMarkupForDuel() {
         var markup = new InlineKeyboardMarkup();
-        String url = "https://t.me/" +
-                handler.getBotUsername() +
-                "?start=duel" +
-                "ZZZ" +
-                chatId +
-                "ZZZ" +
-                messageId;
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
-                .setUrl(url));
+                .setCallbackData(LastkatkaBot.JOIN_DUEL));
         markup.setKeyboard(List.of(row1));
         return markup;
     }
 
+    private void answerCallbackQuery(CallbackQuery query, String text, boolean showAsAlert) {
+        var acq = new AnswerCallbackQuery()
+                .setText(text)
+                .setCallbackQueryId(query.getId())
+                .setShowAlert(showAsAlert);
+        try {
+            handler.execute(acq);
+        } catch (TelegramApiException e) {
+            BotLogger.error("ANSWER CALLBACK", e.toString());
+        }
+    }
 
     private ChatDuels getChatDuels(long chatId) {
         if (duels.containsKey(chatId)) {

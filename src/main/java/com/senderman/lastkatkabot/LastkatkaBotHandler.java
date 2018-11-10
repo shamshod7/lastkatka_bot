@@ -148,6 +148,9 @@ public class LastkatkaBotHandler extends BotHandler {
                     case LastkatkaBot.CALLBACK_PAY_RESPECTS:
                         new CallbackHandler(this, query).payRespects();
                         break;
+                    case LastkatkaBot.JOIN_DUEL:
+                        duelController.joinDuel(query);
+                        break;
                 }
             }
             return null;
@@ -227,17 +230,13 @@ public class LastkatkaBotHandler extends BotHandler {
             usercommands.cake();
 
         } else if (text.startsWith("/feedback") && !isInBlacklist(message)) {
-        	usercommands.feedback();
-        	
+            usercommands.feedback();
+
         } else if (text.startsWith("/dstats")) {
             usercommands.dstats();
 
         } else if (text.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
             duelController.createNewDuel(chatId, message.getFrom());
-
-        } else if (text.startsWith("/start duel")) {
-            String[] params = text.replace("ZZZ", " ").split(" ");
-            duelController.joinDuel(Long.parseLong(params[2]), Integer.parseInt(params[3]), message.getFrom());
 
             // handle admin commands
         } else if (text.startsWith("/owner") && message.getFrom().getId() == LastkatkaBot.mainAdmin) {
@@ -262,8 +261,8 @@ public class LastkatkaBotHandler extends BotHandler {
             adminPanel.loveneko();
 
         } else if (text.startsWith("/getinfo") && isFromAdmin(message)) {
-        	adminPanel.getinfo();
-        	
+            adminPanel.getinfo();
+
         } else if (text.startsWith("/critical") && isFromAdmin(message)) {
             duelController.critical(chatId);
 
