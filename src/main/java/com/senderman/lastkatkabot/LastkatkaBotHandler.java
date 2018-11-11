@@ -177,8 +177,8 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
         }
 
-        // users in blacklist except admins are not allowed to use this commands
-        if (!isInBlacklist(message) && !isFromAdmin(message)) {
+        // users in blacklist are not allowed to use this commands
+        if (!isInBlacklist(message)) {
             switch (command) {
                 case "/action":
                     usercommands.action();
