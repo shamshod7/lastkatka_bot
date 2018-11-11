@@ -50,7 +50,7 @@ public class UsercommandsHandler {
         if (handler.isInBlacklist(message))
             return;
 
-        if (text.split(" ").length == 1) {
+        if (text.split("\\s+").length == 1) {
             return;
         }
 

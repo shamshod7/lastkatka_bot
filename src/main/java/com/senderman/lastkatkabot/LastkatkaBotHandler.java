@@ -50,7 +50,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 botConfig.getLastvegan(),
                 botConfig.getTourgroup()
         ));
-        var envAllowed = System.getenv("allowed_chats");
+        var envAllowed = botConfig.getAllowedChats();
         if (envAllowed != null) {
             for (String allowedChat : envAllowed.split(" ")) {
                 allowedChats.add(Long.valueOf(allowedChat));
@@ -75,6 +75,7 @@ public class LastkatkaBotHandler extends BotHandler {
     @Override
     public BotApiMethod onUpdate(Update update) {
 
+        // first we will handle callbacks
         if (update.hasCallbackQuery()) {
             CallbackQuery query = update.getCallbackQuery();
             String data = query.getData();
@@ -105,7 +106,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         // don't handle old messages
         long currentTime = System.currentTimeMillis() / 1000;
-        if (message.getDate() + 60 < currentTime) {
+        if (message.getDate() + 120 < currentTime) {
             return null;
         }
 
@@ -160,7 +161,9 @@ public class LastkatkaBotHandler extends BotHandler {
          * and NOT on commands for another bots (like /command@notmybot)
          */
         var command = text.split("\\s+", 2)[0].toLowerCase(Locale.ENGLISH).replace("@" + getBotUsername(), "");
-
+        if (command.contains("@"))
+            return null;
+        // TODO: убрать все названия команд из методов
         if (command.startsWith("/pinlist") && isFromWwBot(message)) {
             usercommands.pinlist();
             return null;

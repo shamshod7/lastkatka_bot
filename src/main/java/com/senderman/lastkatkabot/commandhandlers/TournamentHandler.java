@@ -27,7 +27,7 @@ public class TournamentHandler {
         handler.members = new HashSet<>();
         handler.membersIds = new HashSet<>();
         setCurrentMessage();
-        var params = text.split(" ");
+        var params = text.split("\\s+");
         if (params.length != 4) {
             handler.sendMessage(chatId, "Неверное количество аргументов!");
             return;
@@ -95,7 +95,7 @@ public class TournamentHandler {
 
     public void score() {
         setCurrentMessage();
-        var params = text.split(" ");
+        var params = text.split("\\s+");
         if (params.length != 5) {
             handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
             return;
@@ -108,7 +108,7 @@ public class TournamentHandler {
 
     public void win() {
         setCurrentMessage();
-        var params = text.split(" ");
+        var params = text.split("\\s+");
         if (params.length != 6) {
             handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
             return;

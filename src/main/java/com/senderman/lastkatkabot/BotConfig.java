@@ -10,6 +10,12 @@ public class BotConfig {
     private String token;
     @JsonProperty(required = true)
     private String username;
+
+    @JsonProperty(required = true)
+    private int mainAdmin;
+    @JsonProperty(required = true)
+    private String allowedChats;
+
     @JsonProperty(required = true)
     private long lastkatka;
     @JsonProperty(required = true)
@@ -46,6 +52,22 @@ public class BotConfig {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public int getMainAdmin() {
+        return mainAdmin;
+    }
+
+    public void setMainAdmin(int mainAdmin) {
+        this.mainAdmin = mainAdmin;
+    }
+
+    public String getAllowedChats() {
+        return allowedChats;
+    }
+
+    public void setAllowedChats(String allowedChats) {
+        this.allowedChats = allowedChats;
     }
 
     public long getLastkatka() {
