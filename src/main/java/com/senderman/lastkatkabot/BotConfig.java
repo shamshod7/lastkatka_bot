@@ -7,6 +7,10 @@ import java.util.Set;
 public class BotConfig {
 
     @JsonProperty(required = true)
+    private String token;
+    @JsonProperty(required = true)
+    private String username;
+    @JsonProperty(required = true)
     private long lastkatka;
     @JsonProperty(required = true)
     private long lastvegan;
@@ -27,6 +31,22 @@ public class BotConfig {
 
     @JsonProperty
     private String adminhelp;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public long getLastkatka() {
         return lastkatka;

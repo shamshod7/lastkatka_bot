@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class LastkatkaBotHandler extends BotHandler {
@@ -69,65 +70,6 @@ public class LastkatkaBotHandler extends BotHandler {
         return message.getFrom().getFirstName()
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");
-    }
-
-    @Override
-    public String getBotUsername() {
-        return System.getenv("username");
-    }
-
-    @Override
-    public String getBotToken() {
-        return System.getenv("token");
-    }
-
-    private boolean isFromAdmin(Message message) {
-        return admins.contains(message.getFrom().getId());
-    }
-
-    public boolean isInBlacklist(Message message) {
-        boolean result = blacklist.contains(message.getFrom().getId());
-        if (result) {
-            delMessage(message.getChatId(), message.getMessageId());
-        }
-        return result;
-    }
-
-    private boolean isFromWwBot(Message message) {
-        return botConfig.getWwBots().contains(message.getReplyToMessage().getFrom().getUserName()) &&
-                message.getReplyToMessage().getText().contains("#players");
-    }
-
-    public void sendMessage(Long chatId, String message) {
-        sendMessage(new SendMessage(chatId, message));
-    }
-
-    public Message sendMessage(SendMessage message) {
-        message.enableHtml(true);
-        message.disableWebPagePreview();
-        Message result = null;
-        try {
-            result = execute(message);
-        } catch (TelegramApiException e) {
-            BotLogger.error("SEND", e);
-        }
-        return result;
-    }
-
-    public void delMessage(Long chatId, Integer messageId) {
-        delMessage(new DeleteMessage(chatId, messageId));
-    }
-
-    private void delMessage(DeleteMessage message) {
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            BotLogger.error("DELETE", e);
-        }
-    }
-
-    public Message getCurrentMessage() {
-        return message;
     }
 
     @Override
@@ -210,81 +152,173 @@ public class LastkatkaBotHandler extends BotHandler {
 
         var text = message.getText();
 
-        // Handle user commands
-        if (text.startsWith("/pinlist") && isFromWwBot(message)) {
+        // we dont need to handle messages that are not commands
+        if (!text.startsWith("/"))
+            return null;
+
+        /* bot should only trigger on general commands (like /command) or on commands for this bot (/command@mybot),
+         * and NOT on commands for another bots (like /command@notmybot)
+         */
+        var command = text.split("\\s+", 2)[0].toLowerCase(Locale.ENGLISH).replace("@" + getBotUsername(), "");
+
+        if (command.startsWith("/pinlist") && isFromWwBot(message)) {
             usercommands.pinlist();
+            return null;
 
-        } else if (text.startsWith("/action")) {
-            usercommands.action();
-
-        } else if (text.equalsIgnoreCase("/f")) {
-            usercommands.payRespects();
-
-        } else if (text.startsWith("/help")) {
-            usercommands.help();
-
-        } else if (text.startsWith("/dice") && !isInBlacklist(message)) {
-            usercommands.dice();
-
-        } else if (text.startsWith("/cake") && !isInBlacklist(message)) {
-            usercommands.cake();
-
-        } else if (text.startsWith("/feedback") && !isInBlacklist(message)) {
-            usercommands.feedback();
-
-        } else if (text.startsWith("/dstats")) {
-            usercommands.dstats();
-
-        } else if (text.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
+        } else if (command.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
             duelController.createNewDuel(chatId, message.getFrom());
+            return null;
 
-            // handle admin commands
-        } else if (text.startsWith("/owner") && message.getFrom().getId() == LastkatkaBot.mainAdmin) {
-            adminPanel.owner();
-
-        } else if (text.startsWith("/remowner") && message.getFrom().getId() == LastkatkaBot.mainAdmin) {
-            adminPanel.remOwner();
-
-        } else if (text.startsWith("/listowners") && message.getFrom().getId() == LastkatkaBot.mainAdmin) {
-            adminPanel.listOwners();
-
-        } else if (text.startsWith("/badneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-            adminPanel.badneko();
-
-        } else if (text.startsWith("/goodneko") && isFromAdmin(message) && !message.isUserMessage() && message.isReply()) {
-            adminPanel.goodneko();
-
-        } else if (text.startsWith("/nekos") && isFromAdmin(message)) {
-            adminPanel.nekos();
-
-        } else if (text.startsWith("/loveneko") && isFromAdmin(message)) {
-            adminPanel.loveneko();
-
-        } else if (text.startsWith("/getinfo") && isFromAdmin(message)) {
-            adminPanel.getinfo();
-
-        } else if (text.startsWith("/critical") && isFromAdmin(message)) {
-            duelController.critical(chatId);
-
-        } else if (text.startsWith("/update") && isFromAdmin(message)) {
-            adminPanel.update();
-
-        } else if (text.startsWith("/announce") && isFromAdmin(message)) {
-            adminPanel.announce();
-
-        } else if (text.startsWith("/setup") && isFromAdmin(message)) {
+        } else if (command.startsWith("/help")) {
+            usercommands.help();
+            return null;
+        } else if (command.startsWith("/setup") && isFromAdmin(message) && !TournamentHandler.isEnabled) {
             tournament = new TournamentHandler(this);
+            return null;
+        }
 
-        } else if (TournamentHandler.isEnabled && isFromAdmin(message)) {
-            if (text.startsWith("/score")) {
-                tournament.score();
-            } else if (text.startsWith("/win")) {
-                tournament.win();
-            } else if (text.startsWith("/rt")) {
-                tournament.rt();
+        // users in blacklist except admins are not allowed to use this commands
+        if (!isInBlacklist(message) && !isFromAdmin(message)) {
+            switch (command) {
+                case "/action":
+                    usercommands.action();
+                    break;
+                case "/f":
+                    usercommands.payRespects();
+                    break;
+                case "/dice":
+                    usercommands.dice();
+                    break;
+                case "/cake":
+                    usercommands.cake();
+                    break;
+                case "/feedback":
+                    usercommands.feedback();
+                    break;
+                case "/dstats":
+                    usercommands.dstats();
+                    break;
             }
         }
 
+        // commands for main admin only
+        if (message.getFrom().getId().equals(LastkatkaBot.mainAdmin)) {
+            switch (command) {
+                case "/owner":
+                    adminPanel.owner();
+                    break;
+                case "/remowner":
+                    adminPanel.remOwner();
+                    break;
+                case "/update":
+                    adminPanel.update();
+                    break;
+                case "/announce":
+                    adminPanel.announce();
+                    break;
+            }
+        }
+
+        // commands for all admins
+        if (isFromAdmin(message)) {
+            switch (command) {
+                case "/owners":
+                    adminPanel.listOwners();
+                    break;
+                case "/badneko":
+                    adminPanel.badneko();
+                    break;
+                case "/goodneko":
+                    adminPanel.goodneko();
+                    break;
+                case "/nekos":
+                    adminPanel.nekos();
+                    break;
+                case "/loveneko":
+                    adminPanel.loveneko();
+                    break;
+                case "/getinfo":
+                    adminPanel.getinfo();
+                    break;
+                case "/critical":
+                    duelController.critical(chatId);
+                    break;
+            }
+        }
+
+        // commands for tournament
+        if (TournamentHandler.isEnabled && isFromAdmin(message)) {
+            switch (command) {
+                case "/score":
+                    tournament.score();
+                    break;
+                case "/win":
+                    tournament.win();
+                    break;
+                case "/rt":
+                    tournament.win();
+            }
+        }
         return null;
+    }
+
+    @Override
+    public String getBotUsername() {
+        return botConfig.getUsername();
+    }
+
+    @Override
+    public String getBotToken() {
+        return botConfig.getToken();
+    }
+
+    private boolean isFromAdmin(Message message) {
+        delMessage(message.getChatId(), message.getMessageId());
+        return admins.contains(message.getFrom().getId());
+    }
+
+    public boolean isInBlacklist(Message message) {
+        boolean result = blacklist.contains(message.getFrom().getId());
+        if (result) {
+            delMessage(message.getChatId(), message.getMessageId());
+        }
+        return result;
+    }
+
+    private boolean isFromWwBot(Message message) {
+        return botConfig.getWwBots().contains(message.getReplyToMessage().getFrom().getUserName()) &&
+                message.getReplyToMessage().getText().contains("#players");
+    }
+
+    public void sendMessage(Long chatId, String message) {
+        sendMessage(new SendMessage(chatId, message));
+    }
+
+    public Message sendMessage(SendMessage message) {
+        message.enableHtml(true);
+        message.disableWebPagePreview();
+        Message result = null;
+        try {
+            result = execute(message);
+        } catch (TelegramApiException e) {
+            BotLogger.error("SEND", e);
+        }
+        return result;
+    }
+
+    public void delMessage(Long chatId, Integer messageId) {
+        delMessage(new DeleteMessage(chatId, messageId));
+    }
+
+    private void delMessage(DeleteMessage message) {
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            BotLogger.error("DELETE", e);
+        }
+    }
+
+    public Message getCurrentMessage() {
+        return message;
     }
 }

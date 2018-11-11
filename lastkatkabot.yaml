@@ -1,3 +1,6 @@
+token: env(token)
+username: env(username)
+
 lastkatka : -1001156345990
 lastvegan : -1001440160000
 tourgroup : -1001153873643
@@ -6,9 +9,9 @@ tourgroupname : "@bigelmogame"
 tourchannel : '@bigelmocucumber'
 
 wwBots:
-  - 'werewolfbot'
-  - 'werewolfbetabot'
-  - 'blackwerewolfbot'
+- 'werewolfbot'
+- 'werewolfbetabot'
+- 'blackwerewolfbot'
 
 help: |
   Привет! Это очень полезный бот для проекта @lastkatka, который многое что умеет! Основные команды:
@@ -25,8 +28,6 @@ adminhelp: |
 
   <b>Следующая информация только для администрации!</b>
 
-  /update обновления через строку - список обновлений бота во все группы
-  /announce объявление - отправить всем в лс объявление
   /setup @username1 @username2 типРаунда - начать турнир
   /score @username1 score1 @username2 score2 - сообщить счет
   /win @winner score @loser score типСледующегоРаунда - завершить турнир (если текущий раунд - финал, используйте тип раунда over)
@@ -35,4 +36,5 @@ adminhelp: |
   /goodneko - разрешить пользователю юзать /action и /dice
   /nekos - посмотреть кто был плохой кошечкой
   /loveneko - сбросить список плохих кошечек
+  /owners - список админов бота
   /critical - сброс всех дуэлей

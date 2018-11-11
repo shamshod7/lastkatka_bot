@@ -30,6 +30,8 @@ public class AdminHandler {
 
     public void badneko() {
         setCurrentMessage();
+        if (!message.isReply())
+            return;
         if (handler.blacklist.contains(message.getReplyToMessage().getFrom().getId())) {
             return;
         }
@@ -42,6 +44,8 @@ public class AdminHandler {
 
     public void goodneko() {
         setCurrentMessage();
+        if (!message.isReply())
+            return;
         ServiceHolder.db().removeFromBlacklist(message.getReplyToMessage().getFrom().getId(),
                 handler.blacklist);
         handler.sendMessage(chatId, "\uD83D\uDE38 " + message.getReplyToMessage().getFrom().getUserName() +
@@ -61,6 +65,8 @@ public class AdminHandler {
 
     public void owner() {
         setCurrentMessage();
+        if (!message.isReply())
+            return;
         if (handler.admins.contains(message.getReplyToMessage().getFrom().getId())) {
             return;
         }
@@ -72,6 +78,8 @@ public class AdminHandler {
     }
 
     public void remOwner() {
+        if (!message.isReply())
+            return;
         setCurrentMessage();
         ServiceHolder.db().removeFromAdmins(message.getReplyToMessage().getFrom().getId(),
                 handler.admins);
@@ -102,6 +110,8 @@ public class AdminHandler {
 
     public void getinfo() {
         setCurrentMessage();
+        if (!message.isReply())
+            return;
         handler.sendMessage(chatId, message.getReplyToMessage().toString());
     }
 
