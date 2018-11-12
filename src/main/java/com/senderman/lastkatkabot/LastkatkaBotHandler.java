@@ -169,6 +169,7 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
 
         } else if (command.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
+            delMessage(chatId, message.getMessageId());
             duelController.createNewDuel(chatId, message.getFrom());
             return null;
 
@@ -276,7 +277,6 @@ public class LastkatkaBotHandler extends BotHandler {
     }
 
     private boolean isFromAdmin(Message message) {
-        delMessage(message.getChatId(), message.getMessageId());
         return admins.contains(message.getFrom().getId());
     }
 
