@@ -105,8 +105,7 @@ public class LastkatkaBotHandler extends BotHandler {
         message = update.getMessage();
 
         // don't handle old messages
-        long currentTime = System.currentTimeMillis() / 1000;
-        if (message.getDate() + 120 < currentTime) {
+        if (message.getDate() + 120 < System.currentTimeMillis() / 1000) {
             return null;
         }
 
@@ -149,6 +148,9 @@ public class LastkatkaBotHandler extends BotHandler {
         }
 
         if (!message.hasText())
+            return null;
+
+        if (!message.isCommand())
             return null;
 
         var text = message.getText();

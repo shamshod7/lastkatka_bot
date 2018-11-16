@@ -76,10 +76,10 @@ public class UsercommandsHandler {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                         .setText("Принять")
-                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_OK + text.replace("/cake", " ")),
+                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_OK + text.replace("/cake", "")),
                 new InlineKeyboardButton()
                         .setText("Отказаться")
-                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_NOT + text.replace("/cake", " ")));
+                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_NOT + text.replace("/cake", "")));
         markup.setKeyboard(List.of(row1));
         handler.delMessage(chatId, messageId);
         handler.sendMessage(new SendMessage()
