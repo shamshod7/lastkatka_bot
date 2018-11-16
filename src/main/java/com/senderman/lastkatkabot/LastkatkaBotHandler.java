@@ -36,9 +36,9 @@ public class LastkatkaBotHandler extends BotHandler {
 
     LastkatkaBotHandler(BotConfig botConfig) {
         this.botConfig = botConfig;
+        sendMessage((long) LastkatkaBot.mainAdmin, "Инициализация...");
 
         // settings
-        sendMessage((long) LastkatkaBot.mainAdmin, "Инициализация...");
         admins = new HashSet<>();
         blacklist = new HashSet<>();
         ServiceHolder.setDBService(new MongoDBHandler());
@@ -53,7 +53,7 @@ public class LastkatkaBotHandler extends BotHandler {
         var envAllowed = botConfig.getAllowedChats();
         if (envAllowed != null) {
             for (String allowedChat : envAllowed.split(" ")) {
-                allowedChats.add(Long.valueOf(allowedChat));
+                allowedChats.add(Long.parseLong(allowedChat));
             }
         }
 

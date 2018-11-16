@@ -76,10 +76,10 @@ public class UsercommandsHandler {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                         .setText("Принять")
-                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_OK + text.replace("/cake ", "")),
+                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_OK + text.replace("/cake", " ")),
                 new InlineKeyboardButton()
                         .setText("Отказаться")
-                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_NOT + text.replace("/cake ", "")));
+                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_NOT + text.replace("/cake", " ")));
         markup.setKeyboard(List.of(row1));
         handler.delMessage(chatId, messageId);
         handler.sendMessage(new SendMessage()
@@ -93,7 +93,18 @@ public class UsercommandsHandler {
 
     public void dice() {
         setCurrentMessage();
-        int random = ThreadLocalRandom.current().nextInt(1, 7);
+        int random;
+        String[] args = text.split("\\s+", 3);
+        if (args.length == 3) {
+            try {
+                int min = Integer.parseInt(args[1]);
+                int max = Integer.parseInt(args[2]);
+                random = ThreadLocalRandom.current().nextInt(min, max + 1);
+            } catch (NumberFormatException nfe) {
+                random = ThreadLocalRandom.current().nextInt(1, 7);
+            }
+        } else
+            random = ThreadLocalRandom.current().nextInt(1, 7);
         handler.sendMessage(new SendMessage()
                 .setChatId(chatId)
                 .setText("\uD83C\uDFB2 Кубик брошен. Результат: " + random)
@@ -117,9 +128,9 @@ public class UsercommandsHandler {
         }
         handler.delMessage(chatId, messageId);
     }
-    
+
     public void feedback() {
-    	setCurrentMessage();
+        setCurrentMessage();
         String sb = "<b>Багрепорт</b>\n\nОт: " +
                 "<a href=\"tg://user?id=" +
                 message.getFrom().getId() +
