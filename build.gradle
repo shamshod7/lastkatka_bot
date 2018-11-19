@@ -12,10 +12,13 @@ sourceCompatibility = 11
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://annimon.com/maven2'
+    }
 }
 
 dependencies {
-    implementation 'com.annimon:tgbots-module:0.2'
+    implementation 'com.annimon:tgbots-module:0.3.9'
     implementation 'org.mongodb:mongo-java-driver:3.8.2'
 }
 

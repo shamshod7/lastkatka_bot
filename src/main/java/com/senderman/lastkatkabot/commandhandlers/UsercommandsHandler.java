@@ -1,5 +1,6 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
+import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import com.senderman.lastkatkabot.ServiceHolder;
@@ -46,16 +47,13 @@ public class UsercommandsHandler {
 
     public void action() {
         setCurrentMessage();
-        handler.delMessage(chatId, messageId);
-        if (handler.isInBlacklist(message))
-            return;
-
+        Methods.deleteMessage(chatId, messageId).call(handler);
         if (text.split("\\s+").length == 1) {
             return;
         }
 
         var action = text.replace("/action", "");
-        var sm = new SendMessage(chatId, name + action);
+        var sm = Methods.sendMessage(chatId, name + action);
         if (message.isReply()) {
             sm.setReplyToMessageId(message.getReplyToMessage().getMessageId());
         }
@@ -64,8 +62,8 @@ public class UsercommandsHandler {
 
     public void payRespects() { // /f
         setCurrentMessage();
-        handler.delMessage(chatId, messageId);
-        handler.sendMessage(new SendMessage()
+        Methods.deleteMessage(chatId, messageId).call(handler);
+        handler.sendMessage(Methods.sendMessage()
                 .setChatId(chatId)
                 .setText("\uD83D\uDD6F Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName())
                 .setReplyMarkup(getMarkupForPayingRespects()));
@@ -81,8 +79,8 @@ public class UsercommandsHandler {
                         .setText("Отказаться")
                         .setCallbackData(LastkatkaBot.CALLBACK_CAKE_NOT + text.replace("/cake", "")));
         markup.setKeyboard(List.of(row1));
-        handler.delMessage(chatId, messageId);
-        handler.sendMessage(new SendMessage()
+        Methods.deleteMessage(chatId, messageId).call(handler);
+        handler.sendMessage(Methods.sendMessage()
                 .setChatId(chatId)
                 .setText("\uD83C\uDF82 " + message.getReplyToMessage().getFrom().getFirstName()
                         + ", пользователь " + message.getFrom().getFirstName()
@@ -105,7 +103,7 @@ public class UsercommandsHandler {
             }
         } else
             random = ThreadLocalRandom.current().nextInt(1, 7);
-        handler.sendMessage(new SendMessage()
+        handler.sendMessage(Methods.sendMessage()
                 .setChatId(chatId)
                 .setText("\uD83C\uDFB2 Кубик брошен. Результат: " + random)
                 .setReplyToMessageId(messageId));
@@ -126,7 +124,7 @@ public class UsercommandsHandler {
         } catch (TelegramApiException e) {
             BotLogger.error("PINMESSAGE", e);
         }
-        handler.delMessage(chatId, messageId);
+        Methods.deleteMessage(chatId, messageId).call(handler);
     }
 
     public void feedback() {
@@ -148,7 +146,7 @@ public class UsercommandsHandler {
             sb.append(handler.botConfig.getAdminhelp());
         }
         if (message.isUserMessage()) {
-            var sm = new SendMessage()
+            var sm = Methods.sendMessage()
                     .setChatId(chatId)
                     .setText(sb.toString());
             handler.sendMessage(sm);
@@ -157,11 +155,11 @@ public class UsercommandsHandler {
                 handler.execute(new SendMessage((long) message.getFrom().getId(), sb.toString())
                         .setParseMode(ParseMode.HTML));
             } catch (TelegramApiException e) {
-                handler.sendMessage(new SendMessage(chatId, "Пожалуйста, начните диалог со мной в лс, чтобы я мог отправить вам помощь")
+                handler.sendMessage(Methods.sendMessage(chatId, "Пожалуйста, начните диалог со мной в лс, чтобы я мог отправить вам помощь")
                         .setReplyToMessageId(messageId));
                 return;
             }
-            handler.sendMessage(new SendMessage(chatId, "✅ Помощь была отправлена вам в лс")
+            handler.sendMessage(Methods.sendMessage(chatId, "✅ Помощь была отправлена вам в лс")
                     .setReplyToMessageId(messageId));
         }
     }

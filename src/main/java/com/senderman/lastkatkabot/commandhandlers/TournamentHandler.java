@@ -1,14 +1,12 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
+import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +46,7 @@ public class TournamentHandler {
                         .setText("Группа турнира")
                         .setUrl("https://t.me/" + handler.botConfig.getTourgroupname().replace("@", "")));
         markup.setKeyboard(List.of(row1, row2));
-        var toVegans = new SendMessage()
+        var toVegans = Methods.sendMessage()
                 .setChatId(handler.botConfig.getLastvegan())
                 .setText("\uD83D\uDCE3 <b>Турнир активирован!</b>\n\n"
                         + String.join(", ", params[1], params[2],
@@ -56,7 +54,7 @@ public class TournamentHandler {
                 .setReplyMarkup(markup);
         handler.sendMessage(toVegans);
 
-        var toChannel = new SendMessage()
+        var toChannel = Methods.sendMessage()
                 .setChatId(handler.botConfig.getTourchannel())
                 .setText("<b>" + params[3].replace("_", " ") + "</b>\n\n"
                         + params[1] + " vs " + params[2]);
@@ -83,11 +81,7 @@ public class TournamentHandler {
 
     private void restrictMembers(long groupId) {
         for (Integer membersId : handler.membersIds) {
-            try {
-                handler.execute(new RestrictChatMember(groupId, membersId));
-            } catch (TelegramApiException e) {
-                BotLogger.error("RESTRICT", e);
-            }
+            handler.call(new RestrictChatMember(groupId, membersId));
         }
         handler.members.clear();
         handler.membersIds.clear();
@@ -101,9 +95,7 @@ public class TournamentHandler {
             return;
         }
         String score = getScore(params);
-        handler.sendMessage(new SendMessage()
-                .setChatId(handler.botConfig.getTourchannel())
-                .setText(score));
+        handler.sendMessage(Methods.sendMessage(handler.botConfig.getTourchannel(), score));
     }
 
     public void win() {
@@ -117,24 +109,22 @@ public class TournamentHandler {
         restrictMembers(handler.botConfig.getTourgroup());
         isEnabled = false;
         String goingTo = (params[5].equals("over")) ? " выиграл турнир" : " выходит в " + params[5].replace("_", " ");
-        var toChannel = new SendMessage()
+        handler.sendMessage(Methods.sendMessage()
                 .setChatId(handler.botConfig.getTourchannel())
-                .setText(score + "\n\n" + params[1] + "<b>" + goingTo + "!</b>");
-        handler.sendMessage(toChannel);
+                .setText(score + "\n\n" + params[1] + "<b>" + goingTo + "!</b>"));
 
-        var toVegans = new SendMessage()
+        handler.sendMessage(Methods.sendMessage()
                 .setChatId(handler.botConfig.getLastvegan())
                 .setText("\uD83D\uDCE3 <b>Раунд завершен.\n\nПобедитель:</b> "
                         + params[1] + "\nБолельщики, посетите "
-                        + handler.botConfig.getTourchannel() + ",  чтобы узнать подробности");
-        handler.sendMessage(toVegans);
+                        + handler.botConfig.getTourchannel() + ",  чтобы узнать подробности"));
     }
 
     public void rt() {
         setCurrentMessage();
         restrictMembers(handler.botConfig.getTourgroup());
         isEnabled = false;
-        handler.sendMessage(new SendMessage(handler.botConfig.getLastvegan(),
-                "\uD83D\uDEAB <b>Турнир отменен из-за непредвиденных обстоятельств!</b>"));
+        handler.sendMessage(handler.botConfig.getLastvegan(),
+                "\uD83D\uDEAB <b>Турнир отменен из-за непредвиденных обстоятельств!</b>");
     }
 }

@@ -1,18 +1,15 @@
 package com.senderman.lastkatkabot;
 
 import com.annimon.tgbotsmodule.BotHandler;
+import com.annimon.tgbotsmodule.api.methods.Methods;
+import com.annimon.tgbotsmodule.api.methods.send.SendMessageMethod;
 import com.senderman.lastkatkabot.commandhandlers.*;
+import org.jetbrains.annotations.NotNull;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.HashSet;
 import java.util.List;
@@ -73,7 +70,7 @@ public class LastkatkaBotHandler extends BotHandler {
     }
 
     @Override
-    public BotApiMethod onUpdate(Update update) {
+    public BotApiMethod onUpdate(@NotNull Update update) {
 
         // first we will handle callbacks
         if (update.hasCallbackQuery()) {
@@ -114,11 +111,7 @@ public class LastkatkaBotHandler extends BotHandler {
         // leave from groups that not in list
         if (!message.isUserMessage() && !allowedChats.contains(chatId)) {
             sendMessage(chatId, "Какая-то левая конфа. СЛАВА ЛАСТКАТКЕ!");
-            try {
-                execute(new LeaveChat().setChatId(chatId));
-            } catch (TelegramApiException e) {
-                BotLogger.error("LEAVE", e);
-            }
+            Methods.leaveChat(chatId).call(this);
             return null;
         }
 
@@ -128,15 +121,10 @@ public class LastkatkaBotHandler extends BotHandler {
             if (message.getChatId() == botConfig.getTourgroup()) {
                 for (User user : newMembers) {
                     if (!membersIds.contains(user.getId())) {
-                        var rcm = new RestrictChatMember()
+                        Methods.Administration.restrictChatMember()
                                 .setChatId(botConfig.getTourgroup())
                                 .setUserId(user.getId())
-                                .setCanSendMessages(false);
-                        try {
-                            execute(rcm);
-                        } catch (TelegramApiException e) {
-                            BotLogger.error("RESTRICT", e);
-                        }
+                                .setCanSendMessages(false).call(this);
                     }
                 }
             } else { // Say hello to new groups
@@ -170,8 +158,8 @@ public class LastkatkaBotHandler extends BotHandler {
             usercommands.pinlist();
             return null;
 
-        } else if (command.startsWith("/duel") && !message.isUserMessage() && !isInBlacklist(message)) {
-            delMessage(chatId, message.getMessageId());
+        } else if (command.startsWith("/duel") && !message.isUserMessage() && isNotInBlacklist(message)) {
+            Methods.deleteMessage(chatId, message.getMessageId()).call(this);
             duelController.createNewDuel(chatId, message.getFrom());
             return null;
 
@@ -183,8 +171,10 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
         }
 
+        boolean commandHandled = true;
+
         // users in blacklist are not allowed to use this commands
-        if (!isInBlacklist(message)) {
+        if (isNotInBlacklist(message)) {
             switch (command) {
                 case "/action":
                     usercommands.action();
@@ -204,8 +194,13 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/dstats":
                     usercommands.dstats();
                     break;
+                default:
+                    commandHandled = false;
+                    break;
             }
         }
+        if (commandHandled)
+            return null;
 
         // commands for main admin only
         if (message.getFrom().getId().equals(LastkatkaBot.mainAdmin)) {
@@ -222,8 +217,13 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/announce":
                     adminPanel.announce();
                     break;
+                default:
+                    commandHandled = false;
+                    break;
             }
         }
+        if (commandHandled)
+            return null;
 
         // commands for all admins
         if (isFromAdmin(message)) {
@@ -249,8 +249,13 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/critical":
                     duelController.critical(chatId);
                     break;
+                default:
+                    commandHandled = false;
+                    break;
             }
         }
+        if (commandHandled)
+            return null;
 
         // commands for tournament
         if (TournamentHandler.isEnabled && isFromAdmin(message)) {
@@ -262,7 +267,10 @@ public class LastkatkaBotHandler extends BotHandler {
                     tournament.win();
                     break;
                 case "/rt":
-                    tournament.win();
+                    tournament.rt();
+                default:
+                    commandHandled = false;
+                    break;
             }
         }
         return null;
@@ -282,12 +290,12 @@ public class LastkatkaBotHandler extends BotHandler {
         return admins.contains(message.getFrom().getId());
     }
 
-    public boolean isInBlacklist(Message message) {
+    private boolean isNotInBlacklist(Message message) {
         boolean result = blacklist.contains(message.getFrom().getId());
         if (result) {
-            delMessage(message.getChatId(), message.getMessageId());
+            Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(this);
         }
-        return result;
+        return !result;
     }
 
     private boolean isFromWwBot(Message message) {
@@ -295,32 +303,15 @@ public class LastkatkaBotHandler extends BotHandler {
                 message.getReplyToMessage().getText().contains("#players");
     }
 
-    public void sendMessage(Long chatId, String message) {
-        sendMessage(new SendMessage(chatId, message));
+    public void sendMessage(long chatId, String text) {
+        sendMessage(Methods.sendMessage(chatId, text));
     }
 
-    public Message sendMessage(SendMessage message) {
-        message.enableHtml(true);
-        message.disableWebPagePreview();
-        Message result = null;
-        try {
-            result = execute(message);
-        } catch (TelegramApiException e) {
-            BotLogger.error("SEND", e);
-        }
-        return result;
-    }
-
-    public void delMessage(Long chatId, Integer messageId) {
-        delMessage(new DeleteMessage(chatId, messageId));
-    }
-
-    private void delMessage(DeleteMessage message) {
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            BotLogger.error("DELETE", e);
-        }
+    public Message sendMessage(SendMessageMethod sm) {
+        return sm
+                .disableWebPagePreview()
+                .enableHtml(true)
+                .call(this);
     }
 
     public Message getCurrentMessage() {

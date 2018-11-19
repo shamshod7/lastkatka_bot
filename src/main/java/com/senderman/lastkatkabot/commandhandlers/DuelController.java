@@ -1,19 +1,14 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
+import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import com.senderman.lastkatkabot.ServiceHolder;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +27,7 @@ public class DuelController {
     }
 
     public void createNewDuel(long chatId, User player1) {
-        var sm = new SendMessage()
+        var sm = Methods.sendMessage()
                 .setChatId(chatId)
                 .setText("\uD83C\uDFAF Набор на дуэль! Жмите кнопку ниже\nДжойнулись:\n" + player1.getFirstName());
         var duelMessageId = handler.sendMessage(sm).getMessageId();
@@ -111,28 +106,20 @@ public class DuelController {
     }
 
     private void setReplyMarkup(long chatId, int duelMessageId) {
-        var em = new EditMessageReplyMarkup()
+        Methods.editMessageReplyMarkup()
                 .setChatId(chatId)
                 .setMessageId(duelMessageId)
-                .setReplyMarkup(getMarkupForDuel());
-        try {
-            handler.execute(em);
-        } catch (TelegramApiException e) {
-            BotLogger.error("CREATE DUEL", e.toString());
-        }
+                .setReplyMarkup(getMarkupForDuel())
+                .call(handler);
     }
 
     private void editDuelMessage(Duel duel, String text) {
-        var edt = new EditMessageText()
+        Methods.editMessageText()
                 .setChatId(duel.chatId)
                 .setMessageId(duel.messageId)
                 .setText(text)
-                .setParseMode(ParseMode.HTML);
-        try {
-            handler.execute(edt);
-        } catch (TelegramApiException e) {
-            BotLogger.error("EDIT_DUEL", e.toString());
-        }
+                .setParseMode(ParseMode.HTML)
+                .call(handler);
     }
 
     private InlineKeyboardMarkup getMarkupForDuel() {
@@ -145,15 +132,10 @@ public class DuelController {
     }
 
     private void answerCallbackQuery(CallbackQuery query, String text, boolean showAsAlert) {
-        var acq = new AnswerCallbackQuery()
+        Methods.answerCallbackQuery()
                 .setText(text)
                 .setCallbackQueryId(query.getId())
                 .setShowAlert(showAsAlert);
-        try {
-            handler.execute(acq);
-        } catch (TelegramApiException e) {
-            BotLogger.error("ANSWER CALLBACK", e.toString());
-        }
     }
 
     private ChatDuels getChatDuels(long chatId) {
