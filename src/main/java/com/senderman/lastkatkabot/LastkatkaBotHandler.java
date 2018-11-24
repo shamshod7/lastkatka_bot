@@ -22,18 +22,11 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Integer> admins;
     public final Set<Long> allowedChats;
     public final Set<Integer> blacklist;
-    private final UsercommandsHandler usercommands;
     private final DuelController duelController;
-    public Set<String> members;
-    public Set<Integer> membersIds;
-    private TournamentHandler tournament;
-    private AdminHandler adminPanel;
-
-    private Message message;
 
     LastkatkaBotHandler(BotConfig botConfig) {
         this.botConfig = botConfig;
-        sendMessage((long) LastkatkaBot.mainAdmin, "Инициализация...");
+        sendMessage((long) botConfig.getMainAdmin(), "Инициализация...");
 
         // settings
         admins = new HashSet<>();
@@ -53,20 +46,10 @@ public class LastkatkaBotHandler extends BotHandler {
                 allowedChats.add(Long.parseLong(allowedChat));
             }
         }
-
-        // handlers
-        adminPanel = new AdminHandler(this);
-        usercommands = new UsercommandsHandler(this);
         duelController = new DuelController(this);
 
         // notify main admin about launch
-        sendMessage((long) LastkatkaBot.mainAdmin, "Бот готов к работе!");
-    }
-
-    public static String getValidName(Message message) {
-        return message.getFrom().getFirstName()
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
+        sendMessage((long) botConfig.getMainAdmin(), "Бот готов к работе!");
     }
 
     @Override
@@ -77,16 +60,16 @@ public class LastkatkaBotHandler extends BotHandler {
             CallbackQuery query = update.getCallbackQuery();
             String data = query.getData();
             if (data.startsWith(LastkatkaBot.CALLBACK_CAKE_OK)) {
-                new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_OK);
+                CallbackHandler.cake(query, this, CallbackHandler.CAKE_ACTIONS.CAKE_OK);
             } else if (data.startsWith(LastkatkaBot.CALLBACK_CAKE_NOT)) {
-                new CallbackHandler(this, query).cake(CallbackHandler.CAKE_ACTIONS.CAKE_NOT);
+                CallbackHandler.cake(query, this, CallbackHandler.CAKE_ACTIONS.CAKE_NOT);
             } else {
                 switch (data) {
                     case LastkatkaBot.CALLBACK_REGISTER_IN_TOURNAMENT:
-                        new CallbackHandler(this, query).registerInTournament();
+                        CallbackHandler.registerInTournament(query, this);
                         break;
                     case LastkatkaBot.CALLBACK_PAY_RESPECTS:
-                        new CallbackHandler(this, query).payRespects();
+                        CallbackHandler.payRespects(query, this);
                         break;
                     case LastkatkaBot.JOIN_DUEL:
                         duelController.joinDuel(query);
@@ -99,7 +82,7 @@ public class LastkatkaBotHandler extends BotHandler {
         if (!update.hasMessage())
             return null;
 
-        message = update.getMessage();
+        Message message = update.getMessage();
 
         // don't handle old messages
         if (message.getDate() + 120 < System.currentTimeMillis() / 1000) {
@@ -120,7 +103,7 @@ public class LastkatkaBotHandler extends BotHandler {
         if (newMembers != null) {
             if (message.getChatId() == botConfig.getTourgroup()) {
                 for (User user : newMembers) {
-                    if (!membersIds.contains(user.getId())) {
+                    if (TournamentHandler.membersIds == null || !TournamentHandler.membersIds.contains(user.getId())) {
                         Methods.Administration.restrictChatMember()
                                 .setChatId(botConfig.getTourgroup())
                                 .setUserId(user.getId())
@@ -153,9 +136,9 @@ public class LastkatkaBotHandler extends BotHandler {
         var command = text.split("\\s+", 2)[0].toLowerCase(Locale.ENGLISH).replace("@" + getBotUsername(), "");
         if (command.contains("@"))
             return null;
-        // TODO: убрать все названия команд из методов
+
         if (command.startsWith("/pinlist") && isFromWwBot(message)) {
-            usercommands.pinlist();
+            UsercommandsHandler.pinlist(message, this);
             return null;
 
         } else if (command.startsWith("/duel") && !message.isUserMessage() && isNotInBlacklist(message)) {
@@ -164,113 +147,93 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
 
         } else if (command.startsWith("/help")) {
-            usercommands.help();
+            UsercommandsHandler.help(message, this);
             return null;
         } else if (command.startsWith("/setup") && isFromAdmin(message) && !TournamentHandler.isEnabled) {
-            tournament = new TournamentHandler(this);
+            TournamentHandler.setup(message, this);
             return null;
         }
-
-        boolean commandHandled = true;
 
         // users in blacklist are not allowed to use this commands
         if (isNotInBlacklist(message)) {
             switch (command) {
                 case "/action":
-                    usercommands.action();
+                    UsercommandsHandler.action(message, this);
                     break;
                 case "/f":
-                    usercommands.payRespects();
+                    UsercommandsHandler.payRespects(message, this);
                     break;
                 case "/dice":
-                    usercommands.dice();
+                    UsercommandsHandler.dice(message, this);
                     break;
                 case "/cake":
-                    usercommands.cake();
+                    UsercommandsHandler.cake(message, this);
                     break;
                 case "/feedback":
-                    usercommands.feedback();
+                    UsercommandsHandler.feedback(message, this);
                     break;
                 case "/dstats":
-                    usercommands.dstats();
-                    break;
-                default:
-                    commandHandled = false;
+                    UsercommandsHandler.dstats(message, this);
                     break;
             }
         }
-        if (commandHandled)
-            return null;
 
         // commands for main admin only
-        if (message.getFrom().getId().equals(LastkatkaBot.mainAdmin)) {
+        if (message.getFrom().getId().equals(botConfig.getMainAdmin())) {
             switch (command) {
                 case "/owner":
-                    adminPanel.owner();
+                    AdminHandler.owner(message, this);
                     break;
                 case "/remowner":
-                    adminPanel.remOwner();
+                    AdminHandler.remOwner(message, this);
                     break;
                 case "/update":
-                    adminPanel.update();
+                    AdminHandler.update(message, this);
                     break;
                 case "/announce":
-                    adminPanel.announce();
-                    break;
-                default:
-                    commandHandled = false;
+                    AdminHandler.announce(message, this);
                     break;
             }
         }
-        if (commandHandled)
-            return null;
 
         // commands for all admins
         if (isFromAdmin(message)) {
             switch (command) {
                 case "/owners":
-                    adminPanel.listOwners();
+                    AdminHandler.listOwners(message, this);
                     break;
                 case "/badneko":
-                    adminPanel.badneko();
+                    AdminHandler.badneko(message, this);
                     break;
                 case "/goodneko":
-                    adminPanel.goodneko();
+                    AdminHandler.goodneko(message, this);
                     break;
                 case "/nekos":
-                    adminPanel.nekos();
+                    AdminHandler.nekos(message, this);
                     break;
                 case "/loveneko":
-                    adminPanel.loveneko();
+                    AdminHandler.loveneko(message, this);
                     break;
                 case "/getinfo":
-                    adminPanel.getinfo();
+                    AdminHandler.getinfo(message, this);
                     break;
                 case "/critical":
                     duelController.critical(chatId);
                     break;
-                default:
-                    commandHandled = false;
-                    break;
             }
         }
-        if (commandHandled)
-            return null;
 
         // commands for tournament
         if (TournamentHandler.isEnabled && isFromAdmin(message)) {
             switch (command) {
                 case "/score":
-                    tournament.score();
+                    TournamentHandler.score(message, this);
                     break;
                 case "/win":
-                    tournament.win();
+                    TournamentHandler.win(message, this);
                     break;
                 case "/rt":
-                    tournament.rt();
-                default:
-                    commandHandled = false;
-                    break;
+                    TournamentHandler.rt(this);
             }
         }
         return null;
@@ -312,9 +275,5 @@ public class LastkatkaBotHandler extends BotHandler {
                 .disableWebPagePreview()
                 .enableHtml(true)
                 .call(this);
-    }
-
-    public Message getCurrentMessage() {
-        return message;
     }
 }

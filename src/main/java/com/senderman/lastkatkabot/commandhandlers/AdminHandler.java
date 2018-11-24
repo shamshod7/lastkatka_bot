@@ -9,27 +9,7 @@ import org.telegram.telegrambots.meta.logging.BotLogger;
 
 public class AdminHandler {
 
-    private final LastkatkaBotHandler handler;
-    private Message message;
-    private long chatId;
-    private int messageId;
-    private String text;
-    private String name;
-
-    public AdminHandler(LastkatkaBotHandler handler) {
-        this.handler = handler;
-    }
-
-    private void setCurrentMessage() {
-        this.message = handler.getCurrentMessage();
-        this.chatId = message.getChatId();
-        this.messageId = message.getMessageId();
-        this.text = message.getText();
-        this.name = LastkatkaBotHandler.getValidName(message);
-    }
-
-    public void badneko() {
-        setCurrentMessage();
+    public static void badneko(Message message, LastkatkaBotHandler handler) {
         if (!message.isReply())
             return;
         if (handler.blacklist.contains(message.getReplyToMessage().getFrom().getId())) {
@@ -38,33 +18,29 @@ public class AdminHandler {
         ServiceHolder.db().addToBlacklist(message.getReplyToMessage().getFrom().getId(),
                 message.getReplyToMessage().getFrom().getFirstName(),
                 handler.blacklist);
-        handler.sendMessage(chatId, "\uD83D\uDE3E " + message.getReplyToMessage().getFrom().getUserName() +
+        handler.sendMessage(message.getChatId(), "\uD83D\uDE3E " + message.getReplyToMessage().getFrom().getUserName() +
                 " - плохая киса!");
     }
 
-    public void goodneko() {
-        setCurrentMessage();
+    public static void goodneko(Message message, LastkatkaBotHandler handler) {
         if (!message.isReply())
             return;
         ServiceHolder.db().removeFromBlacklist(message.getReplyToMessage().getFrom().getId(),
                 handler.blacklist);
-        handler.sendMessage(chatId, "\uD83D\uDE38 " + message.getReplyToMessage().getFrom().getUserName() +
+        handler.sendMessage(message.getChatId(), "\uD83D\uDE38 " + message.getReplyToMessage().getFrom().getUserName() +
                 " хорошая киса!");
     }
 
-    public void nekos() {
-        setCurrentMessage();
-        handler.sendMessage(chatId, ServiceHolder.db().getBlackList());
+    public static void nekos(Message message, LastkatkaBotHandler handler) {
+        handler.sendMessage(message.getChatId(), ServiceHolder.db().getBlackList());
     }
 
-    public void loveneko() {
-        setCurrentMessage();
+    public static void loveneko(Message message, LastkatkaBotHandler handler) {
         ServiceHolder.db().resetBlackList(handler.blacklist);
-        handler.sendMessage(chatId, "❤️ Все кисы - хорошие!");
+        handler.sendMessage(message.getChatId(), "❤️ Все кисы - хорошие!");
     }
 
-    public void owner() {
-        setCurrentMessage();
+    public static void owner(Message message, LastkatkaBotHandler handler) {
         if (!message.isReply())
             return;
         if (handler.admins.contains(message.getReplyToMessage().getFrom().getId())) {
@@ -73,30 +49,27 @@ public class AdminHandler {
         ServiceHolder.db().addToAdmins(message.getReplyToMessage().getFrom().getId(),
                 message.getReplyToMessage().getFrom().getFirstName(),
                 handler.admins);
-        handler.sendMessage(chatId, "✅" + message.getReplyToMessage().getFrom().getFirstName() +
+        handler.sendMessage(message.getChatId(), "✅" + message.getReplyToMessage().getFrom().getFirstName() +
                 " теперь мой хозяин!");
     }
 
-    public void remOwner() {
+    public static void remOwner(Message message, LastkatkaBotHandler handler) {
         if (!message.isReply())
             return;
-        setCurrentMessage();
         ServiceHolder.db().removeFromAdmins(message.getReplyToMessage().getFrom().getId(),
                 handler.admins);
-        handler.sendMessage(chatId, "\uD83D\uDEAB " + message.getReplyToMessage().getFrom().getFirstName() +
+        handler.sendMessage(message.getChatId(), "\uD83D\uDEAB " + message.getReplyToMessage().getFrom().getFirstName() +
                 " больше не мой хозяин!");
     }
 
-    public void listOwners() {
-        setCurrentMessage();
-        handler.sendMessage(chatId, ServiceHolder.db().getAdmins());
+    public static void listOwners(Message message, LastkatkaBotHandler handler) {
+        handler.sendMessage(message.getChatId(), ServiceHolder.db().getAdmins());
     }
 
-    public void update() {
-        setCurrentMessage();
-        String[] params = text.split("\n");
+    public static void update(Message message, LastkatkaBotHandler handler) {
+        String[] params = message.getText().split("\n");
         if (params.length < 2) {
-            handler.sendMessage(chatId, "Неверное количество аргументов!");
+            handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
             return;
         }
         var update = new StringBuilder().append("\uD83D\uDCE3 <b>ВАЖНОЕ ОБНОВЛЕНИЕ:</b> \n\n");
@@ -108,17 +81,16 @@ public class AdminHandler {
         }
     }
 
-    public void getinfo() {
-        setCurrentMessage();
+    public static void getinfo(Message message, LastkatkaBotHandler handler) {
         if (!message.isReply())
             return;
-        handler.sendMessage(chatId, message.getReplyToMessage().toString());
+        handler.sendMessage(message.getChatId(), message.getReplyToMessage().toString());
     }
 
-    public void announce() {
-        setCurrentMessage();
-        handler.sendMessage(chatId, "Рассылка запущена. На время рассылки бот будет недоступен");
-        text = "\uD83D\uDCE3 <b>Объявление</b>\n\n" + text.replace("/announce ", "");
+    public static void announce(Message message, LastkatkaBotHandler handler) {
+        handler.sendMessage(message.getChatId(), "Рассылка запущена. На время рассылки бот будет недоступен");
+        var text = message.getText();
+        text = "\uD83D\uDCE3 <b>Объявление</b>\n\n" + text.split("\\s+", 2)[1];
         var players = ServiceHolder.db().getPlayersIds();
         int counter = 0;
         for (long player : players) {
@@ -129,6 +101,6 @@ public class AdminHandler {
                 BotLogger.error("ANNOUNCE", e.toString());
             }
         }
-        handler.sendMessage(chatId, "Объявление получили " + counter + " человек");
+        handler.sendMessage(message.getChatId(), "Объявление получили " + counter + " человек");
     }
 }

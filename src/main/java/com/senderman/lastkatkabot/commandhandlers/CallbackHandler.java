@@ -4,85 +4,64 @@ import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Message;
 
 public class CallbackHandler {
-    private final LastkatkaBotHandler handler;
-    private CallbackQuery query;
-    private String id;
-    private Message message;
-    private long chatId;
-    private int messageId;
-    private String text;
-    private String name;
 
-    public CallbackHandler(LastkatkaBotHandler handler, CallbackQuery query) {
-        this.handler = handler;
-        this.query = query;
-        this.id = query.getId();
-        this.message = query.getMessage();
-        this.chatId = message.getChatId();
-        this.messageId = message.getMessageId();
-        this.text = message.getText();
-        this.name = query.getFrom().getFirstName()
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
-    }
 
-    public void payRespects() {
-        if (text.contains(query.getFrom().getFirstName())) {
+    public static void payRespects(CallbackQuery query, LastkatkaBotHandler handler) {
+        if (query.getMessage().getText().contains(query.getFrom().getFirstName())) {
             Methods.answerCallbackQuery()
-                    .setCallbackQueryId(id)
+                    .setCallbackQueryId(query.getId())
                     .setText("You've already payed respects! (or you've tried to pay respects to yourself)")
                     .setShowAlert(true)
                     .call(handler);
             return;
         }
         Methods.answerCallbackQuery()
-                .setCallbackQueryId(id)
+                .setCallbackQueryId(query.getId())
                 .setText("You've payed respects")
                 .setShowAlert(true).call(handler);
         Methods.editMessageText()
-                .setChatId(chatId)
-                .setMessageId(message.getMessageId())
+                .setChatId(query.getMessage().getChatId())
+                .setMessageId(query.getMessage().getMessageId())
                 .setInlineMessageId(query.getInlineMessageId())
                 .setReplyMarkup(UsercommandsHandler.getMarkupForPayingRespects())
-                .setText(text + "\n" + query.getFrom().getFirstName() + " have payed respects")
+                .setText(query.getMessage().getText() + "\n" + query.getFrom().getFirstName() + " have payed respects")
                 .call(handler);
     }
 
-    public void cake(CAKE_ACTIONS actions) {
-        if (!query.getFrom().getId().equals(message.getReplyToMessage().getFrom().getId())) {
+    public static void cake(CallbackQuery query, LastkatkaBotHandler handler, CAKE_ACTIONS actions) {
+        if (!query.getFrom().getId().equals(query.getMessage().getReplyToMessage().getFrom().getId())) {
             Methods.answerCallbackQuery()
-                    .setCallbackQueryId(id)
+                    .setCallbackQueryId(query.getId())
                     .setText("Этот тортик не вам!")
                     .setShowAlert(true)
                     .call(handler);
             return;
         }
         var acq = Methods.answerCallbackQuery()
-                .setCallbackQueryId(id);
+                .setCallbackQueryId(query.getId());
         var emt = Methods.editMessageText()
-                .setChatId(chatId)
-                .setMessageId(messageId)
+                .setChatId(query.getMessage().getChatId())
+                .setMessageId(query.getMessage().getMessageId())
                 .setReplyMarkup(null);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("n p u я m н o r o  a n n e m u m a");
-            emt.setText("\uD83C\uDF82 " + name + " принял тортик "
+            emt.setText("\uD83C\uDF82 " + query.getFrom().getFirstName() + " принял тортик "
                     + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, ""));
         } else {
             acq.setText("Ну и ладно");
-            emt.setText("\uD83D\uDEAB \uD83C\uDF82 " + name + " отказался от тортика "
+            emt.setText("\uD83D\uDEAB \uD83C\uDF82 " + query.getFrom().getFirstName() + " отказался от тортика "
                     + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_NOT, ""));
         }
         acq.call(handler);
         emt.call(handler);
     }
 
-    public void registerInTournament() {
+    public static void registerInTournament(CallbackQuery query, LastkatkaBotHandler handler) {
         int memberId = query.getFrom().getId();
-        if (handler.members.contains(query.getFrom().getUserName()) && !handler.membersIds.contains(memberId)) {
-            handler.membersIds.add(memberId);
+        if (TournamentHandler.members.contains(query.getFrom().getUserName()) && !TournamentHandler.membersIds.contains(memberId)) {
+            TournamentHandler.membersIds.add(memberId);
             Methods.Administration.restrictChatMember()
                     .setChatId(handler.botConfig.getTourgroup())
                     .setUserId(memberId)
@@ -91,7 +70,7 @@ public class CallbackHandler {
                     .setCanSendOtherMessages(true)
                     .call(handler);
             Methods.answerCallbackQuery()
-                    .setCallbackQueryId(id)
+                    .setCallbackQueryId(query.getId())
                     .setText("✅ Вам даны права на отправку сообщений в группе турнира!")
                     .setShowAlert(true)
                     .call(handler);
@@ -103,7 +82,7 @@ public class CallbackHandler {
                             + " <b>получил доступ к игре</b>");
         } else {
             Methods.answerCallbackQuery()
-                    .setCallbackQueryId(id)
+                    .setCallbackQueryId(query.getId())
                     .setText("\uD83D\uDEAB Вы не являетесь участником текущего раунда!")
                     .setShowAlert(true)
                     .call(handler);

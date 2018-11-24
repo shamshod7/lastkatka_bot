@@ -3,37 +3,31 @@ package com.senderman.lastkatkabot.commandhandlers;
 import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TournamentHandler {
     public static boolean isEnabled = false;
-    private final LastkatkaBotHandler handler;
-    private Message message;
-    private long chatId;
-    private int messageId;
-    private String text;
-    private String name;
+    public static Set<Integer> membersIds;
+    static Set<String> members;
 
-    public TournamentHandler(LastkatkaBotHandler handler) {
-        this.handler = handler;
-        handler.members = new HashSet<>();
-        handler.membersIds = new HashSet<>();
-        setCurrentMessage();
-        var params = text.split("\\s+");
+    public static void setup(Message message, LastkatkaBotHandler handler) {
+        members = new HashSet<>();
+        membersIds = new HashSet<>();
+        var params = message.getText().split("\\s+");
         if (params.length != 4) {
-            handler.sendMessage(chatId, "Неверное количество аргументов!");
+            handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
             return;
         }
-        handler.members.clear();
-        handler.membersIds.clear();
-        handler.members.add(params[1].replace("@", ""));
-        handler.members.add(params[2].replace("@", ""));
+        members.clear();
+        membersIds.clear();
+        members.add(params[1].replace("@", ""));
+        members.add(params[2].replace("@", ""));
 
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(
@@ -62,15 +56,7 @@ public class TournamentHandler {
         isEnabled = true;
     }
 
-    private void setCurrentMessage() {
-        this.message = handler.getCurrentMessage();
-        this.chatId = message.getChatId();
-        this.messageId = message.getMessageId();
-        this.text = message.getText();
-        this.name = LastkatkaBotHandler.getValidName(message);
-    }
-
-    private String getScore(String[] params) {
+    private static String getScore(String[] params) {
         String player1 = params[1];
         String player2 = params[3];
         return player1 + " - " +
@@ -79,17 +65,16 @@ public class TournamentHandler {
                 params[4];
     }
 
-    private void restrictMembers(long groupId) {
-        for (Integer membersId : handler.membersIds) {
-            handler.call(new RestrictChatMember(groupId, membersId));
+    private static void restrictMembers(LastkatkaBotHandler handler) {
+        for (Integer memberId : membersIds) {
+            Methods.Administration.restrictChatMember(handler.botConfig.getTourgroup(), memberId).call(handler);
         }
-        handler.members.clear();
-        handler.membersIds.clear();
+        members.clear();
+        membersIds.clear();
     }
 
-    public void score() {
-        setCurrentMessage();
-        var params = text.split("\\s+");
+    public static void score(Message message, LastkatkaBotHandler handler) {
+        var params = message.getText().split("\\s+");
         if (params.length != 5) {
             handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
             return;
@@ -98,15 +83,14 @@ public class TournamentHandler {
         handler.sendMessage(Methods.sendMessage(handler.botConfig.getTourchannel(), score));
     }
 
-    public void win() {
-        setCurrentMessage();
-        var params = text.split("\\s+");
+    public static void win(Message message, LastkatkaBotHandler handler) {
+        var params = message.getText().split("\\s+");
         if (params.length != 6) {
             handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
             return;
         }
         var score = getScore(params);
-        restrictMembers(handler.botConfig.getTourgroup());
+        restrictMembers(handler);
         isEnabled = false;
         String goingTo = (params[5].equals("over")) ? " выиграл турнир" : " выходит в " + params[5].replace("_", " ");
         handler.sendMessage(Methods.sendMessage()
@@ -120,9 +104,8 @@ public class TournamentHandler {
                         + handler.botConfig.getTourchannel() + ",  чтобы узнать подробности"));
     }
 
-    public void rt() {
-        setCurrentMessage();
-        restrictMembers(handler.botConfig.getTourgroup());
+    public static void rt(LastkatkaBotHandler handler) {
+        restrictMembers(handler);
         isEnabled = false;
         handler.sendMessage(handler.botConfig.getLastvegan(),
                 "\uD83D\uDEAB <b>Турнир отменен из-за непредвиденных обстоятельств!</b>");
