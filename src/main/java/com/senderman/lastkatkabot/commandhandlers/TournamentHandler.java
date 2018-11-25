@@ -34,13 +34,13 @@ public class TournamentHandler {
         var checkMessage = Methods.sendMessage()
                 .setChatId(handler.botConfig.getLastvegan());
 
-        roundName = params[3];
+        roundName = params[3].strip();
 
         if (isTeamMode) {
             team1 = params[1].split("\\s+", 2)[0];
             team2 = params[2].split("\\s+", 2)[0];
-            params[1] = params[1].replace(team1, "");
-            params[2] = params[2].replace(team2, "");
+            params[1] = params[1].replace(team1, "").strip();
+            params[2] = params[2].replace(team2, "").strip();
             for (int i = 1; i < 3; i++) {
                 for (String member : params[i].split("\\s+")) {
                     members.add(member.replace("@", ""));
@@ -51,9 +51,10 @@ public class TournamentHandler {
                     "Тип игры: Командный\nРаунд: " + roundName + "\nКоманды: " +
                     team1 + ", " + team2 + "\nУчастники: " + getMembersAsString() +
                     "\n\n/go - подтвердить, /ct - отменить");
+
         } else {
-            members.add(params[1].replace("@", ""));
-            members.add(params[2].replace("@", ""));
+            members.add(params[1].replace("@", "").strip());
+            members.add(params[2].replace("@", "").strip());
             checkMessage.setText("⚠️ Проверьте правильность веденных данных\n" +
                     "Тип игры: Дуэль\nРаунд: " + roundName + "\nУчастники: " + getMembersAsString() +
                     "\n\n/go - подтвердить, /ct - отменить");
