@@ -81,7 +81,7 @@ public class TournamentHandler {
         var toVegans = Methods.sendMessage()
                 .setChatId(handler.botConfig.getLastvegan())
                 .setText("\uD83D\uDCE3 <b>Турнир активирован!</b>\n\n"
-                        + "@" + getMembersAsString() +
+                        + getMembersAsString() +
                         ", нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n")
                 .setReplyMarkup(markup);
         handler.sendMessage(toVegans);
@@ -101,7 +101,7 @@ public class TournamentHandler {
 
     public static void cancelTournament(LastkatkaBotHandler handler) {
         restrictMembers(handler);
-        Methods.sendMessage(handler.botConfig.getLastvegan(), "\uD83D\uDEAB Действие отменено");
+        Methods.sendMessage(handler.botConfig.getLastvegan(), "\uD83D\uDEAB Действие отменено").call(handler);
     }
 
     private static String getScore(String[] params) {
@@ -162,7 +162,7 @@ public class TournamentHandler {
     private static String getMembersAsString() {
         var memberList = new StringBuilder();
         for (String member : members) {
-            memberList.append(member).append(", ");
+            memberList.append("@").append(member).append(", ");
         }
         memberList.delete(memberList.lastIndexOf(","), memberList.length() - 1);
         return memberList.toString();
