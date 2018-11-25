@@ -226,7 +226,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/ct":
                     TournamentHandler.cancelTournament(this);
                     break;
-                case "/setuphelp":
+                case "/tourhelp":
                     AdminHandler.setupHelp(message, this);
                     break;
             }

@@ -63,7 +63,7 @@ public class TournamentHandler {
     }
 
     public static void startTournament(LastkatkaBotHandler handler) {
-        if (members.isEmpty())
+        if (members.isEmpty() || isEnabled)
             return;
 
         var markup = new InlineKeyboardMarkup();
@@ -101,6 +101,8 @@ public class TournamentHandler {
     }
 
     public static void cancelTournament(LastkatkaBotHandler handler) {
+        if (isEnabled)
+            return;
         restrictMembers(handler);
         Methods.sendMessage(handler.botConfig.getLastvegan(), "\uD83D\uDEAB Действие отменено").call(handler);
     }
