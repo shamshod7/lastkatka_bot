@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,13 +49,13 @@ public class TournamentHandler {
             }
             checkMessage.setText("⚠️ Проверьте правильность веденных данных\n" +
                     "Тип игры: Командный\nРаунд: " + roundName + "\nКоманды: " +
-                    team1 + ", " + team2 + "\nУчастники: " + String.join(", ", members +
+                    team1 + ", " + team2 + "\nУчастники: " + String.join(", ", Arrays.toString(members.toArray()) +
                     "\n\n/go - подтвердить, /ct - отменить"));
         } else {
             members.add(params[1].replace("@", ""));
             members.add(params[2].replace("@", ""));
             checkMessage.setText("⚠️ Проверьте правильность веденных данных\n" +
-                    "Тип игры: Дуэль\nРаунд: " + roundName + "\nУчастники: " + String.join(", ", members +
+                    "Тип игры: Дуэль\nРаунд: " + roundName + "\nУчастники: " + String.join(", ", Arrays.toString(members.toArray()) +
                     "\n\n/go - подтвердить, /ct - отменить"));
         }
         checkMessage.setReplyToMessageId(message.getMessageId()).call(handler);
@@ -78,7 +79,7 @@ public class TournamentHandler {
         var toVegans = Methods.sendMessage()
                 .setChatId(handler.botConfig.getLastvegan())
                 .setText("\uD83D\uDCE3 <b>Турнир активирован!</b>\n\n"
-                        + "@" + String.join(", @", members) +
+                        + "@" + String.join(", @", (String[]) members.toArray()) +
                         ", нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n")
                 .setReplyMarkup(markup);
         handler.sendMessage(toVegans);
