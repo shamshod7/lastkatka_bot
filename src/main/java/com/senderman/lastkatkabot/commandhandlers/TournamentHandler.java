@@ -7,7 +7,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,16 +46,17 @@ public class TournamentHandler {
                     members.add(member.replace("@", ""));
                 }
             }
+
             checkMessage.setText("⚠️ Проверьте правильность веденных данных\n" +
                     "Тип игры: Командный\nРаунд: " + roundName + "\nКоманды: " +
-                    team1 + ", " + team2 + "\nУчастники: " + String.join(", ", Arrays.toString(members.toArray()) +
-                    "\n\n/go - подтвердить, /ct - отменить"));
+                    team1 + ", " + team2 + "\nУчастники: " + getMembersAsString() +
+                    "\n\n/go - подтвердить, /ct - отменить");
         } else {
             members.add(params[1].replace("@", ""));
             members.add(params[2].replace("@", ""));
             checkMessage.setText("⚠️ Проверьте правильность веденных данных\n" +
-                    "Тип игры: Дуэль\nРаунд: " + roundName + "\nУчастники: " + String.join(", ", Arrays.toString(members.toArray()) +
-                    "\n\n/go - подтвердить, /ct - отменить"));
+                    "Тип игры: Дуэль\nРаунд: " + roundName + "\nУчастники: " + getMembersAsString() +
+                    "\n\n/go - подтвердить, /ct - отменить");
         }
         checkMessage.setReplyToMessageId(message.getMessageId()).call(handler);
     }
@@ -76,10 +76,12 @@ public class TournamentHandler {
                         .setText("Группа турнира")
                         .setUrl("https://t.me/" + handler.botConfig.getTourgroupname().replace("@", "")));
         markup.setKeyboard(List.of(row1, row2));
+
+
         var toVegans = Methods.sendMessage()
                 .setChatId(handler.botConfig.getLastvegan())
                 .setText("\uD83D\uDCE3 <b>Турнир активирован!</b>\n\n"
-                        + "@" + String.join(", @", (String[]) members.toArray()) +
+                        + "@" + getMembersAsString() +
                         ", нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n")
                 .setReplyMarkup(markup);
         handler.sendMessage(toVegans);
@@ -155,5 +157,14 @@ public class TournamentHandler {
         isEnabled = false;
         handler.sendMessage(handler.botConfig.getLastvegan(),
                 "\uD83D\uDEAB <b>Турнир отменен из-за непредвиденных обстоятельств!</b>");
+    }
+
+    private static String getMembersAsString() {
+        var memberList = new StringBuilder();
+        for (String member : members) {
+            memberList.append(member).append(", ");
+        }
+        memberList.delete(memberList.lastIndexOf(","), memberList.length() - 1);
+        return memberList.toString();
     }
 }
