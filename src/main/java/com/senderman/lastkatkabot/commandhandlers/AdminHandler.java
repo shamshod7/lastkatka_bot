@@ -1,5 +1,6 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
+import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import com.senderman.lastkatkabot.ServiceHolder;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -102,5 +103,9 @@ public class AdminHandler {
             }
         }
         handler.sendMessage(message.getChatId(), "Объявление получили " + counter + " человек");
+    }
+
+    public static void setupHelp(Message message, LastkatkaBotHandler handler) {
+        Methods.sendMessage(message.getChatId(), handler.botConfig.getSetuphelp()).call(handler);
     }
 }

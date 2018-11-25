@@ -38,6 +38,9 @@ public class BotConfig {
     @JsonProperty
     private String adminhelp;
 
+    @JsonProperty
+    private String setuphelp;
+
     public String getToken() {
         return token;
     }
@@ -134,10 +137,22 @@ public class BotConfig {
         this.adminhelp = adminhelp;
     }
 
+    public String getSetuphelp() {
+        return setuphelp;
+    }
+
+    public void setSetuphelp(String setuphelp) {
+        this.setuphelp = setuphelp;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("BotConfig{");
-        sb.append("lastkatka=").append(lastkatka);
+        sb.append("token='").append(token).append('\'');
+        sb.append(", username='").append(username).append('\'');
+        sb.append(", mainAdmin=").append(mainAdmin);
+        sb.append(", allowedChats='").append(allowedChats).append('\'');
+        sb.append(", lastkatka=").append(lastkatka);
         sb.append(", lastvegan=").append(lastvegan);
         sb.append(", tourgroup=").append(tourgroup);
         sb.append(", tourchannel='").append(tourchannel).append('\'');
@@ -145,6 +160,7 @@ public class BotConfig {
         sb.append(", wwBots=").append(wwBots);
         sb.append(", help='").append(help).append('\'');
         sb.append(", adminhelp='").append(adminhelp).append('\'');
+        sb.append(", setuphelp='").append(setuphelp).append('\'');
         sb.append('}');
         return sb.toString();
     }

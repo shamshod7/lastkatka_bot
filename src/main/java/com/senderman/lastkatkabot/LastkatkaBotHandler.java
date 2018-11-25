@@ -93,7 +93,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         // leave from groups that not in list
         if (!message.isUserMessage() && !allowedChats.contains(chatId)) {
-            sendMessage(chatId, "Какая-то левая конфа. СЛАВА ЛАСТКАТКЕ!");
+            sendMessage(chatId, "Какая-то левая конфа (id" + chatId + "). СЛАВА ЛАСТКАТКЕ!");
             Methods.leaveChat(chatId).call(this);
             return null;
         }
@@ -219,6 +219,14 @@ public class LastkatkaBotHandler extends BotHandler {
                     break;
                 case "/critical":
                     duelController.critical(chatId);
+                    break;
+                case "/go":
+                    TournamentHandler.startTournament(this);
+                    break;
+                case "/ct":
+                    TournamentHandler.cancelTournament(this);
+                case "/setuphelp":
+                    AdminHandler.setupHelp(message, this);
                     break;
             }
         }

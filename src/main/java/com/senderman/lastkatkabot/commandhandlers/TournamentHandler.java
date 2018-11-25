@@ -15,19 +15,54 @@ public class TournamentHandler {
     public static boolean isEnabled = false;
     public static Set<Integer> membersIds;
     static Set<String> members;
+    private static String team1;
+    private static String team2;
+    private static boolean isTeamMode;
+    private static String roundName;
 
     public static void setup(Message message, LastkatkaBotHandler handler) {
         members = new HashSet<>();
         membersIds = new HashSet<>();
-        var params = message.getText().split("\\s+");
+        var params = message.getText().split("\n");
         if (params.length != 4) {
             handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
             return;
         }
-        members.clear();
-        membersIds.clear();
-        members.add(params[1].replace("@", ""));
-        members.add(params[2].replace("@", ""));
+
+        isTeamMode = params[1].startsWith("@");
+
+        var checkMessage = Methods.sendMessage()
+                .setChatId(handler.botConfig.getLastvegan());
+
+        roundName = params[3];
+
+        if (isTeamMode) {
+            team1 = params[1].split("\\s+", 2)[0];
+            team2 = params[2].split("\\s+", 2)[0];
+            params[1] = params[1].replace(team1, "");
+            params[2] = params[2].replace(team2, "");
+            for (int i = 1; i < 3; i++) {
+                for (String member : params[i].split("\\s+")) {
+                    members.add(member.replace("@", ""));
+                }
+            }
+            checkMessage.setText("⚠️ Проверьте правильность веденных данных\n" +
+                    "Тип игры: Командный\nРаунд: " + roundName + "\nКоманды: " +
+                    team1 + ", " + team2 + "\nУчастники: " + String.join(", ", members +
+                    "\n\n/go - подтвердить, /ct - отменить"));
+        } else {
+            members.add(params[1].replace("@", ""));
+            members.add(params[2].replace("@", ""));
+            checkMessage.setText("⚠️ Проверьте правильность веденных данных\n" +
+                    "Тип игры: Дуэль\nРаунд: " + roundName + "\nУчастники: " + String.join(", ", members +
+                    "\n\n/go - подтвердить, /ct - отменить"));
+        }
+        checkMessage.setReplyToMessageId(message.getMessageId()).call(handler);
+    }
+
+    public static void startTournament(LastkatkaBotHandler handler) {
+        if (members.isEmpty())
+            return;
 
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(
@@ -43,17 +78,27 @@ public class TournamentHandler {
         var toVegans = Methods.sendMessage()
                 .setChatId(handler.botConfig.getLastvegan())
                 .setText("\uD83D\uDCE3 <b>Турнир активирован!</b>\n\n"
-                        + String.join(", ", params[1], params[2],
-                        "нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n"))
+                        + "@" + String.join(", @", members) +
+                        ", нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n")
                 .setReplyMarkup(markup);
         handler.sendMessage(toVegans);
 
         var toChannel = Methods.sendMessage()
-                .setChatId(handler.botConfig.getTourchannel())
-                .setText("<b>" + params[3].replace("_", " ") + "</b>\n\n"
-                        + params[1] + " vs " + params[2]);
+                .setChatId(handler.botConfig.getTourchannel());
+        if (isTeamMode) {
+            toChannel.setText("<b>" + roundName + "</b>\n\n"
+                    + team1 + " vs " + team2);
+        } else {
+            toChannel.setText("<b>" + roundName + "</b>\n\n"
+                    + members.toArray()[0] + " vs " + members.toArray()[1]);
+        }
         handler.sendMessage(toChannel);
         isEnabled = true;
+    }
+
+    public static void cancelTournament(LastkatkaBotHandler handler) {
+        restrictMembers(handler);
+        Methods.sendMessage(handler.botConfig.getLastvegan(), "\uD83D\uDEAB Действие отменено");
     }
 
     private static String getScore(String[] params) {
