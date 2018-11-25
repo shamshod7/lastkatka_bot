@@ -29,7 +29,7 @@ public class TournamentHandler {
             return;
         }
 
-        isTeamMode = params[1].startsWith("@");
+        isTeamMode = !params[1].startsWith("@");
 
         var checkMessage = Methods.sendMessage()
                 .setChatId(handler.botConfig.getLastvegan());
