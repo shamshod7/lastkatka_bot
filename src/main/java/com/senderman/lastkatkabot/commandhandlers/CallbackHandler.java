@@ -60,33 +60,44 @@ public class CallbackHandler {
 
     public static void registerInTournament(CallbackQuery query, LastkatkaBotHandler handler) {
         int memberId = query.getFrom().getId();
-        if (TournamentHandler.members.contains(query.getFrom().getUserName()) && !TournamentHandler.membersIds.contains(memberId)) {
-            TournamentHandler.membersIds.add(memberId);
-            Methods.Administration.restrictChatMember()
-                    .setChatId(handler.botConfig.getTourgroup())
-                    .setUserId(memberId)
-                    .setCanSendMessages(true)
-                    .setCanSendMediaMessages(true)
-                    .setCanSendOtherMessages(true)
-                    .call(handler);
+
+        if (TournamentHandler.membersIds.contains(memberId)) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
-                    .setText("✅ Вам даны права на отправку сообщений в группе турнира!")
+                    .setText("⚠️ Вы уже получили разрешение на отправку сообщений!")
                     .setShowAlert(true)
                     .call(handler);
-            handler.sendMessage(handler.botConfig.getTourgroup(),
-                    "✅ " +
-                            query.getFrom().getFirstName()
-                                    .replace("<", "&lt")
-                                    .replace(">", "&gt")
-                            + " <b>получил доступ к игре</b>");
-        } else {
+            return;
+        }
+
+        if (!TournamentHandler.members.contains(query.getFrom().getUserName())) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
                     .setText("\uD83D\uDEAB Вы не являетесь участником текущего раунда!")
                     .setShowAlert(true)
                     .call(handler);
+            return;
         }
+
+        TournamentHandler.membersIds.add(memberId);
+        Methods.Administration.restrictChatMember()
+                .setChatId(handler.botConfig.getTourgroup())
+                .setUserId(memberId)
+                .setCanSendMessages(true)
+                .setCanSendMediaMessages(true)
+                .setCanSendOtherMessages(true)
+                .call(handler);
+        Methods.answerCallbackQuery()
+                .setCallbackQueryId(query.getId())
+                .setText("✅ Вам даны права на отправку сообщений в группе турнира!")
+                .setShowAlert(true)
+                .call(handler);
+        handler.sendMessage(handler.botConfig.getTourgroup(),
+                "✅ " +
+                        query.getFrom().getFirstName()
+                                .replace("<", "&lt")
+                                .replace(">", "&gt")
+                        + " <b>получил доступ к игре</b>");
     }
 
     public enum CAKE_ACTIONS {CAKE_OK, CAKE_NOT}

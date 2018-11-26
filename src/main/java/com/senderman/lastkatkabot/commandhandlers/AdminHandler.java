@@ -106,6 +106,6 @@ public class AdminHandler {
     }
 
     public static void setupHelp(Message message, LastkatkaBotHandler handler) {
-        Methods.sendMessage(message.getChatId(), handler.botConfig.getSetuphelp()).call(handler);
+        handler.sendMessage(Methods.sendMessage(message.getChatId(), handler.botConfig.getSetuphelp()));
     }
 }
