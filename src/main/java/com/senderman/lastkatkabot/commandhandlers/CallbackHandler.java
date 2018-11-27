@@ -61,6 +61,15 @@ public class CallbackHandler {
     public static void registerInTournament(CallbackQuery query, LastkatkaBotHandler handler) {
         int memberId = query.getFrom().getId();
 
+        if (!TournamentHandler.isEnabled) {
+            Methods.answerCallbackQuery()
+                    .setCallbackQueryId(query.getId())
+                    .setText("⚠️ На данный момент нет открытых раундов!")
+                    .setShowAlert(true)
+                    .call(handler);
+            return;
+        }
+
         if (TournamentHandler.membersIds.contains(memberId)) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())

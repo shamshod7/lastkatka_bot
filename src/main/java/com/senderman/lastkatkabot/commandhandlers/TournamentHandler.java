@@ -33,8 +33,8 @@ public class TournamentHandler {
         roundName = params[3].strip();
 
         var checkText = new StringBuilder()
-                .append("⚠️ Проверьте правильность введенных данных\n")
-                .append("Раунд: ").append(roundName);
+                .append("⚠️ Проверьте правильность введенных данных\n\n")
+                .append("<b>Раунд:</b> ").append(roundName);
 
         if (isTeamMode) {
             teams = new HashSet<>();
@@ -45,13 +45,13 @@ public class TournamentHandler {
                     members.add(paramString[j].replace("@", ""));
                 }
             }
-            checkText.append("\nКоманды: ").append(getTeamsAsString());
+            checkText.append("\n<b>Команды:</b> ").append(getTeamsAsString());
 
         } else {
             members.add(params[1].replace("@", "").strip());
             members.add(params[2].replace("@", "").strip());
         }
-        checkText.append("\nУчастники: ").append(getMembersAsString())
+        checkText.append("\n<b>Участники:</b> ").append(getMembersAsString())
                 .append("\n\n/go - подтвердить, /ct - отменить");
 
         handler.sendMessage(Methods.sendMessage()
@@ -96,14 +96,14 @@ public class TournamentHandler {
             toChannel.setText("<b>" + roundName + "</b>\n\n"
                     + teams.toArray()[0] + " vs " + teams.toArray()[1]);
         } else {
-            toChannel.setText("<b>" + roundName + "</b>\n\n"
-                    + members.toArray()[0] + " vs " + members.toArray()[1]);
+            toChannel.setText("<b>" + roundName + "</b>\n\n@"
+                    + members.toArray()[0] + " vs @" + members.toArray()[1]);
         }
         handler.sendMessage(toChannel);
         isEnabled = true;
     }
 
-    public static void cancelTournament(LastkatkaBotHandler handler) {
+    public static void cancelSetup(LastkatkaBotHandler handler) {
         if (isEnabled)
             return;
         members.clear();
@@ -122,6 +122,7 @@ public class TournamentHandler {
     }
 
     private static void restrictMembers(LastkatkaBotHandler handler) {
+        isEnabled = false;
         for (Integer memberId : membersIds) {
             Methods.Administration.restrictChatMember(handler.botConfig.getTourgroup(), memberId).call(handler);
         }
@@ -129,6 +130,7 @@ public class TournamentHandler {
         membersIds.clear();
         if (isTeamMode)
             teams.clear();
+        Methods.Administration.unpinChatMessage(handler.botConfig.getLastvegan());
     }
 
     public static void score(Message message, LastkatkaBotHandler handler) {
@@ -149,7 +151,6 @@ public class TournamentHandler {
         }
         var score = getScore(params);
         restrictMembers(handler);
-        isEnabled = false;
         String goingTo = (params[5].equals("over")) ? " выиграл турнир" : " выходит в " + params[5].replace("_", " ");
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(handler.botConfig.getTourchannel())
@@ -164,7 +165,6 @@ public class TournamentHandler {
 
     public static void rt(LastkatkaBotHandler handler) {
         restrictMembers(handler);
-        isEnabled = false;
         handler.sendMessage(handler.botConfig.getLastvegan(),
                 "\uD83D\uDEAB <b>Турнир отменен из-за непредвиденных обстоятельств!</b>");
     }
