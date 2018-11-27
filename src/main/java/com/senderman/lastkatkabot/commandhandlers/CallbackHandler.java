@@ -47,11 +47,11 @@ public class CallbackHandler {
                 .setReplyMarkup(null);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("n p u я m н o r o  a n n e m u m a");
-            emt.setText("\uD83C\uDF82 " + query.getFrom().getFirstName() + " принял тортик "
+            emt.setText("\uD83C\uDF82 " + query.getFrom().getFirstName() + " принял тортик"
                     + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, ""));
         } else {
             acq.setText("Ну и ладно");
-            emt.setText("\uD83D\uDEAB \uD83C\uDF82 " + query.getFrom().getFirstName() + " отказался от тортика "
+            emt.setText("\uD83D\uDEAB \uD83C\uDF82 " + query.getFrom().getFirstName() + " отказался от тортика"
                     + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_NOT, ""));
         }
         acq.call(handler);

@@ -32,7 +32,7 @@ public class UsercommandsHandler {
         }
 
         var action = message.getText().split("\\s+", 2)[1];
-        var sm = Methods.sendMessage(message.getChatId(), message.getFrom().getFirstName() + "" + action);
+        var sm = Methods.sendMessage(message.getChatId(), message.getFrom().getFirstName() + " " + action);
         if (message.isReply()) {
             sm.setReplyToMessageId(message.getReplyToMessage().getMessageId());
         }
@@ -42,7 +42,7 @@ public class UsercommandsHandler {
     public static void payRespects(Message message, LastkatkaBotHandler handler) { // /f
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
         handler.sendMessage(Methods.sendMessage()
-                .setChatId(message.getMessageId())
+                .setChatId(message.getChatId())
                 .setText("\uD83D\uDD6F Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName())
                 .setReplyMarkup(getMarkupForPayingRespects()));
     }
@@ -105,6 +105,10 @@ public class UsercommandsHandler {
                 "</a>\n\n" +
                 message.getText().replace("/feedback ", "");
         handler.sendMessage((long) handler.botConfig.getMainAdmin(), sb);
+        handler.sendMessage(Methods.sendMessage()
+                .setChatId(message.getChatId())
+                .setText("✅ отправлено разрабу бота")
+                .setReplyToMessageId(message.getMessageId()));
     }
 
     public static void help(Message message, LastkatkaBotHandler handler) {
