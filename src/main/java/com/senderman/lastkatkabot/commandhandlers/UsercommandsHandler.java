@@ -107,7 +107,7 @@ public class UsercommandsHandler {
         handler.sendMessage((long) handler.botConfig.getMainAdmin(), sb);
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
-                .setText("✅ отправлено разрабу бота")
+                .setText("✅ Отправлено разрабу бота")
                 .setReplyToMessageId(message.getMessageId()));
     }
 

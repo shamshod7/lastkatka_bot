@@ -24,7 +24,6 @@ public class CallbackHandler {
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setMessageId(query.getMessage().getMessageId())
-                .setInlineMessageId(query.getInlineMessageId())
                 .setReplyMarkup(UsercommandsHandler.getMarkupForPayingRespects())
                 .setText(query.getMessage().getText() + "\n" + query.getFrom().getFirstName() + " have payed respects")
                 .call(handler);
