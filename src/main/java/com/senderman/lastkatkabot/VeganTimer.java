@@ -1,6 +1,7 @@
 package com.senderman.lastkatkabot;
 
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,6 +25,11 @@ class VeganTimer {
             if (i % 60 == 0 && i != 300) {
                 handler.sendMessage(chatId,
                         "Осталось " + (i / 60) + " минуты чтобы джойнуться\n\nДжоин --> /join@veganwarsbot");
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                BotLogger.error("THREAD SLEEP", e.toString());
             }
         }
         stop();
