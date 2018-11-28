@@ -11,10 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 public class LastkatkaBotHandler extends BotHandler {
 
@@ -23,6 +20,7 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Long> allowedChats;
     public final Set<Integer> blacklist;
     private final DuelController duelController;
+    Map<Long, VeganTimer> veganTimers;
 
     LastkatkaBotHandler(BotConfig botConfig) {
         this.botConfig = botConfig;
@@ -47,6 +45,7 @@ public class LastkatkaBotHandler extends BotHandler {
             }
         }
         duelController = new DuelController(this);
+        veganTimers = new HashMap<>();
 
         // notify main admin about launch
         sendMessage((long) botConfig.getMainAdmin(), "Бот готов к работе!");
@@ -131,10 +130,29 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
 
         /* bot should only trigger on general commands (like /command) or on commands for this bot (/command@mybot),
-         * and NOT on commands for another bots (like /command@notmybot)
+         * and NOT on commands for another bots (like /command@notmybot) except @veganwarsbot
          */
         var command = text.split("\\s+", 2)[0].toLowerCase(Locale.ENGLISH).replace("@" + getBotUsername(), "");
-        if (command.contains("@"))
+
+        if (botConfig.getVeganWarsCommands().contains(text) && !veganTimers.containsKey(chatId)) { // start veganwars timer
+            veganTimers.put(chatId, new VeganTimer(chatId, this));
+            veganTimers.get(chatId).start();
+        } else if (text.startsWith("/join") && veganTimers.containsKey(chatId)) {
+            veganTimers.get(chatId).addPlayer(message.getFrom().getId(), message);
+
+        } else if (text.startsWith("/flee") && veganTimers.containsKey(chatId)) {
+            veganTimers.get(chatId).removePlayer(message.getFrom().getId());
+
+        } else if (text.startsWith("/fight") && veganTimers.containsKey(chatId)) {
+            if (veganTimers.get(chatId).getVegansAmount() > 1) {
+                veganTimers.get(chatId).stop();
+            }
+
+        } else if (text.startsWith("/reset") && veganTimers.containsKey(chatId)) {
+            veganTimers.get(chatId).stop();
+            sendMessage(chatId, "Список игроков сброшен");
+
+        } else if (command.contains("@"))
             return null;
 
         if (command.startsWith("/pinlist") && isFromWwBot(message)) {

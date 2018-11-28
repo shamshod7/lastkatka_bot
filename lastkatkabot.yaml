@@ -16,6 +16,10 @@ wwBots:
 - 'werewolfbetabot'
 - 'blackwerewolfbot'
 
+veganWarsCommands:
+  - '/game@veganwarsbot'
+  - '/customgame@veganwarsbot'
+
 help: |
   Привет! Это очень полезный бот для проекта @lastkatka, который многое что умеет! Основные команды:
 
@@ -30,7 +34,7 @@ help: |
 
 adminhelp: |
 
-  <b>Следующая информация только для администрации!</b>
+  <b>Информация для админов бота</b>
 
   /setup - помощь по этой команде - /tourhelp
   /score name1 score1 name2 score2 - сообщить счет

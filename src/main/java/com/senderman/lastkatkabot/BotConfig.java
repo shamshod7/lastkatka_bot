@@ -41,6 +41,9 @@ public class BotConfig {
     @JsonProperty
     private String setuphelp;
 
+    @JsonProperty
+    private Set<String> veganWarsCommands;
+
     public String getToken() {
         return token;
     }
@@ -145,6 +148,14 @@ public class BotConfig {
         this.setuphelp = setuphelp;
     }
 
+    public Set<String> getVeganWarsCommands() {
+        return veganWarsCommands;
+    }
+
+    public void setVeganWarsCommands(Set<String> veganWarsCommands) {
+        this.veganWarsCommands = veganWarsCommands;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("BotConfig{");
@@ -161,6 +172,7 @@ public class BotConfig {
         sb.append(", help='").append(help).append('\'');
         sb.append(", adminhelp='").append(adminhelp).append('\'');
         sb.append(", setuphelp='").append(setuphelp).append('\'');
+        sb.append(", veganWarsCommands=").append(veganWarsCommands);
         sb.append('}');
         return sb.toString();
     }
