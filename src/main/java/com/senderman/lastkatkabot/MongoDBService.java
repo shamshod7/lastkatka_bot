@@ -173,5 +173,9 @@ public class MongoDBService implements DBService {
             settings.insertOne(new Document("messageId", messageId));
         else
             settings.updateOne(Filters.exists("messageId", true), new Document("messageId", messageId));
+        settings.updateOne(Filters.exists("messageId", true),
+                new Document(
+                        "$set", new Document("messageId", messageId)
+                ));
     }
 }
