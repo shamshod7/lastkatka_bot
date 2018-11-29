@@ -19,7 +19,8 @@ repositories {
 
 dependencies {
     implementation 'com.annimon:tgbots-module:0.3.9'
-    implementation 'org.mongodb:mongo-java-driver:3.8.2'
+    implementation 'org.mongodb:mongodb-driver-sync:3.9.1'
+
 }
 
 shadowJar {
