@@ -19,17 +19,19 @@ class VeganTimer {
     }
 
     private void veganTimer() {
-        for (int i = 300; i > 0; i--) {
+        for (int i = 299; i > 0; i--) {
             if (!runTimer) break;
 
-            if (i % 60 == 0 && i != 300) {
+            if (i % 60 == 0) {
                 handler.sendMessage(chatId,
                         "Осталось " + (i / 60) + " минуты чтобы джойнуться\n\nДжоин --> /join@veganwarsbot");
             }
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
+                stop();
                 BotLogger.error("THREAD SLEEP", e.toString());
+                handler.sendMessage(chatId, "Ошибка, таймер остановлен");
             }
         }
         stop();
@@ -45,9 +47,9 @@ class VeganTimer {
     }
 
     void addPlayer(int id, Message message) {
-        if (vegans.contains(message.getFrom().getId())) {
+        if (vegans.contains(message.getFrom().getId()))
             return;
-        }
+
         vegans.add(id);
         int count = vegans.size();
         String toSend = "Джойнулось " + count + " игроков";
@@ -58,11 +60,11 @@ class VeganTimer {
     }
 
     void removePlayer(int id) {
-        if (!vegans.contains(id)) {
+        if (!vegans.contains(id))
             return;
-        }
+
         vegans.remove(id);
-        int count = vegans.size();
+        int count = getVegansAmount();
         String toSend = "Осталось " + count + " игроков";
         if (count % 2 != 0 && count > 2) {
             toSend += "\nБудет крыса!";

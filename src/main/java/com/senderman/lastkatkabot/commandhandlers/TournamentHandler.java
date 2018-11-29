@@ -20,6 +20,9 @@ public class TournamentHandler {
     private static String roundName;
 
     public static void setup(Message message, LastkatkaBotHandler handler) {
+        if (isEnabled)
+            return;
+
         members = new HashSet<>();
         membersIds = new HashSet<>();
         var params = message.getText().split("\n");

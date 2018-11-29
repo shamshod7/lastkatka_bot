@@ -3,6 +3,7 @@ package com.senderman.lastkatkabot;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
+import java.util.StringJoiner;
 
 public class BotConfig {
 
@@ -16,8 +17,6 @@ public class BotConfig {
     @JsonProperty(required = true)
     private String allowedChats;
 
-    @JsonProperty(required = true)
-    private long lastkatka;
     @JsonProperty(required = true)
     private long lastvegan;
     @JsonProperty(required = true)
@@ -74,14 +73,6 @@ public class BotConfig {
 
     public void setAllowedChats(String allowedChats) {
         this.allowedChats = allowedChats;
-    }
-
-    public long getLastkatka() {
-        return lastkatka;
-    }
-
-    public void setLastkatka(long lastkatka) {
-        this.lastkatka = lastkatka;
     }
 
     public long getLastvegan() {
@@ -158,22 +149,20 @@ public class BotConfig {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("BotConfig{");
-        sb.append("token='").append(token).append('\'');
-        sb.append(", username='").append(username).append('\'');
-        sb.append(", mainAdmin=").append(mainAdmin);
-        sb.append(", allowedChats='").append(allowedChats).append('\'');
-        sb.append(", lastkatka=").append(lastkatka);
-        sb.append(", lastvegan=").append(lastvegan);
-        sb.append(", tourgroup=").append(tourgroup);
-        sb.append(", tourchannel='").append(tourchannel).append('\'');
-        sb.append(", tourgroupname='").append(tourgroupname).append('\'');
-        sb.append(", wwBots=").append(wwBots);
-        sb.append(", help='").append(help).append('\'');
-        sb.append(", adminhelp='").append(adminhelp).append('\'');
-        sb.append(", setuphelp='").append(setuphelp).append('\'');
-        sb.append(", veganWarsCommands=").append(veganWarsCommands);
-        sb.append('}');
-        return sb.toString();
+        return new StringJoiner(", ", BotConfig.class.getSimpleName() + "[", "]")
+                .add("token='" + token + "'")
+                .add("username='" + username + "'")
+                .add("mainAdmin=" + mainAdmin)
+                .add("allowedChats='" + allowedChats + "'")
+                .add("lastvegan=" + lastvegan)
+                .add("tourgroup=" + tourgroup)
+                .add("tourchannel='" + tourchannel + "'")
+                .add("tourgroupname='" + tourgroupname + "'")
+                .add("wwBots=" + wwBots)
+                .add("help='" + help + "'")
+                .add("adminhelp='" + adminhelp + "'")
+                .add("setuphelp='" + setuphelp + "'")
+                .add("veganWarsCommands=" + veganWarsCommands)
+                .toString();
     }
 }

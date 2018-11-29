@@ -4,7 +4,6 @@ username: env(username)
 mainAdmin: env(main_admin)
 allowedChats: env(allowed_chats)
 
-lastkatka : -1001156345990
 lastvegan : -1001440160000
 tourgroup : -1001153873643
 
@@ -31,6 +30,7 @@ help: |
   /duel - начать дуэль
   /dstats - стата по дуэлям
   /feedback сообщение - отзыв/багрепорт о боте
+  /reset - сброс веганотаймера в чате
 
 adminhelp: |
 

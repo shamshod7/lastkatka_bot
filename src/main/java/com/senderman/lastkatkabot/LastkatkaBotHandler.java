@@ -34,7 +34,6 @@ public class LastkatkaBotHandler extends BotHandler {
         ServiceHolder.db().updateBlacklist(blacklist);
 
         allowedChats = new HashSet<>(List.of(
-                botConfig.getLastkatka(),
                 botConfig.getLastvegan(),
                 botConfig.getTourgroup()
         ));
@@ -137,6 +136,7 @@ public class LastkatkaBotHandler extends BotHandler {
         if (botConfig.getVeganWarsCommands().contains(text) && !veganTimers.containsKey(chatId)) { // start veganwars timer
             veganTimers.put(chatId, new VeganTimer(chatId, this));
             veganTimers.get(chatId).start();
+
         } else if (text.startsWith("/join") && veganTimers.containsKey(chatId)) {
             veganTimers.get(chatId).addPlayer(message.getFrom().getId(), message);
 
@@ -147,10 +147,6 @@ public class LastkatkaBotHandler extends BotHandler {
             if (veganTimers.get(chatId).getVegansAmount() > 1) {
                 veganTimers.get(chatId).stop();
             }
-
-        } else if (text.startsWith("/reset") && veganTimers.containsKey(chatId)) {
-            veganTimers.get(chatId).stop();
-            sendMessage(chatId, "Список игроков сброшен");
 
         } else if (command.contains("@"))
             return null;
@@ -167,9 +163,10 @@ public class LastkatkaBotHandler extends BotHandler {
         } else if (command.startsWith("/help")) {
             UsercommandsHandler.help(message, this);
             return null;
-        } else if (command.startsWith("/setup") && isFromAdmin(message) && !TournamentHandler.isEnabled) {
-            TournamentHandler.setup(message, this);
-            return null;
+        } else if (command.startsWith("/reset") && veganTimers.containsKey(chatId)) {
+            veganTimers.get(chatId).stop();
+            sendMessage(chatId, "Список игроков сброшен");
+
         }
 
         // users in blacklist are not allowed to use this commands
@@ -237,6 +234,9 @@ public class LastkatkaBotHandler extends BotHandler {
                     break;
                 case "/critical":
                     duelController.critical(chatId);
+                    break;
+                case "/setup":
+                    TournamentHandler.setup(message, this);
                     break;
                 case "/go":
                     TournamentHandler.startTournament(this);
