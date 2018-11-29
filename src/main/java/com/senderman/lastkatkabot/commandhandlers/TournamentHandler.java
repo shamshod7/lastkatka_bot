@@ -134,7 +134,7 @@ public class TournamentHandler {
         membersIds.clear();
         if (isTeamMode)
             teams.clear();
-        Methods.Administration.unpinChatMessage(handler.botConfig.getLastvegan());
+        Methods.Administration.unpinChatMessage(handler.botConfig.getLastvegan()).call(handler);
         int tournamentMessage = ServiceHolder.db().getTournamentMessage();
         if (tournamentMessage != 0) {
             Methods.Administration.pinChatMessage()

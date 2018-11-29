@@ -168,6 +168,10 @@ public class MongoDBService implements DBService {
 
     @Override
     public void setTournamentMessage(int messageId) {
-        settings.insertOne(new Document("messageId", messageId));
+        var doc = settings.find(Filters.eq("messageId")).first();
+        if (doc == null)
+            settings.insertOne(new Document("messageId", messageId));
+        else
+            settings.updateOne(Filters.eq("messageId"), new Document("messageId", messageId));
     }
 }
