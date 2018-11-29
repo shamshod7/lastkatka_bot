@@ -7,12 +7,13 @@ import org.bson.Document;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MongoDBHandler implements DBService {
+public class MongoDBService implements DBService {
     private final MongoClient client = MongoClients.create(System.getenv("database"));
     private final MongoDatabase database = client.getDatabase("lastkatka");
     private final MongoCollection<Document> admins = database.getCollection("admins");
     private final MongoCollection<Document> blacklist = database.getCollection("blacklist");
     private final MongoCollection<Document> duelstats = database.getCollection("duelstats");
+    private final MongoCollection<Document> settings = database.getCollection("settings");
 
     public void initStats(int id) {
         var doc = new Document("id", id)
@@ -155,5 +156,18 @@ public class MongoDBHandler implements DBService {
             }
         }
         return players;
+    }
+
+    @Override
+    public int getTournamentMessage() {
+        var doc = settings.find(Filters.eq("messageId")).first();
+        if (doc == null)
+            return 0;
+        return doc.getInteger("messageId");
+    }
+
+    @Override
+    public void setTournamentMessage(int messageId) {
+        settings.insertOne(new Document("messageId", messageId));
     }
 }

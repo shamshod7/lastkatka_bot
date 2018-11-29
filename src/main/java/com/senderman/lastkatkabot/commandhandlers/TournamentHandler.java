@@ -3,6 +3,7 @@ package com.senderman.lastkatkabot.commandhandlers;
 import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
+import com.senderman.lastkatkabot.ServiceHolder;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -134,6 +135,14 @@ public class TournamentHandler {
         if (isTeamMode)
             teams.clear();
         Methods.Administration.unpinChatMessage(handler.botConfig.getLastvegan());
+        int tournamentMessage = ServiceHolder.db().getTournamentMessage();
+        if (tournamentMessage != 0) {
+            Methods.Administration.pinChatMessage()
+                    .setChatId(handler.botConfig.getLastvegan())
+                    .setMessageId(tournamentMessage)
+                    .setNotificationEnabled(false)
+                    .call(handler);
+        }
     }
 
     public static void score(Message message, LastkatkaBotHandler handler) {
@@ -170,6 +179,13 @@ public class TournamentHandler {
         restrictMembers(handler);
         handler.sendMessage(handler.botConfig.getLastvegan(),
                 "\uD83D\uDEAB <b>Турнир отменен из-за непредвиденных обстоятельств!</b>");
+    }
+
+    public static void tourmessage(LastkatkaBotHandler handler, Message message) {
+        if (!message.getChatId().equals(handler.botConfig.getLastvegan()) || !message.isReply())
+            return;
+        ServiceHolder.db().setTournamentMessage(message.getReplyToMessage().getMessageId());
+        handler.sendMessage(message.getChatId(), "✅ Главное сообщение турнира установлено!");
     }
 
     private static String getMembersAsString() {

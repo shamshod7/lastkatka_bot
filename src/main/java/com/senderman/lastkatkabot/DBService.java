@@ -32,4 +32,8 @@ public interface DBService {
 
     Set<Long> getPlayersIds();
 
+    int getTournamentMessage();
+
+    void setTournamentMessage(int messageId);
+
 }

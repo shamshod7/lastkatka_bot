@@ -40,6 +40,7 @@ adminhelp: |
   /score name1 score1 name2 score2 - сообщить счет
   /win winner score loser score типСледующегоРаунда - завершить турнир (если текущий раунд - финал, используйте тип раунда over)
   /rt - отменить турнир
+  /tourmessage - ответьте этим на главный пост турнира
   /badneko - запретить пользователю юзать /action и /dice
   /goodneko - разрешить пользователю юзать /action и /dice
   /nekos - посмотреть кто был плохой кошечкой

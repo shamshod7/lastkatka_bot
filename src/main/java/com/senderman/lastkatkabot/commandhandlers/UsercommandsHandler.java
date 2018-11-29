@@ -97,14 +97,14 @@ public class UsercommandsHandler {
     }
 
     public static void feedback(Message message, LastkatkaBotHandler handler) {
-        String sb = "<b>Багрепорт</b>\n\nОт: " +
+        String bugreport = "⚠️ <b>Багрепорт</b>\n\nОт: " +
                 "<a href=\"tg://user?id=" +
                 message.getFrom().getId() +
                 "\">" +
                 message.getFrom().getFirstName() +
                 "</a>\n\n" +
                 message.getText().replace("/feedback ", "");
-        handler.sendMessage((long) handler.botConfig.getMainAdmin(), sb);
+        handler.sendMessage((long) handler.botConfig.getMainAdmin(), bugreport);
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
                 .setText("✅ Отправлено разрабу бота")

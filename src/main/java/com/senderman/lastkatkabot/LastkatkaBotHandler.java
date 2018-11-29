@@ -29,7 +29,7 @@ public class LastkatkaBotHandler extends BotHandler {
         // settings
         admins = new HashSet<>();
         blacklist = new HashSet<>();
-        ServiceHolder.setDBService(new MongoDBHandler());
+        ServiceHolder.setDBService(new MongoDBService());
         ServiceHolder.db().updateAdmins(admins);
         ServiceHolder.db().updateBlacklist(blacklist);
 
@@ -246,6 +246,9 @@ public class LastkatkaBotHandler extends BotHandler {
                     break;
                 case "/tourhelp":
                     AdminHandler.setupHelp(message, this);
+                    break;
+                case "/tourmessage":
+                    TournamentHandler.tourmessage(this, message);
                     break;
             }
         }
