@@ -160,7 +160,7 @@ public class MongoDBService implements DBService {
 
     @Override
     public int getTournamentMessage() {
-        var doc = settings.find(Filters.eq("messageId")).first();
+        var doc = settings.find(Filters.exists("messageId")).first();
         if (doc == null)
             return 0;
         return doc.getInteger("messageId");
@@ -168,7 +168,7 @@ public class MongoDBService implements DBService {
 
     @Override
     public void setTournamentMessage(int messageId) {
-        var doc = settings.find(Filters.eq("messageId")).first();
+        var doc = settings.find(Filters.exists("messageId")).first();
         if (doc == null)
             settings.insertOne(new Document("messageId", messageId));
         else
