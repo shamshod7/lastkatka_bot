@@ -2,7 +2,6 @@ token: env(token)
 username: env(username)
 
 mainAdmin: env(main_admin)
-allowedChats: env(allowed_chats)
 
 lastvegan : -1001440160000
 tourgroup : -1001153873643

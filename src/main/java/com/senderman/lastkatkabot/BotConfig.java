@@ -14,8 +14,6 @@ public class BotConfig {
 
     @JsonProperty(required = true)
     private int mainAdmin;
-    @JsonProperty(required = true)
-    private String allowedChats;
 
     @JsonProperty(required = true)
     private long lastvegan;
@@ -65,14 +63,6 @@ public class BotConfig {
 
     public void setMainAdmin(int mainAdmin) {
         this.mainAdmin = mainAdmin;
-    }
-
-    public String getAllowedChats() {
-        return allowedChats;
-    }
-
-    public void setAllowedChats(String allowedChats) {
-        this.allowedChats = allowedChats;
     }
 
     public long getLastvegan() {
@@ -153,7 +143,6 @@ public class BotConfig {
                 .add("token='" + token + "'")
                 .add("username='" + username + "'")
                 .add("mainAdmin=" + mainAdmin)
-                .add("allowedChats='" + allowedChats + "'")
                 .add("lastvegan=" + lastvegan)
                 .add("tourgroup=" + tourgroup)
                 .add("tourchannel='" + tourchannel + "'")

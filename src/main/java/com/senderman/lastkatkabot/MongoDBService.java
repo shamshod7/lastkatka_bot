@@ -14,6 +14,7 @@ public class MongoDBService implements DBService {
     private final MongoCollection<Document> blacklist = database.getCollection("blacklist");
     private final MongoCollection<Document> duelstats = database.getCollection("duelstats");
     private final MongoCollection<Document> settings = database.getCollection("settings");
+    private final MongoCollection<Document> allowedChatsCollection = database.getCollection("allowedchats");
 
     public void initStats(int id) {
         var doc = new Document("id", id)
@@ -69,12 +70,12 @@ public class MongoDBService implements DBService {
     public void addToBlacklist(int id, String name, Set<Integer> blacklistSet) {
         blacklist.insertOne(new Document("id", id)
                 .append("name", name));
-        updateBlacklist(blacklistSet);
+        blacklistSet.add(id);
     }
 
     public void removeFromBlacklist(int id, Set<Integer> blacklistSet) {
         blacklist.deleteOne(Filters.eq("id", id));
-        updateBlacklist(blacklistSet);
+        blacklistSet.remove(id);
     }
 
     public String getBlackList() {
@@ -112,12 +113,12 @@ public class MongoDBService implements DBService {
     public void addToAdmins(int id, String name, Set<Integer> adminsSet) {
         admins.insertOne(new Document("id", id)
                 .append("name", name));
-        updateAdmins(adminsSet);
+        adminsSet.add(id);
     }
 
     public void removeFromAdmins(int id, Set<Integer> adminsSet) {
         admins.deleteOne(Filters.eq("id", id));
-        updateAdmins(adminsSet);
+        adminsSet.remove(id);
     }
 
     public String getAdmins() {
@@ -176,5 +177,27 @@ public class MongoDBService implements DBService {
                     new Document(
                             "$set", new Document("messageId", messageId)
                     ));
+    }
+
+    @Override
+    public void updateAllowedChats(Set<Long> allowedChats) {
+        try (MongoCursor<Document> cursor = allowedChatsCollection.find().iterator()) {
+            while (cursor.hasNext()) {
+                var doc = cursor.next();
+                allowedChats.add(doc.getLong("chatId"));
+            }
+        }
+    }
+
+    @Override
+    public void addToAllowedChats(long chatId, Set<Long> allowedChats) {
+        allowedChatsCollection.insertOne(new Document("chatId", chatId));
+        allowedChats.add(chatId);
+    }
+
+    @Override
+    public void removeFromAllowedChats(long chatId, Set<Long> allowedChats) {
+        allowedChatsCollection.deleteOne(Filters.eq("chatId", chatId));
+        allowedChats.remove(chatId);
     }
 }

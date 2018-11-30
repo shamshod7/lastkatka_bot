@@ -27,22 +27,19 @@ public class LastkatkaBotHandler extends BotHandler {
         sendMessage((long) botConfig.getMainAdmin(), "Инициализация...");
 
         // settings
-        admins = new HashSet<>();
-        blacklist = new HashSet<>();
         ServiceHolder.setDBService(new MongoDBService());
+
+        admins = new HashSet<>();
         ServiceHolder.db().updateAdmins(admins);
+
+        blacklist = new HashSet<>();
         ServiceHolder.db().updateBlacklist(blacklist);
 
-        allowedChats = new HashSet<>(List.of(
-                botConfig.getLastvegan(),
-                botConfig.getTourgroup()
-        ));
-        var envAllowed = botConfig.getAllowedChats();
-        if (envAllowed != null) {
-            for (String allowedChat : envAllowed.split(" ")) {
-                allowedChats.add(Long.parseLong(allowedChat));
-            }
-        }
+        allowedChats = new HashSet<>();
+        allowedChats.add(botConfig.getLastvegan());
+        allowedChats.add(botConfig.getTourgroup());
+        ServiceHolder.db().updateAllowedChats(allowedChats);
+
         duelController = new DuelController(this);
         veganTimers = new HashMap<>();
 
@@ -207,6 +204,14 @@ public class LastkatkaBotHandler extends BotHandler {
                     break;
                 case "/announce":
                     AdminHandler.announce(message, this);
+                    break;
+                case "/addchat": // /addchat chatId
+                    ServiceHolder.db().addToAllowedChats(Long.parseLong(text.replace("/addchat ", "")),
+                            allowedChats);
+                    sendMessage(chatId, "✅ Чат добавлен!");
+                    break;
+                case "/remchat":
+                    ServiceHolder.db().removeFromAllowedChats(chatId, allowedChats);
                     break;
             }
         }

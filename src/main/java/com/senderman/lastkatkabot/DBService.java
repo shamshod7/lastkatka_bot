@@ -36,4 +36,10 @@ public interface DBService {
 
     void setTournamentMessage(int messageId);
 
+    void updateAllowedChats(Set<Long> allowedChats);
+
+    void addToAllowedChats(long chatId, Set<Long> allowedChats);
+
+    void removeFromAllowedChats(long chatId, Set<Long> allowedChats);
+
 }
