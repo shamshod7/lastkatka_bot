@@ -92,7 +92,8 @@ public class UsercommandsHandler {
     }
 
     public static void pinlist(Message message, LastkatkaBotHandler handler) {
-        Methods.Administration.pinChatMessage(message.getChatId(), message.getReplyToMessage().getMessageId()).call(handler);
+        Methods.Administration.pinChatMessage(message.getChatId(), message.getReplyToMessage().getMessageId())
+                .setNotificationEnabled(false).call(handler);
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
     }
 

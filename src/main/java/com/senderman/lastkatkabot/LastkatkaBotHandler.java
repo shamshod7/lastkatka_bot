@@ -88,7 +88,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         // leave from groups that not in list
         if (!message.isUserMessage() && !allowedChats.contains(chatId)) {
-            sendMessage(chatId, "Какая-то левая конфа (id" + chatId + "). СЛАВА ЛАСТКАТКЕ!");
+            sendMessage(chatId, "Какая-то левая конфа (id " + chatId + "). СЛАВА ЛАСТКАТКЕ!");
             Methods.leaveChat(chatId).call(this);
             return null;
         }
