@@ -163,7 +163,13 @@ public class TournamentHandler {
         }
         var score = getScore(params);
         restrictMembers(handler);
-        String goingTo = (params[5].equals("over")) ? " выиграл турнир" : " выходит в " + params[5].replace("_", " ");
+
+        String goingTo;
+        if (isTeamMode)
+            goingTo = (params[5].equals("over")) ? " выиграли турнир" : " выходят в " + params[5].replace("_", " ");
+        else
+            goingTo = (params[5].equals("over")) ? " выиграл турнир" : " выходит в " + params[5].replace("_", " ");
+
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(handler.botConfig.getTourchannel())
                 .setText(score + "\n\n" + params[1] + "<b>" + goingTo + "!</b>"));
@@ -172,7 +178,7 @@ public class TournamentHandler {
                 .setChatId(handler.botConfig.getLastvegan())
                 .setText("\uD83D\uDCE3 <b>Раунд завершен.\n\nПобедитель:</b> "
                         + params[1] + "\nБолельщики, посетите "
-                        + handler.botConfig.getTourchannel() + ",  чтобы узнать подробности"));
+                        + handler.botConfig.getTourchannel() + ", чтобы узнать подробности"));
     }
 
     public static void rt(LastkatkaBotHandler handler) {

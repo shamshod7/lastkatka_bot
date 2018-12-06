@@ -101,11 +101,11 @@ public class CallbackHandler {
                 .setShowAlert(true)
                 .call(handler);
         handler.sendMessage(handler.botConfig.getTourgroup(),
-                "✅ " +
+                "✅ <b>" +
                         query.getFrom().getFirstName()
                                 .replace("<", "&lt")
                                 .replace(">", "&gt")
-                        + " <b>получил доступ к игре</b>");
+                        + " получил доступ к игре</b>");
     }
 
     public enum CAKE_ACTIONS {CAKE_OK, CAKE_NOT}
