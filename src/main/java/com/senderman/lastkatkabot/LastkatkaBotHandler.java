@@ -118,15 +118,16 @@ public class LastkatkaBotHandler extends BotHandler {
         if (!message.hasText())
             return null;
 
-        if (!message.isCommand())
-            return null;
-
         var text = message.getText();
 
         // for bulls and cows
         if (text.matches("\\d{4}") && bullsAndCowsGames.containsKey(chatId)) {
             bullsAndCowsGames.get(chatId).check(Integer.parseInt(text));
+            return null;
         }
+
+        if (!message.isCommand())
+            return null;
 
         // we dont need to handle messages that are not commands
         if (!text.startsWith("/"))
