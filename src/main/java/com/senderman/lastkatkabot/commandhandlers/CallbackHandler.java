@@ -20,7 +20,8 @@ public class CallbackHandler {
         Methods.answerCallbackQuery()
                 .setCallbackQueryId(query.getId())
                 .setText("You've payed respects")
-                .setShowAlert(true).call(handler);
+                .setShowAlert(true)
+                .call(handler);
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setMessageId(query.getMessage().getMessageId())
@@ -37,6 +38,19 @@ public class CallbackHandler {
                     .setShowAlert(true)
                     .call(handler);
             return;
+        }
+        if (query.getMessage().getDate() + 2400 < System.currentTimeMillis() / 1000) {
+            Methods.answerCallbackQuery()
+                    .setCallbackQueryId(query.getId())
+                    .setText("Тортик испорчен!")
+                    .setShowAlert(true)
+                    .call(handler);
+            Methods.editMessageText()
+                    .setChatId(query.getMessage().getChatId())
+                    .setText("\uD83E\uDD22 Тортик испортился!")
+                    .setMessageId(query.getMessage().getMessageId())
+                    .setReplyMarkup(null)
+                    .call(handler);
         }
         var acq = Methods.answerCallbackQuery()
                 .setCallbackQueryId(query.getId());
@@ -101,11 +115,7 @@ public class CallbackHandler {
                 .setShowAlert(true)
                 .call(handler);
         handler.sendMessage(handler.botConfig.getTourgroup(),
-                "✅ <b>" +
-                        query.getFrom().getFirstName()
-                                .replace("<", "&lt")
-                                .replace(">", "&gt")
-                        + " получил доступ к игре</b>");
+                "✅ " + query.getFrom().getUserName() + " получил доступ к игре!");
     }
 
     public enum CAKE_ACTIONS {CAKE_OK, CAKE_NOT}

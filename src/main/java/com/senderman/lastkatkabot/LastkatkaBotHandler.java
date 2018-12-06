@@ -21,6 +21,7 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Integer> blacklist;
     private final DuelController duelController;
     Map<Long, VeganTimer> veganTimers;
+    Map<Long, BullsAndCowsGame> bullsAndCowsGames;
 
     LastkatkaBotHandler(BotConfig botConfig) {
         this.botConfig = botConfig;
@@ -42,6 +43,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         duelController = new DuelController(this);
         veganTimers = new HashMap<>();
+        bullsAndCowsGames = new HashMap<>();
 
         // notify main admin about launch
         sendMessage((long) botConfig.getMainAdmin(), "Бот готов к работе!");
@@ -121,6 +123,11 @@ public class LastkatkaBotHandler extends BotHandler {
 
         var text = message.getText();
 
+        // for bulls and cows
+        if (text.matches("\\d{4}") && bullsAndCowsGames.containsKey(chatId)) {
+            bullsAndCowsGames.get(chatId).check(Integer.parseInt(text));
+        }
+
         // we dont need to handle messages that are not commands
         if (!text.startsWith("/"))
             return null;
@@ -186,6 +193,12 @@ public class LastkatkaBotHandler extends BotHandler {
                     break;
                 case "/dstats":
                     UsercommandsHandler.dstats(message, this);
+                    break;
+                case "/bnc":
+                    if (!bullsAndCowsGames.containsKey(chatId))
+                        bullsAndCowsGames.put(chatId, new BullsAndCowsGame(this, chatId));
+                    else
+                        sendMessage(chatId, "В этом чате игра уже идет!");
                     break;
             }
         }
