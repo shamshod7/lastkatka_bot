@@ -129,10 +129,6 @@ public class LastkatkaBotHandler extends BotHandler {
         if (!message.isCommand())
             return null;
 
-        // we dont need to handle messages that are not commands
-        if (!text.startsWith("/"))
-            return null;
-
         /* bot should only trigger on general commands (like /command) or on commands for this bot (/command@mybot),
          * and NOT on commands for another bots (like /command@notmybot) except @veganwarsbot
          */

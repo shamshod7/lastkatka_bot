@@ -71,14 +71,14 @@ public class MongoDBService implements DBService {
         }
         return "\uD83D\uDCCA Статистика " +
                 player +
-                "\nВыиграно игр: " +
+                "\nВыиграно дуэлей: " +
                 wins +
-                "\nВсего игр: " +
+                "\nВсего дуэлей сыграно: " +
                 total +
                 "\nВинрейт: " +
                 winrate +
                 "%" +
-                "Выиграно в Быки и Коровы: "
+                "\n\n\uD83D\uDC2EВыиграно в Быки и Коровы: "
                 + bncwins;
     }
 

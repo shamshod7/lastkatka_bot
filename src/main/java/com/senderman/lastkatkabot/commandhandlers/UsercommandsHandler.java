@@ -77,8 +77,12 @@ public class UsercommandsHandler {
             } catch (NumberFormatException nfe) {
                 random = ThreadLocalRandom.current().nextInt(1, 7);
             }
+        } else if (args.length == 2) {
+            int max = Integer.parseInt(args[2]);
+            random = ThreadLocalRandom.current().nextInt(1, max + 1);
         } else
             random = ThreadLocalRandom.current().nextInt(1, 7);
+
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
                 .setText("\uD83C\uDFB2 Кубик брошен. Результат: " + random)
