@@ -1,7 +1,10 @@
 package com.senderman.lastkatkabot;
 
+import com.annimon.tgbotsmodule.api.methods.Methods;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 class BullsAndCowsGame {
@@ -11,13 +14,14 @@ class BullsAndCowsGame {
     private int[] answerArray;
     private long chatId;
     private LastkatkaBotHandler handler;
+    private final Set<Integer> messagesToDelete;
 
-    // TODO: пин в ластвегане, сокращение флуда, история
-
+    // TODO: пин в ластвегане + история
 
     BullsAndCowsGame(LastkatkaBotHandler handler, long chatId) {
         this.handler = handler;
         this.chatId = chatId;
+        messagesToDelete = new HashSet<>();
         attempts = 10;
         handler.sendMessage(chatId, "Генерируем число...");
         answer = generateRandom();
@@ -28,28 +32,45 @@ class BullsAndCowsGame {
 
     void check(Message message) {
 
+        messagesToDelete.add(message.getMessageId());
         int number = Integer.parseInt(message.getText());
 
         if (hasRepeatingDigits(split(number))) {
-            handler.sendMessage(chatId, "Загаданное число не может содержать повторяющиеся числа!");
+            messagesToDelete.add(
+                    handler.sendMessage(chatId, "Загаданное число не может содержать повторяющиеся числа!")
+                            .getMessageId());
             return;
         }
 
         int[] results = calculate(split(number));
-        if (results[0] == 4) {
-            handler.sendMessage(chatId, "Вы выиграли! " + number + " - правильный ответ!");
+        if (results[0] == 4) { // win
+            handler.sendMessage(chatId, message.getFrom().getFirstName() + " выиграл! " + number + " - правильный ответ!");
             ServiceHolder.db().incBNCWin(message.getFrom().getId());
+            for (int messageId : messagesToDelete) {
+                Methods.deleteMessage(chatId, messageId).call(handler);
+            }
             handler.bullsAndCowsGames.remove(chatId);
+            return;
 
-        } else {
-            attempts--;
-            if (attempts == 0) {
-                handler.sendMessage(chatId, "Вы проиграли! Ответ: " + answer);
-                handler.bullsAndCowsGames.remove(chatId);
-            } else
-                handler.sendMessage(chatId, String.format(" %4$d: Быков: %1$d, коров: %2$d, попыток: %3$d\n",
-                        results[0], results[1], attempts, number));
         }
+
+        attempts--;
+        if (attempts != 0) { // attempt
+            messagesToDelete.add(handler.sendMessage(chatId, String.format(" %4$d: %1$dБ %2$dК, попыток: %3$d\n",
+                    results[0], results[1], attempts, number))
+                    .getMessageId());
+
+        } else { // lose
+            messagesToDelete.add(
+                    handler.sendMessage(chatId, "Вы проиграли! Ответ: " + answer)
+                            .getMessageId());
+            for (int messageId : messagesToDelete) {
+                Methods.deleteMessage(chatId, messageId).call(handler);
+            }
+            handler.bullsAndCowsGames.remove(chatId);
+        }
+
+
     }
 
     private int generateRandom() {

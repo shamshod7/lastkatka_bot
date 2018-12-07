@@ -78,7 +78,7 @@ public class MongoDBService implements DBService {
                 "\nВинрейт: " +
                 winrate +
                 "%" +
-                "\n\n\uD83D\uDC2EВыиграно в Быки и Коровы: "
+                "\n\n\uD83D\uDC2E Выиграно в Быки и Коровы: "
                 + bncwins;
     }
 

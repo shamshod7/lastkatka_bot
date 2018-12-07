@@ -311,8 +311,8 @@ public class LastkatkaBotHandler extends BotHandler {
                 message.getReplyToMessage().getText().contains("#players");
     }
 
-    public void sendMessage(long chatId, String text) {
-        sendMessage(Methods.sendMessage(chatId, text));
+    public Message sendMessage(long chatId, String text) {
+        return sendMessage(Methods.sendMessage(chatId, text));
     }
 
     public Message sendMessage(SendMessageMethod sm) {
