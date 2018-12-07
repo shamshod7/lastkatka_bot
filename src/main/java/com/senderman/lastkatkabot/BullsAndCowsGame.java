@@ -43,7 +43,7 @@ class BullsAndCowsGame {
 
         } else {
             attempts--;
-            if (attempts != 0) {
+            if (attempts == 0) {
                 handler.sendMessage(chatId, "Вы проиграли! Ответ: " + answer);
                 handler.bullsAndCowsGames.remove(chatId);
             } else
