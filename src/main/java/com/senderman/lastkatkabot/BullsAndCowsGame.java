@@ -61,9 +61,7 @@ class BullsAndCowsGame {
                     .getMessageId());
 
         } else { // lose
-            messagesToDelete.add(
-                    handler.sendMessage(chatId, "Вы проиграли! Ответ: " + answer)
-                            .getMessageId());
+            handler.sendMessage(chatId, "Вы проиграли! Ответ: " + answer);
             for (int messageId : messagesToDelete) {
                 Methods.deleteMessage(chatId, messageId).call(handler);
             }
