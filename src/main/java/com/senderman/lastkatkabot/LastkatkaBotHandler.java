@@ -227,6 +227,10 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/remchat":
                     ServiceHolder.db().removeFromAllowedChats(chatId, allowedChats);
                     break;
+                case "/newfield":
+                    sendMessage(chatId, "Инит");
+                    ServiceHolder.db().updStats();
+                    sendMessage(chatId, "done");
             }
         }
 

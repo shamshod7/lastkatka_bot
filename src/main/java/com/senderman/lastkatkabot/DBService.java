@@ -6,9 +6,11 @@ public interface DBService {
 
     void initStats(int id);
 
-    void winnerToStats(int id);
+    void incDuelWins(int id);
 
-    void loserToStats(int id);
+    void incDuelLoses(int id);
+
+    void incBNCWin(int id);
 
     String getStats(int id, String player);
 
@@ -41,5 +43,7 @@ public interface DBService {
     void addToAllowedChats(long chatId, Set<Long> allowedChats);
 
     void removeFromAllowedChats(long chatId, Set<Long> allowedChats);
+
+    void updStats();
 
 }

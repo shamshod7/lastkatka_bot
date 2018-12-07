@@ -2,6 +2,7 @@ package com.senderman.lastkatkabot;
 
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
+import org.bson.BsonType;
 import org.bson.Document;
 
 import java.util.HashSet;
@@ -19,11 +20,12 @@ public class MongoDBService implements DBService {
     public void initStats(int id) {
         var doc = new Document("id", id)
                 .append("total", 0)
-                .append("wins", 0);
+                .append("wins", 0)
+                .append("bncwins", 0);
         duelstats.insertOne(doc);
     }
 
-    public void winnerToStats(int id) {
+    public void incDuelWins(int id) {
         var doc = duelstats.find(Filters.eq("id", id)).first();
         if (doc == null) {
             initStats(id);
@@ -36,7 +38,7 @@ public class MongoDBService implements DBService {
         duelstats.updateOne(Filters.eq("id", id), updateDoc);
     }
 
-    public void loserToStats(int id) {
+    public void incDuelLoses(int id) {
         var doc = duelstats.find(Filters.eq("id", id)).first();
         if (doc == null) {
             initStats(id);
@@ -46,8 +48,19 @@ public class MongoDBService implements DBService {
         duelstats.updateOne(Filters.eq("id", id), updateDoc);
     }
 
+    @Override
+    public void incBNCWin(int id) {
+        var doc = duelstats.find(Filters.eq("id", id)).first();
+        if (doc == null) {
+            initStats(id);
+        }
+        var updateDoc = new Document()
+                .append("$inc", new Document("bncwins", 1));
+        duelstats.updateOne(Filters.eq("id", id), updateDoc);
+    }
+
     public String getStats(int id, String player) {
-        int total = 0, wins = 0, winrate = 0;
+        int total = 0, wins = 0, winrate = 0, bncwins = 0;
         var doc = duelstats.find(Filters.eq("id", id)).first();
         if (doc == null) {
             initStats(id);
@@ -55,6 +68,7 @@ public class MongoDBService implements DBService {
             total = doc.getInteger("total");
             wins = doc.getInteger("wins");
             winrate = (total == 0) ? 0 : 100 * wins / total;
+            bncwins = doc.getInteger("bncwins");
         }
         return "\uD83D\uDCCA Статистика " +
                 player +
@@ -64,7 +78,9 @@ public class MongoDBService implements DBService {
                 total +
                 "\nВинрейт: " +
                 winrate +
-                "%";
+                "%" +
+                "Выиграно в Быки и Коровы: "
+                + bncwins;
     }
 
     public void addToBlacklist(int id, String name, Set<Integer> blacklistSet) {
@@ -199,5 +215,10 @@ public class MongoDBService implements DBService {
     public void removeFromAllowedChats(long chatId, Set<Long> allowedChats) {
         allowedChatsCollection.deleteOne(Filters.eq("chatId", chatId));
         allowedChats.remove(chatId);
+    }
+
+    public void updStats() {
+        duelstats.updateMany(Filters.type("total", BsonType.INT32),
+                new Document("$set", new Document("bncwins", 0)));
     }
 }

@@ -3,12 +3,14 @@ package com.senderman.lastkatkabot;
 import java.util.concurrent.ThreadLocalRandom;
 
 class BullsAndCowsGame {
-    private final int MAX_COUNT = 4;
+    private final int LENGTH = 4;
     private int attempts;
     private int answer;
     private int[] answerArray;
     private long chatId;
     private LastkatkaBotHandler handler;
+
+    // TODO: пин в ластвегане, статистика, сокращение флуда, история
 
 
     BullsAndCowsGame(LastkatkaBotHandler handler, long chatId) {
@@ -24,15 +26,11 @@ class BullsAndCowsGame {
 
     void check(int number) {
 
-        if (attempts == 1) {
-            handler.sendMessage(chatId, "Вы проиграли! Ответ: " + answer);
-            handler.bullsAndCowsGames.remove(chatId);
-            return;
-        }
-        if (matchFound(split(number))) {
+        if (hasRepeatingDigits(split(number))) {
             handler.sendMessage(chatId, "Загаданное число не может содержать повторяющиеся числа!");
             return;
         }
+
         int[] results = calculate(split(number));
         if (results[0] == 4) {
             handler.sendMessage(chatId, "Вы выиграли! " + number + " - правильный ответ!");
@@ -40,8 +38,12 @@ class BullsAndCowsGame {
 
         } else {
             attempts--;
-            handler.sendMessage(chatId, String.format(" %4$d: Быков: %1$d, коров: %2$d, попыток: %3$d\n",
-                    results[0], results[1], attempts, number));
+            if (attempts != 0) {
+                handler.sendMessage(chatId, "Вы проиграли! Ответ: " + answer);
+                handler.bullsAndCowsGames.remove(chatId);
+            } else
+                handler.sendMessage(chatId, String.format(" %4$d: Быков: %1$d, коров: %2$d, попыток: %3$d\n",
+                        results[0], results[1], attempts, number));
         }
     }
 
@@ -49,25 +51,25 @@ class BullsAndCowsGame {
         int random;
         do {
             random = ThreadLocalRandom.current().nextInt(1000, 10000);
-        } while (matchFound(split(random)));
+        } while (hasRepeatingDigits(split(random)));
         return random;
     }
 
     // int to int[] :)
     private int[] split(int num) {
-        int[] result = new int[MAX_COUNT];
-        for (int i = 0; i < MAX_COUNT; i++) {
+        int[] result = new int[LENGTH];
+        for (int i = 0; i < LENGTH; i++) {
             int t = num % 10;
-            result[MAX_COUNT - 1 - i] = t;
+            result[LENGTH - 1 - i] = t;
             num /= 10;
         }
         return result;
     }
 
     // check that array contains only unique numbers
-    private boolean matchFound(int[] array) {
-        for (int i = 0; i < MAX_COUNT; i++) {
-            for (int j = i + 1; j < MAX_COUNT; j++) {
+    private boolean hasRepeatingDigits(int[] array) {
+        for (int i = 0; i < LENGTH; i++) {
+            for (int j = i + 1; j < LENGTH; j++) {
                 if (array[i] == array[j]) {
                     return true;
                 }
@@ -79,11 +81,11 @@ class BullsAndCowsGame {
     //calculate bulls and cows
     private int[] calculate(int[] player) {
         int bulls = 0, cows = 0;
-        for (int i = 0; i < MAX_COUNT; i++) {
+        for (int i = 0; i < LENGTH; i++) {
             if (answerArray[i] == player[i]) {
                 bulls++;
             } else {
-                for (int j = 0; j < MAX_COUNT; j++) {
+                for (int j = 0; j < LENGTH; j++) {
                     if (player[i] == answerArray[j] && player[j] != answerArray[j]) {
                         cows++;
                     }
