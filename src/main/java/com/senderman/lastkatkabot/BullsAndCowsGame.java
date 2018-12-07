@@ -1,5 +1,7 @@
 package com.senderman.lastkatkabot;
 
+import org.telegram.telegrambots.meta.api.objects.Message;
+
 import java.util.concurrent.ThreadLocalRandom;
 
 class BullsAndCowsGame {
@@ -10,7 +12,7 @@ class BullsAndCowsGame {
     private long chatId;
     private LastkatkaBotHandler handler;
 
-    // TODO: пин в ластвегане, статистика, сокращение флуда, история
+    // TODO: пин в ластвегане, сокращение флуда, история
 
 
     BullsAndCowsGame(LastkatkaBotHandler handler, long chatId) {
@@ -24,7 +26,9 @@ class BullsAndCowsGame {
                 "Отправляйте в чат ваши варианты, они должны состоять только из 4 неповторяющихся чисел!");
     }
 
-    void check(int number) {
+    void check(Message message) {
+
+        int number = Integer.parseInt(message.getText());
 
         if (hasRepeatingDigits(split(number))) {
             handler.sendMessage(chatId, "Загаданное число не может содержать повторяющиеся числа!");
@@ -34,6 +38,7 @@ class BullsAndCowsGame {
         int[] results = calculate(split(number));
         if (results[0] == 4) {
             handler.sendMessage(chatId, "Вы выиграли! " + number + " - правильный ответ!");
+            ServiceHolder.db().incBNCWin(message.getFrom().getId());
             handler.bullsAndCowsGames.remove(chatId);
 
         } else {

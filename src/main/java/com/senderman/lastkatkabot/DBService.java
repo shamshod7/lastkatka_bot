@@ -44,6 +44,4 @@ public interface DBService {
 
     void removeFromAllowedChats(long chatId, Set<Long> allowedChats);
 
-    void updStats();
-
 }

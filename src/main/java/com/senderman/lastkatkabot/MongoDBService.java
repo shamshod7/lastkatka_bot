@@ -2,7 +2,6 @@ package com.senderman.lastkatkabot;
 
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
-import org.bson.BsonType;
 import org.bson.Document;
 
 import java.util.HashSet;
@@ -215,10 +214,5 @@ public class MongoDBService implements DBService {
     public void removeFromAllowedChats(long chatId, Set<Long> allowedChats) {
         allowedChatsCollection.deleteOne(Filters.eq("chatId", chatId));
         allowedChats.remove(chatId);
-    }
-
-    public void updStats() {
-        duelstats.updateMany(Filters.type("total", BsonType.INT32),
-                new Document("$set", new Document("bncwins", 0)));
     }
 }

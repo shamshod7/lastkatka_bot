@@ -122,7 +122,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         // for bulls and cows
         if (text.matches("\\d{4}") && bullsAndCowsGames.containsKey(chatId)) {
-            bullsAndCowsGames.get(chatId).check(Integer.parseInt(text));
+            bullsAndCowsGames.get(chatId).check(message);
             return null;
         }
 
@@ -227,10 +227,6 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/remchat":
                     ServiceHolder.db().removeFromAllowedChats(chatId, allowedChats);
                     break;
-                case "/newfield":
-                    sendMessage(chatId, "Инит");
-                    ServiceHolder.db().updStats();
-                    sendMessage(chatId, "done");
             }
         }
 
