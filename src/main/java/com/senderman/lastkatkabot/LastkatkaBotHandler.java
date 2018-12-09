@@ -188,7 +188,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/feedback":
                     UsercommandsHandler.feedback(message, this);
                     break;
-                case "/dstats":
+                case "/stats":
                     UsercommandsHandler.dstats(message, this);
                     break;
                 case "/bnc":
@@ -196,6 +196,9 @@ public class LastkatkaBotHandler extends BotHandler {
                         bullsAndCowsGames.put(chatId, new BullsAndCowsGame(this, chatId));
                     else
                         sendMessage(chatId, "В этом чате игра уже идет!");
+                    break;
+                case "/bnchelp":
+                    UsercommandsHandler.bnchelp(message, this);
                     break;
             }
         }

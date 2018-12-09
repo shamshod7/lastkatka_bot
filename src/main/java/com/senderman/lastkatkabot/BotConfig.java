@@ -43,6 +43,9 @@ public class BotConfig {
     @JsonProperty
     private String mainadminhelp;
 
+    @JsonProperty
+    private String bncphoto;
+
     public String getToken() {
         return token;
     }
@@ -145,5 +148,13 @@ public class BotConfig {
 
     public void setMainadminhelp(String mainadminhelp) {
         this.mainadminhelp = mainadminhelp;
+    }
+
+    public String getBncphoto() {
+        return bncphoto;
+    }
+
+    public void setBncphoto(String bncphoto) {
+        this.bncphoto = bncphoto;
     }
 }

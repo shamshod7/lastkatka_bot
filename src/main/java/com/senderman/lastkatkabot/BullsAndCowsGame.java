@@ -35,7 +35,7 @@ class BullsAndCowsGame {
         messagesToDelete.add(message.getMessageId());
 
         if (message.getText().startsWith("0")) {
-            handler.sendMessage(chatId, "Число не начинается с 0!");
+            messagesToDelete.add(handler.sendMessage(chatId, "Число не начинается с 0!").getMessageId());
             return;
         }
         int number = Integer.parseInt(message.getText());
@@ -49,9 +49,8 @@ class BullsAndCowsGame {
 
         int[] results = calculate(split(number));
         if (results[0] == 4) { // win
-            handler.sendMessage(chatId, message.getFrom().getFirstName() +
-                    " выиграл за " + (9 - attempts) + " попыток! "
-                    + number + " - правильный ответ!");
+            handler.sendMessage(chatId, String.format("%1$s выиграл за %2$d попыток! %3$d - правильный ответ!",
+                    message.getFrom().getFirstName(), 9 - attempts, number));
             ServiceHolder.db().incBNCWin(message.getFrom().getId());
             for (int messageId : messagesToDelete) {
                 Methods.deleteMessage(chatId, messageId).call(handler);

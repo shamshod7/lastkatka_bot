@@ -1,6 +1,7 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
 import com.annimon.tgbotsmodule.api.methods.Methods;
+import com.annimon.tgbotsmodule.api.methods.send.SendPhotoMethod;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import com.senderman.lastkatkabot.ServiceHolder;
@@ -114,6 +115,17 @@ public class UsercommandsHandler {
                 .setChatId(message.getChatId())
                 .setText("✅ Отправлено разрабу бота")
                 .setReplyToMessageId(message.getMessageId()));
+    }
+
+    public static void bnchelp(Message message, LastkatkaBotHandler handler) {
+        SendPhotoMethod sendPhoto = Methods.sendPhoto()
+                .setChatId(message.getChatId())
+                .setFile(handler.botConfig.getBncphoto());
+        if (message.isReply())
+            sendPhoto.setReplyToMessageId(message.getReplyToMessage().getMessageId());
+        else
+            sendPhoto.setReplyToMessageId(message.getMessageId());
+        sendPhoto.call(handler);
     }
 
     public static void help(Message message, LastkatkaBotHandler handler) {

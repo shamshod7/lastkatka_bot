@@ -126,10 +126,7 @@ public class TournamentHandler {
             player1 = params[1];
             player2 = params[3];
         }
-        return player1 + " - " +
-                player2 + "\n" +
-                params[2] + ":" +
-                params[4];
+        return String.format("%1$s - %2$s\n%3$s:%4$s", player1, player2, params[2], params[4]);
     }
 
     private static void restrictMembers(LastkatkaBotHandler handler) {
