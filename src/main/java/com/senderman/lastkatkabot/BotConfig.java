@@ -3,7 +3,6 @@ package com.senderman.lastkatkabot;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
-import java.util.StringJoiner;
 
 public class BotConfig {
 
@@ -40,6 +39,9 @@ public class BotConfig {
 
     @JsonProperty
     private Set<String> veganWarsCommands;
+
+    @JsonProperty
+    private String mainadminhelp;
 
     public String getToken() {
         return token;
@@ -137,21 +139,11 @@ public class BotConfig {
         this.veganWarsCommands = veganWarsCommands;
     }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", BotConfig.class.getSimpleName() + "[", "]")
-                .add("token='" + token + "'")
-                .add("username='" + username + "'")
-                .add("mainAdmin=" + mainAdmin)
-                .add("lastvegan=" + lastvegan)
-                .add("tourgroup=" + tourgroup)
-                .add("tourchannel='" + tourchannel + "'")
-                .add("tourgroupname='" + tourgroupname + "'")
-                .add("wwBots=" + wwBots)
-                .add("help='" + help + "'")
-                .add("adminhelp='" + adminhelp + "'")
-                .add("setuphelp='" + setuphelp + "'")
-                .add("veganWarsCommands=" + veganWarsCommands)
-                .toString();
+    public String getMainadminhelp() {
+        return mainadminhelp;
+    }
+
+    public void setMainadminhelp(String mainadminhelp) {
+        this.mainadminhelp = mainadminhelp;
     }
 }

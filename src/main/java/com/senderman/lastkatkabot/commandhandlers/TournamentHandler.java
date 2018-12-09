@@ -117,8 +117,15 @@ public class TournamentHandler {
     }
 
     private static String getScore(String[] params) {
-        String player1 = params[1];
-        String player2 = params[3];
+        String player1;
+        String player2;
+        if (isTeamMode) {
+            player1 = params[1].replace("_", " ");
+            player2 = params[3].replace("_", " ");
+        } else {
+            player1 = params[1];
+            player2 = params[3];
+        }
         return player1 + " - " +
                 player2 + "\n" +
                 params[2] + ":" +

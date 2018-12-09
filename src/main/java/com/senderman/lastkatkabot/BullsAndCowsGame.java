@@ -33,6 +33,11 @@ class BullsAndCowsGame {
     void check(Message message) {
 
         messagesToDelete.add(message.getMessageId());
+
+        if (message.getText().startsWith("0")) {
+            handler.sendMessage(chatId, "Число не начинается с 0!");
+            return;
+        }
         int number = Integer.parseInt(message.getText());
 
         if (hasRepeatingDigits(split(number))) {
@@ -44,7 +49,9 @@ class BullsAndCowsGame {
 
         int[] results = calculate(split(number));
         if (results[0] == 4) { // win
-            handler.sendMessage(chatId, message.getFrom().getFirstName() + " выиграл! " + number + " - правильный ответ!");
+            handler.sendMessage(chatId, message.getFrom().getFirstName() +
+                    " выиграл за " + (9 - attempts) + " попыток! "
+                    + number + " - правильный ответ!");
             ServiceHolder.db().incBNCWin(message.getFrom().getId());
             for (int messageId : messagesToDelete) {
                 Methods.deleteMessage(chatId, messageId).call(handler);

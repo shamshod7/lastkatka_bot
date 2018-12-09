@@ -121,6 +121,9 @@ public class UsercommandsHandler {
         if (handler.admins.contains(message.getFrom().getId())) { // admins want to get extra help
             sb.append(handler.botConfig.getAdminhelp());
         }
+        if (message.getFrom().getId().equals(handler.botConfig.getMainAdmin())) {
+            sb.append(handler.botConfig.getMainadminhelp());
+        }
         if (message.isUserMessage()) {
             var sm = Methods.sendMessage()
                     .setChatId(message.getChatId())
