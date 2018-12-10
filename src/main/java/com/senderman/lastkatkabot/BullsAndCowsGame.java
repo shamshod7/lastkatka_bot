@@ -21,13 +21,14 @@ class BullsAndCowsGame {
     BullsAndCowsGame(LastkatkaBotHandler handler, long chatId) {
         this.handler = handler;
         this.chatId = chatId;
-        messagesToDelete = new HashSet<>();
         attempts = 10;
+        messagesToDelete = new HashSet<>();
         handler.sendMessage(chatId, "Генерируем число...");
         answer = generateRandom();
         answerArray = split(answer);
         handler.sendMessage(chatId, "Число загадано!\n" +
-                "Отправляйте в чат ваши варианты, они должны состоять только из 4 неповторяющихся чисел!");
+                "Отправляйте в чат ваши варианты, они должны состоять только из 4 неповторяющихся чисел!\n" +
+                "Правила игры - /bnchelp");
     }
 
     void check(Message message) {
@@ -49,8 +50,9 @@ class BullsAndCowsGame {
 
         int[] results = calculate(split(number));
         if (results[0] == 4) { // win
+            attempts--;
             handler.sendMessage(chatId, String.format("%1$s выиграл за %2$d попыток! %3$d - правильный ответ!",
-                    message.getFrom().getFirstName(), 9 - attempts, number));
+                    message.getFrom().getFirstName(), 10 - attempts, number));
             ServiceHolder.db().incBNCWin(message.getFrom().getId());
             for (int messageId : messagesToDelete) {
                 Methods.deleteMessage(chatId, messageId).call(handler);
@@ -60,13 +62,15 @@ class BullsAndCowsGame {
 
         }
 
-        attempts--;
         if (attempts != 0) { // attempt
-            messagesToDelete.add(handler.sendMessage(chatId, String.format(" %4$d: %1$dБ %2$dК, попыток: %3$d\n",
+            attempts--;
+            messagesToDelete.add(handler.sendMessage(chatId, String.format("%4$d: %1$dБ %2$dК, попыток: %3$d\n",
                     results[0], results[1], attempts, number))
                     .getMessageId());
 
-        } else { // lose
+        }
+
+        if (attempts == 0) { // lose
             handler.sendMessage(chatId, "Вы проиграли! Ответ: " + answer);
             for (int messageId : messagesToDelete) {
                 Methods.deleteMessage(chatId, messageId).call(handler);
