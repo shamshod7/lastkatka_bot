@@ -188,7 +188,7 @@ public class TournamentHandler {
     public static void rt(LastkatkaBotHandler handler) {
         restrictMembers(handler);
         handler.sendMessage(handler.botConfig.getLastvegan(),
-                "\uD83D\uDEAB <b>Турнир отменен из-за непредвиденных обстоятельств!</b>");
+                "\uD83D\uDEAB <b>Раунд отменен из-за непредвиденных обстоятельств!</b>");
     }
 
     public static void tourmessage(LastkatkaBotHandler handler, Message message) {

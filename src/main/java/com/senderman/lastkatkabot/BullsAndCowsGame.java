@@ -16,8 +16,6 @@ class BullsAndCowsGame {
     private LastkatkaBotHandler handler;
     private final Set<Integer> messagesToDelete;
 
-    // TODO: пин в ластвегане + история
-
     BullsAndCowsGame(LastkatkaBotHandler handler, long chatId) {
         this.handler = handler;
         this.chatId = chatId;
@@ -48,9 +46,9 @@ class BullsAndCowsGame {
             return;
         }
 
+        attempts--;
         int[] results = calculate(split(number));
         if (results[0] == 4) { // win
-            attempts--;
             handler.sendMessage(chatId, String.format("%1$s выиграл за %2$d попыток! %3$d - правильный ответ!",
                     message.getFrom().getFirstName(), 10 - attempts, number));
             ServiceHolder.db().incBNCWin(message.getFrom().getId());
@@ -62,23 +60,17 @@ class BullsAndCowsGame {
 
         }
 
-        if (attempts != 0) { // attempt
-            attempts--;
+        if (attempts != 0) {
             messagesToDelete.add(handler.sendMessage(chatId, String.format("%4$d: %1$dБ %2$dК, попыток: %3$d\n",
                     results[0], results[1], attempts, number))
                     .getMessageId());
-
-        }
-
-        if (attempts == 0) { // lose
+        } else { // lose
             handler.sendMessage(chatId, "Вы проиграли! Ответ: " + answer);
             for (int messageId : messagesToDelete) {
                 Methods.deleteMessage(chatId, messageId).call(handler);
             }
             handler.bullsAndCowsGames.remove(chatId);
         }
-
-
     }
 
     private int generateRandom() {
