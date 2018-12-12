@@ -176,7 +176,7 @@ public class TournamentHandler {
 
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(handler.botConfig.getTourchannel())
-                .setText(score + "\n\n" + params[1] + "<b>" + goingTo + "!</b>"));
+                .setText(score + "\n\n" + params[1].replace("_", " ") + "<b>" + goingTo + "!</b>"));
 
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(handler.botConfig.getLastvegan())
