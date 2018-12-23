@@ -46,6 +46,9 @@ public class BotConfig {
     @JsonProperty
     private String bncphoto;
 
+    @JsonProperty
+    private String leavesticker;
+
     public String getToken() {
         return token;
     }
@@ -156,5 +159,13 @@ public class BotConfig {
 
     public void setBncphoto(String bncphoto) {
         this.bncphoto = bncphoto;
+    }
+
+    public String getLeavesticker() {
+        return leavesticker;
+    }
+
+    public void setLeavesticker(String leavesticker) {
+        this.leavesticker = leavesticker;
     }
 }

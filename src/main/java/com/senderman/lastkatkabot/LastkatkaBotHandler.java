@@ -115,6 +115,14 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
         }
 
+        if (message.getLeftChatMember() != null) {
+            Methods.sendDocument()
+                    .setChatId(chatId)
+                    .setFile(botConfig.getLeavesticker())
+                    .setReplyToMessageId(message.getMessageId())
+                    .call(this);
+        }
+
         if (!message.hasText())
             return null;
 
@@ -136,7 +144,6 @@ public class LastkatkaBotHandler extends BotHandler {
 
         if (botConfig.getVeganWarsCommands().contains(text) && !veganTimers.containsKey(chatId)) { // start veganwars timer
             veganTimers.put(chatId, new VeganTimer(chatId, this));
-            veganTimers.get(chatId).start();
 
         } else if (text.startsWith("/join") && veganTimers.containsKey(chatId)) {
             veganTimers.get(chatId).addPlayer(message.getFrom().getId(), message);

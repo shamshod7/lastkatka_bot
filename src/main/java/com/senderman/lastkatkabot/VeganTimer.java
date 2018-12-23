@@ -16,9 +16,10 @@ class VeganTimer {
         this.chatId = chatId;
         this.handler = handler;
         vegans = new HashSet<>();
+        new Thread(this::startVeganTimer).start();
     }
 
-    private void veganTimer() {
+    private void startVeganTimer() {
         for (int i = 299; i > 0; i--) {
             if (!runTimer) break;
 
@@ -35,10 +36,6 @@ class VeganTimer {
             }
         }
         stop();
-    }
-
-    void start() {
-        new Thread(this::veganTimer).start();
     }
 
     void stop() {

@@ -19,6 +19,7 @@ veganWarsCommands:
   - '/customgame@veganwarsbot'
 
 bncphoto: env(bncphoto)
+leavesticker: env(leavesticker)
 
 help: |
   Привет! Это очень полезный бот для проекта @lastkatka, который многое что умеет! Основные команды:
