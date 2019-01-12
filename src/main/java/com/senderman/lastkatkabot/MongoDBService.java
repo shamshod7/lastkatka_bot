@@ -22,6 +22,7 @@ public class MongoDBService implements DBService {
     private MongoCollection<Document> getChatMembersCollection(long chatId) {
         var collection = chatMembersDB.getCollection(String.valueOf(chatId));
         if (collection == null) {
+            System.out.println("Collection not exists");
             chatMembersDB.createCollection(String.valueOf(chatId));
             collection = chatMembersDB.getCollection(String.valueOf(chatId));
         }
