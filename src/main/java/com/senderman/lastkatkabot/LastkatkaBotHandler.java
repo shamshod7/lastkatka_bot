@@ -3,6 +3,8 @@ package com.senderman.lastkatkabot;
 import com.annimon.tgbotsmodule.BotHandler;
 import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.annimon.tgbotsmodule.api.methods.send.SendMessageMethod;
+import com.senderman.lastkatkabot.TempObjects.BullsAndCowsGame;
+import com.senderman.lastkatkabot.TempObjects.VeganTimer;
 import com.senderman.lastkatkabot.commandhandlers.*;
 import org.jetbrains.annotations.NotNull;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -20,8 +22,8 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Long> allowedChats;
     public final Set<Integer> blacklist;
     private final DuelController duelController;
-    Map<Long, VeganTimer> veganTimers;
-    Map<Long, BullsAndCowsGame> bullsAndCowsGames;
+    public Map<Long, VeganTimer> veganTimers;
+    public Map<Long, BullsAndCowsGame> bullsAndCowsGames;
 
     LastkatkaBotHandler(BotConfig botConfig) {
         this.botConfig = botConfig;
@@ -121,7 +123,11 @@ public class LastkatkaBotHandler extends BotHandler {
                     .setFile(botConfig.getLeavesticker())
                     .setReplyToMessageId(message.getMessageId())
                     .call(this);
+            ServiceHolder.db().removeUserFromDB(message.getLeftChatMember(), chatId);
         }
+
+        if (!message.isUserMessage() && !message.isChannelMessage()) // add user to DB
+            ServiceHolder.db().addUserToDB(message.getFrom(), chatId);
 
         if (!message.hasText())
             return null;
@@ -180,6 +186,8 @@ public class LastkatkaBotHandler extends BotHandler {
         // users in blacklist are not allowed to use this commands
         if (isNotInBlacklist(message)) {
             switch (command) {
+                case "/pair":
+                    UsercommandsHandler.pair(chatId, this);
                 case "/action":
                     UsercommandsHandler.action(message, this);
                     break;

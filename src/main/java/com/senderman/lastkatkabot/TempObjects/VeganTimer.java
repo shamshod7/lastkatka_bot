@@ -1,18 +1,19 @@
-package com.senderman.lastkatkabot;
+package com.senderman.lastkatkabot.TempObjects;
 
+import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.HashSet;
 import java.util.Set;
 
-class VeganTimer {
+public class VeganTimer {
     private final long chatId;
     private final LastkatkaBotHandler handler;
     private Set<Integer> vegans;
     private boolean runTimer = true;
 
-    VeganTimer(long chatId, LastkatkaBotHandler handler) {
+    public VeganTimer(long chatId, LastkatkaBotHandler handler) {
         this.chatId = chatId;
         this.handler = handler;
         vegans = new HashSet<>();
@@ -38,12 +39,12 @@ class VeganTimer {
         stop();
     }
 
-    void stop() {
+    public void stop() {
         runTimer = false;
         handler.veganTimers.remove(chatId);
     }
 
-    void addPlayer(int id, Message message) {
+    public void addPlayer(int id, Message message) {
         if (vegans.contains(message.getFrom().getId()))
             return;
 
@@ -56,7 +57,7 @@ class VeganTimer {
         handler.sendMessage(chatId, toSend);
     }
 
-    void removePlayer(int id) {
+    public void removePlayer(int id) {
         if (!vegans.contains(id))
             return;
 
@@ -69,7 +70,7 @@ class VeganTimer {
         handler.sendMessage(chatId, toSend);
     }
 
-    int getVegansAmount() {
+    public int getVegansAmount() {
         return vegans.size();
     }
 }

@@ -1,13 +1,15 @@
-package com.senderman.lastkatkabot;
+package com.senderman.lastkatkabot.TempObjects;
 
 import com.annimon.tgbotsmodule.api.methods.Methods;
+import com.senderman.lastkatkabot.LastkatkaBotHandler;
+import com.senderman.lastkatkabot.ServiceHolder;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-class BullsAndCowsGame {
+public class BullsAndCowsGame {
     private final int LENGTH = 4;
     private int attempts;
     private int answer;
@@ -16,7 +18,7 @@ class BullsAndCowsGame {
     private LastkatkaBotHandler handler;
     private final Set<Integer> messagesToDelete;
 
-    BullsAndCowsGame(LastkatkaBotHandler handler, long chatId) {
+    public BullsAndCowsGame(LastkatkaBotHandler handler, long chatId) {
         this.handler = handler;
         this.chatId = chatId;
         attempts = 10;
@@ -29,7 +31,7 @@ class BullsAndCowsGame {
                 "Правила игры - /bnchelp");
     }
 
-    void check(Message message) {
+    public void check(Message message) {
 
         messagesToDelete.add(message.getMessageId());
 

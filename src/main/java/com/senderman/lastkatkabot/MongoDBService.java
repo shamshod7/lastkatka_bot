@@ -2,19 +2,26 @@ package com.senderman.lastkatkabot;
 
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
+import com.senderman.lastkatkabot.TempObjects.TgUser;
 import org.bson.Document;
+import org.telegram.telegrambots.meta.api.objects.User;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class MongoDBService implements DBService {
     private final MongoClient client = MongoClients.create(System.getenv("database"));
     private final MongoDatabase database = client.getDatabase("lastkatka");
+    private final MongoDatabase chatMembersDB = client.getDatabase("chatmembers");
     private final MongoCollection<Document> admins = database.getCollection("admins");
     private final MongoCollection<Document> blacklist = database.getCollection("blacklist");
     private final MongoCollection<Document> duelstats = database.getCollection("duelstats");
     private final MongoCollection<Document> settings = database.getCollection("settings");
     private final MongoCollection<Document> allowedChatsCollection = database.getCollection("allowedchats");
+
+    private MongoCollection<Document> getChatMembersCollection(long chatId) {
+        return chatMembersDB.getCollection(String.valueOf(chatId));
+    }
 
     public void initStats(int id) {
         var doc = new Document("id", id)
@@ -144,9 +151,7 @@ public class MongoDBService implements DBService {
                 result.append("<a href=\"tg://user?id=")
                         .append(doc.getInteger("id"))
                         .append("\">")
-                        .append(doc.getString("name")
-                                .replace("<", "&lt;")
-                                .replace(">", "&gt;"))
+                        .append(doc.getString("name"))
                         .append("</a>\n");
             }
         }
@@ -163,15 +168,43 @@ public class MongoDBService implements DBService {
         }
     }
 
-    public Set<Long> getPlayersIds() {
-        Set<Long> players = new HashSet<>();
+    public Set<Integer> getPlayersIds() {
+        Set<Integer> players = new HashSet<>();
         try (MongoCursor<Document> cursor = duelstats.find().iterator()) {
             while (cursor.hasNext()) {
                 var doc = cursor.next();
-                players.add(doc.getInteger("id").longValue());
+                players.add(doc.getInteger("id"));
             }
         }
         return players;
+    }
+
+    @Override
+    public void addUserToDB(User user, long chatId) {
+        var doc = getChatMembersCollection(chatId).find(Filters.eq("id", user.getId()));
+        if (doc != null)
+            return;
+        getChatMembersCollection(chatId).insertOne(new Document()
+                .append("name", user.getFirstName())
+                .append("id", user.getId()));
+    }
+
+    @Override
+    public void removeUserFromDB(User user, long chatId) {
+        getChatMembersCollection(chatId).deleteOne(Filters.eq("id", user.getId()));
+    }
+
+    @Override
+    public List<TgUser> getChatMemebers(long chatId) {
+        var chat = getChatMembersCollection(chatId);
+        ArrayList<TgUser> members = new ArrayList<>();
+        try (MongoCursor<Document> cursor = chat.find().iterator()) {
+            while (cursor.hasNext()) {
+                var doc = cursor.next();
+                members.add(new TgUser(doc.getInteger("id"), doc.getString("name")));
+            }
+        }
+        return members;
     }
 
     @Override
@@ -208,11 +241,46 @@ public class MongoDBService implements DBService {
     public void addToAllowedChats(long chatId, Set<Long> allowedChats) {
         allowedChatsCollection.insertOne(new Document("chatId", chatId));
         allowedChats.add(chatId);
+        chatMembersDB.createCollection(String.valueOf(chatId));
     }
 
     @Override
     public void removeFromAllowedChats(long chatId, Set<Long> allowedChats) {
         allowedChatsCollection.deleteOne(Filters.eq("chatId", chatId));
         allowedChats.remove(chatId);
+        settings.deleteOne(Filters.eq("chatId", chatId));
+        getChatMembersCollection(chatId).drop();
+    }
+
+    @Override
+    public boolean pairExistsToday(long chatId) {
+        var doc = getChatMembersCollection(chatId).find(Filters.eq("chatId", chatId)).first();
+        if (doc == null)
+            return false;
+        else {
+            var format = new SimpleDateFormat("yyyyMMdd");
+            var today = format.format(new Date());
+            return Long.parseLong(doc.getString("date")) == Long.parseLong(today);
+        }
+    }
+
+    @Override
+    public void setPair(long chatId, String name1, String name2) {
+        settings.deleteOne(Filters.eq("chatId", chatId));
+        var format = new SimpleDateFormat("yyyyMMdd");
+        settings.insertOne(new Document()
+                .append("chatId", chatId)
+                .append("name1", name1)
+                .append("name2", name2)
+                .append("date", Long.parseLong(format.format(new Date()))));
+    }
+
+    @Override
+    public String getPairOfTheDay(long chatId) {
+        var doc = settings.find(Filters.eq("chatId")).first();
+        if (doc != null) {
+            return "Пара дня: " + doc.getString("name1") + " ❤️ " + doc.getString("name2");
+        } else
+            return "Ошибка, попробуйте завтра";
     }
 }

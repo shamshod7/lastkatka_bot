@@ -29,7 +29,7 @@ public class AdminHandler {
         ServiceHolder.db().removeFromBlacklist(message.getReplyToMessage().getFrom().getId(),
                 handler.blacklist);
         handler.sendMessage(message.getChatId(), "\uD83D\uDE38 " + message.getReplyToMessage().getFrom().getUserName() +
-                " хорошая киса!");
+                " - хорошая киса!");
     }
 
     public static void nekos(Message message, LastkatkaBotHandler handler) {
@@ -94,9 +94,9 @@ public class AdminHandler {
         text = "\uD83D\uDCE3 <b>Объявление</b>\n\n" + text.split("\\s+", 2)[1];
         var players = ServiceHolder.db().getPlayersIds();
         int counter = 0;
-        for (long player : players) {
+        for (int player : players) {
             try {
-                handler.execute(new SendMessage(player, text).enableHtml(true));
+                handler.execute(new SendMessage((long) player, text).enableHtml(true));
                 counter++;
             } catch (TelegramApiException e) {
                 BotLogger.error("ANNOUNCE", e.toString());

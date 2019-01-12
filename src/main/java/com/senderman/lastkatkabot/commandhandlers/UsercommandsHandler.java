@@ -154,4 +154,30 @@ public class UsercommandsHandler {
                     .setReplyToMessageId(message.getMessageId()));
         }
     }
+
+    public static void pair(long chatId, LastkatkaBotHandler handler) {
+        if (ServiceHolder.db().pairExistsToday(chatId)) {
+            handler.sendMessage(chatId, ServiceHolder.db().getPairOfTheDay(chatId));
+            return;
+        }
+
+        var users = ServiceHolder.db().getChatMemebers(chatId);
+        if (users.size() < 3) {
+            handler.sendMessage(chatId, "Недостаточно пользователей для создания пары! Подождите, пока кто-то еще напишет в чат!");
+            return;
+        }
+
+        handler.sendMessage(chatId, "Определение пары дня...");
+        int random1 = ThreadLocalRandom.current().nextInt(0, users.size());
+        int random2;
+        do {
+            random2 = ThreadLocalRandom.current().nextInt(0, users.size());
+        } while (random1 == random2);
+
+        var user1 = users.get(random1);
+        var user2 = users.get(random2);
+        ServiceHolder.db().setPair(chatId, user1.getName(), user2.getName());
+        handler.sendMessage(chatId,
+                "Пара дня: " + user1.getLink() + " ❤ " + user2.getLink());
+    }
 }
