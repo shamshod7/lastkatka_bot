@@ -127,12 +127,7 @@ public class LastkatkaBotHandler extends BotHandler {
         }
 
         if (message.isGroupMessage() || message.isSuperGroupMessage()) // add user to DB
-            sendMessage(chatId, "Попытка добавления пользователя");
-        try {
             ServiceHolder.db().addUserToDB(message.getFrom(), chatId);
-        } catch (Exception e) {
-            sendMessage(chatId, e.toString());
-        }
 
         if (!message.hasText())
             return null;

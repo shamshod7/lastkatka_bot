@@ -186,7 +186,9 @@ public class MongoDBService implements DBService {
 
     @Override
     public void addUserToDB(User user, long chatId) {
-        var doc = getChatMembersCollection(chatId).find(Filters.eq("id", user.getId()));
+        var chat = chatMembersDB.getCollection(String.valueOf(chatId));
+        //var doc = getChatMembersCollection(chatId).find(Filters.eq("id", user.getId()));
+        var doc = chat.find(Filters.eq("id", user.getId())).first();
         if (doc != null)
             return;
         getChatMembersCollection(chatId).insertOne(new Document()
