@@ -5,6 +5,7 @@ import com.mongodb.client.model.Filters;
 import com.senderman.lastkatkabot.TempObjects.TgUser;
 import org.bson.Document;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -22,7 +23,7 @@ public class MongoDBService implements DBService {
     private MongoCollection<Document> getChatMembersCollection(long chatId) {
         var collection = chatMembersDB.getCollection(String.valueOf(chatId));
         if (collection == null) {
-            System.out.println("Collection not exists");
+            BotLogger.error("MONGODB", "Collection not exists");
             chatMembersDB.createCollection(String.valueOf(chatId));
             collection = chatMembersDB.getCollection(String.valueOf(chatId));
         }
@@ -190,6 +191,7 @@ public class MongoDBService implements DBService {
         var doc = getChatMembersCollection(chatId).find(Filters.eq("id", user.getId()));
         if (doc != null)
             return;
+        BotLogger.error("MONGODB", "user add");
         getChatMembersCollection(chatId).insertOne(new Document()
                 .append("name", user.getFirstName())
                 .append("id", user.getId()));
