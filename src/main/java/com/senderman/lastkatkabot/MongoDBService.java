@@ -265,7 +265,7 @@ public class MongoDBService implements DBService {
         else {
             var format = new SimpleDateFormat("yyyyMMdd");
             var today = format.format(new Date());
-            return Long.parseLong(doc.getString("date")) == Long.parseLong(today);
+            return doc.getLong("date") == Long.parseLong(today);
         }
     }
 
