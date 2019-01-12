@@ -20,7 +20,12 @@ public class MongoDBService implements DBService {
     private final MongoCollection<Document> allowedChatsCollection = database.getCollection("allowedchats");
 
     private MongoCollection<Document> getChatMembersCollection(long chatId) {
-        return chatMembersDB.getCollection(String.valueOf(chatId));
+        var collection = chatMembersDB.getCollection(String.valueOf(chatId));
+        if (collection == null) {
+            chatMembersDB.createCollection(String.valueOf(chatId));
+            collection = chatMembersDB.getCollection(String.valueOf(chatId));
+        }
+        return collection;
     }
 
     public void initStats(int id) {
@@ -195,7 +200,7 @@ public class MongoDBService implements DBService {
     }
 
     @Override
-    public List<TgUser> getChatMemebers(long chatId) {
+    public List<TgUser> getChatMembers(long chatId) {
         var chat = getChatMembersCollection(chatId);
         ArrayList<TgUser> members = new ArrayList<>();
         try (MongoCursor<Document> cursor = chat.find().iterator()) {

@@ -161,7 +161,7 @@ public class UsercommandsHandler {
             return;
         }
 
-        var users = ServiceHolder.db().getChatMemebers(chatId);
+        var users = ServiceHolder.db().getChatMembers(chatId);
         if (users.size() < 3) {
             handler.sendMessage(chatId, "Недостаточно пользователей для создания пары! Подождите, пока кто-то еще напишет в чат!");
             return;

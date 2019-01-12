@@ -42,7 +42,7 @@ public interface DBService {
 
     void removeUserFromDB(User user, long chatId);
 
-    List<TgUser> getChatMemebers(long chatId);
+    List<TgUser> getChatMembers(long chatId);
 
     int getTournamentMessage();
 
