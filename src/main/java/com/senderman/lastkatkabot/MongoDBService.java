@@ -282,7 +282,7 @@ public class MongoDBService implements DBService {
 
     @Override
     public String getPairOfTheDay(long chatId) {
-        var doc = settings.find(Filters.eq("chatId")).first();
+        var doc = settings.find(Filters.eq("chatId", chatId)).first();
         if (doc != null) {
             return "Пара дня: " + doc.getString("name1") + " ❤️ " + doc.getString("name2");
         } else
