@@ -5,25 +5,23 @@ import com.mongodb.client.model.Filters;
 import com.senderman.lastkatkabot.TempObjects.TgUser;
 import org.bson.Document;
 import org.telegram.telegrambots.meta.api.objects.User;
-import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class MongoDBService implements DBService {
     private final MongoClient client = MongoClients.create(System.getenv("database"));
-    private final MongoDatabase database = client.getDatabase("lastkatka");
+    private final MongoDatabase lastkatkaDB = client.getDatabase("lastkatka");
     private final MongoDatabase chatMembersDB = client.getDatabase("chatmembers");
-    private final MongoCollection<Document> admins = database.getCollection("admins");
-    private final MongoCollection<Document> blacklist = database.getCollection("blacklist");
-    private final MongoCollection<Document> duelstats = database.getCollection("duelstats");
-    private final MongoCollection<Document> settings = database.getCollection("settings");
-    private final MongoCollection<Document> allowedChatsCollection = database.getCollection("allowedchats");
+    private final MongoCollection<Document> admins = lastkatkaDB.getCollection("admins");
+    private final MongoCollection<Document> blacklist = lastkatkaDB.getCollection("blacklist");
+    private final MongoCollection<Document> duelstats = lastkatkaDB.getCollection("duelstats");
+    private final MongoCollection<Document> settings = lastkatkaDB.getCollection("settings");
+    private final MongoCollection<Document> allowedChatsCollection = lastkatkaDB.getCollection("allowedchats");
 
     private MongoCollection<Document> getChatMembersCollection(long chatId) {
         var collection = chatMembersDB.getCollection(String.valueOf(chatId));
         if (collection == null) {
-            BotLogger.error("MONGODB", "Collection not exists");
             chatMembersDB.createCollection(String.valueOf(chatId));
             collection = chatMembersDB.getCollection(String.valueOf(chatId));
         }
@@ -191,7 +189,6 @@ public class MongoDBService implements DBService {
         var doc = getChatMembersCollection(chatId).find(Filters.eq("id", user.getId()));
         if (doc != null)
             return;
-        BotLogger.error("MONGODB", "user add");
         getChatMembersCollection(chatId).insertOne(new Document()
                 .append("name", user.getFirstName())
                 .append("id", user.getId()));
