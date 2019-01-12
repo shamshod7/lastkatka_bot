@@ -126,7 +126,7 @@ public class LastkatkaBotHandler extends BotHandler {
             ServiceHolder.db().removeUserFromDB(message.getLeftChatMember(), chatId);
         }
 
-        if (!message.isUserMessage() && !message.isChannelMessage()) // add user to DB
+        if (message.isGroupMessage() || message.isSuperGroupMessage()) // add user to DB
             ServiceHolder.db().addUserToDB(message.getFrom(), chatId);
 
         if (!message.hasText())
