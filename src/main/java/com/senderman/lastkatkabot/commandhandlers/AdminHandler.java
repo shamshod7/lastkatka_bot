@@ -3,6 +3,7 @@ package com.senderman.lastkatkabot.commandhandlers;
 import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import com.senderman.lastkatkabot.ServiceHolder;
+import com.senderman.lastkatkabot.TempObjects.TgUser;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -33,7 +34,13 @@ public class AdminHandler {
     }
 
     public static void nekos(Message message, LastkatkaBotHandler handler) {
-        handler.sendMessage(message.getChatId(), ServiceHolder.db().getBlackList());
+        StringBuilder badnekos = new StringBuilder().append("\uD83D\uDE3E <b>Список плохих кис:</b>\n\n");
+        var nekoSet = ServiceHolder.db().getBlackList();
+        for (TgUser neko : nekoSet) {
+            badnekos.append(neko.getLink()).append("\n");
+        }
+        handler.sendMessage(Methods.sendMessage(message.getChatId(), badnekos.toString())
+                .disableNotification());
     }
 
     public static void loveneko(Message message, LastkatkaBotHandler handler) {
@@ -64,7 +71,13 @@ public class AdminHandler {
     }
 
     public static void listOwners(Message message, LastkatkaBotHandler handler) {
-        handler.sendMessage(message.getChatId(), ServiceHolder.db().getAdmins());
+        StringBuilder owners = new StringBuilder().append("\uD83D\uDE0E <b>Админы бота:</b>\n\n");
+        var ownersSet = ServiceHolder.db().getAdmins();
+        for (TgUser owner : ownersSet) {
+            owners.append(owner.getLink()).append("\n");
+        }
+        handler.sendMessage(Methods.sendMessage(message.getChatId(), owners.toString())
+                .disableNotification());
     }
 
     public static void update(Message message, LastkatkaBotHandler handler) {

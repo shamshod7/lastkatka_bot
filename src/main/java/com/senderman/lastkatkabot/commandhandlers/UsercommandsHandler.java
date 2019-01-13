@@ -11,9 +11,11 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class UsercommandsHandler {
 
@@ -157,7 +159,8 @@ public class UsercommandsHandler {
 
     public static void pair(long chatId, LastkatkaBotHandler handler) {
         if (ServiceHolder.db().pairExistsToday(chatId)) {
-            handler.sendMessage(chatId, ServiceHolder.db().getPairOfTheDay(chatId));
+            handler.sendMessage(Methods.sendMessage(chatId, ServiceHolder.db().getPairOfTheDay(chatId))
+                    .disableNotification());
             return;
         }
 
@@ -167,7 +170,15 @@ public class UsercommandsHandler {
             return;
         }
 
-        handler.sendMessage(chatId, "Определение пары дня...");
+        handler.sendMessage(chatId, "Как Винко и Юни руинят в ласткатке");
+        try {
+            Thread.sleep(1000);
+            handler.sendMessage(chatId, "Как ебутся коты Пасюка в кустах");
+            Thread.sleep(1000);
+            handler.sendMessage(chatId, "И как Мяф и Исаев сливают турнир");
+        } catch (InterruptedException e) {
+            BotLogger.error("PAIR", "Ошибка таймера");
+        }
         int random1 = ThreadLocalRandom.current().nextInt(0, users.size());
         int random2;
         do {
@@ -176,8 +187,25 @@ public class UsercommandsHandler {
 
         var user1 = users.get(random1);
         var user2 = users.get(random2);
-        ServiceHolder.db().setPair(chatId, user1.getName(), user2.getName());
-        handler.sendMessage(chatId,
-                "Пара дня: " + user1.getLink() + " ❤ " + user2.getLink());
+        String pair = user1.getLink() + " ❤ " + user2.getLink();
+        var history = ServiceHolder.db().getPairsHistory(chatId);
+        if (history == null) {
+            history = pair;
+        } else { // update history
+            history = pair + "\n" + history;
+            history = history.lines()
+                    .limit(10)
+                    .collect(Collectors.joining("\n"));
+        }
+        ServiceHolder.db().setPair(chatId, pair, history);
+        handler.sendMessage(chatId, "Так и этих двоих свела судьба: " + pair);
+    }
+
+    public static void lastpairs(long chatId, LastkatkaBotHandler handler) {
+        var history = ServiceHolder.db().getPairsHistory(chatId);
+        if (history == null)
+            handler.sendMessage(chatId, "В этом чате еще никогда не запускали команду /pair!");
+        else
+            handler.sendMessage(chatId, "<b>Последние 10 пар:</b>\n\n" + history);
     }
 }

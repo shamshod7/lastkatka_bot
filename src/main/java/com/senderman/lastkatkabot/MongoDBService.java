@@ -105,21 +105,15 @@ public class MongoDBService implements DBService {
         blacklistSet.remove(id);
     }
 
-    public String getBlackList() {
-        var result = new StringBuilder("\uD83D\uDE3E <b>Список плохих кис:</b>\n\n");
+    public Set<TgUser> getBlackList() {
+        Set<TgUser> result = new HashSet<>();
         try (MongoCursor<Document> cursor = blacklist.find().iterator()) {
             while (cursor.hasNext()) {
                 var doc = cursor.next();
-                result.append("<a href=\"tg://user?id=")
-                        .append(doc.getInteger("id"))
-                        .append("\">")
-                        .append(doc.getString("name")
-                                .replace("<", "&lt;")
-                                .replace(">", "&gt;"))
-                        .append("</a>\n");
+                result.add(new TgUser(doc.getInteger("id"), doc.getString("name")));
             }
         }
-        return result.toString();
+        return result;
     }
 
     public void updateBlacklist(Set<Integer> blacklistSet) {
@@ -148,19 +142,15 @@ public class MongoDBService implements DBService {
         adminsSet.remove(id);
     }
 
-    public String getAdmins() {
-        var result = new StringBuilder("\uD83D\uDE0E <b>Админы бота:</b>\n\n");
+    public Set<TgUser> getAdmins() {
+        Set<TgUser> result = new HashSet<>();
         try (MongoCursor<Document> cursor = admins.find().iterator()) {
             while (cursor.hasNext()) {
                 var doc = cursor.next();
-                result.append("<a href=\"tg://user?id=")
-                        .append(doc.getInteger("id"))
-                        .append("\">")
-                        .append(doc.getString("name"))
-                        .append("</a>\n");
+                result.add(new TgUser(doc.getInteger("id"), doc.getString("name")));
             }
         }
-        return result.toString();
+        return result;
     }
 
     public void updateAdmins(Set<Integer> adminsSet) {
@@ -186,10 +176,11 @@ public class MongoDBService implements DBService {
 
     @Override
     public void addUserToDB(User user, long chatId) {
-        var doc = getChatMembersCollection(chatId).find(Filters.eq("id", user.getId())).first();
+        var chat = getChatMembersCollection(chatId);
+        var doc = chat.find(Filters.eq("id", user.getId())).first();
         if (doc != null)
             return;
-        getChatMembersCollection(chatId).insertOne(new Document()
+        chat.insertOne(new Document()
                 .append("name", user.getFirstName())
                 .append("id", user.getId()));
     }
@@ -270,13 +261,13 @@ public class MongoDBService implements DBService {
     }
 
     @Override
-    public void setPair(long chatId, String name1, String name2) {
+    public void setPair(long chatId, String pair, String history) {
         settings.deleteOne(Filters.eq("chatId", chatId));
         var format = new SimpleDateFormat("yyyyMMdd");
         settings.insertOne(new Document()
                 .append("chatId", chatId)
-                .append("name1", name1)
-                .append("name2", name2)
+                .append("pair", pair)
+                .append("history", history)
                 .append("date", Long.parseLong(format.format(new Date()))));
     }
 
@@ -284,8 +275,14 @@ public class MongoDBService implements DBService {
     public String getPairOfTheDay(long chatId) {
         var doc = settings.find(Filters.eq("chatId", chatId)).first();
         if (doc != null) {
-            return "Пара дня: " + doc.getString("name1") + " ❤️ " + doc.getString("name2");
+            return "Пара дня: " + doc.getString("pair");
         } else
             return "Ошибка, попробуйте завтра";
+    }
+
+    @Override
+    public String getPairsHistory(long chatId) {
+        var doc = settings.find(Filters.eq("chatId", chatId)).first();
+        return (doc != null) ? doc.getString("history") : null;
     }
 }

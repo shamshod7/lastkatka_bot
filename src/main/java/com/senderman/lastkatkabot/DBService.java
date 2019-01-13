@@ -22,7 +22,7 @@ public interface DBService {
 
     void removeFromBlacklist(int id, Set<Integer> blacklistSet);
 
-    String getBlackList();
+    Set<TgUser> getBlackList();
 
     void updateBlacklist(Set<Integer> blacklistSet);
 
@@ -32,7 +32,7 @@ public interface DBService {
 
     void removeFromAdmins(int id, Set<Integer> adminsSet);
 
-    String getAdmins();
+    Set<TgUser> getAdmins();
 
     void updateAdmins(Set<Integer> adminsSet);
 
@@ -56,8 +56,10 @@ public interface DBService {
 
     boolean pairExistsToday(long chatId);
 
-    void setPair(long chatId, String name1, String name2);
+    void setPair(long chatId, String pair, String history);
 
     String getPairOfTheDay(long chatId);
+
+    String getPairsHistory(long chatId);
 
 }

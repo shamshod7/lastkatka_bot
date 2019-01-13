@@ -10,10 +10,6 @@ public class TgUser {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public String getLink() {
         return "<a href=\"tg://user?id=" + id + "\">" + name
                 .replace("<", "&lt;")

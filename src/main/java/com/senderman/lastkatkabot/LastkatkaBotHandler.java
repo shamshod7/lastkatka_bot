@@ -188,6 +188,10 @@ public class LastkatkaBotHandler extends BotHandler {
             switch (command) {
                 case "/pair":
                     UsercommandsHandler.pair(chatId, this);
+                    break;
+                case "/lastpairs":
+                    UsercommandsHandler.lastpairs(chatId, this);
+                    break;
                 case "/action":
                     UsercommandsHandler.action(message, this);
                     break;
