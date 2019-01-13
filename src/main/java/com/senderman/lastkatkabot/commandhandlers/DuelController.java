@@ -63,7 +63,7 @@ public class DuelController {
     }
 
     private void startDuel(Duel duel) {
-        int randomInt = ThreadLocalRandom.current().nextInt(0, 100);
+        int randomInt = ThreadLocalRandom.current().nextInt(100);
         var winner = (randomInt < 50) ? duel.player1 : duel.player2;
         var loser = (randomInt < 50) ? duel.player2 : duel.player1;
 
@@ -76,7 +76,7 @@ public class DuelController {
                 .append("\n\nПротивники разошлись в разные стороны, развернулись лицом друг к другу, и ")
                 .append(winnerName).append(" выстрелил первым!\n")
                 .append(loserName).append(" лежит на земле, истекая кровью!\n");
-        if (ThreadLocalRandom.current().nextInt(0, 100) < 20) {
+        if (ThreadLocalRandom.current().nextInt(100) < 20) {
             messageText.append("\nНо, умирая, ")
                     .append(loserName).append(" успевает выстрелить в голову ").append(winnerName).append("! ")
                     .append(winnerName).append(" падает замертво!")

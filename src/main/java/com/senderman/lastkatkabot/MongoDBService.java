@@ -17,6 +17,7 @@ public class MongoDBService implements DBService {
     private final MongoCollection<Document> blacklist = lastkatkaDB.getCollection("blacklist");
     private final MongoCollection<Document> duelstats = lastkatkaDB.getCollection("duelstats");
     private final MongoCollection<Document> settings = lastkatkaDB.getCollection("settings");
+    private final MongoCollection<Document> pairs = lastkatkaDB.getCollection("pairs");
     private final MongoCollection<Document> allowedChatsCollection = lastkatkaDB.getCollection("allowedchats");
 
     private MongoCollection<Document> getChatMembersCollection(long chatId) {
@@ -244,13 +245,13 @@ public class MongoDBService implements DBService {
     public void removeFromAllowedChats(long chatId, Set<Long> allowedChats) {
         allowedChatsCollection.deleteOne(Filters.eq("chatId", chatId));
         allowedChats.remove(chatId);
-        settings.deleteOne(Filters.eq("chatId", chatId));
+        pairs.deleteOne(Filters.eq("chatId", chatId));
         getChatMembersCollection(chatId).drop();
     }
 
     @Override
     public boolean pairExistsToday(long chatId) {
-        var doc = settings.find(Filters.eq("chatId", chatId)).first();
+        var doc = pairs.find(Filters.eq("chatId", chatId)).first();
         if (doc == null)
             return false;
         else {
@@ -262,9 +263,9 @@ public class MongoDBService implements DBService {
 
     @Override
     public void setPair(long chatId, String pair, String history) {
-        settings.deleteOne(Filters.eq("chatId", chatId));
+        pairs.deleteOne(Filters.eq("chatId", chatId));
         var format = new SimpleDateFormat("yyyyMMdd");
-        settings.insertOne(new Document()
+        pairs.insertOne(new Document()
                 .append("chatId", chatId)
                 .append("pair", pair)
                 .append("history", history)
@@ -273,16 +274,16 @@ public class MongoDBService implements DBService {
 
     @Override
     public String getPairOfTheDay(long chatId) {
-        var doc = settings.find(Filters.eq("chatId", chatId)).first();
+        var doc = pairs.find(Filters.eq("chatId", chatId)).first();
         if (doc != null) {
             return "Пара дня: " + doc.getString("pair");
         } else
-            return "Ошибка, попробуйте завтра";
+            return null;
     }
 
     @Override
     public String getPairsHistory(long chatId) {
-        var doc = settings.find(Filters.eq("chatId", chatId)).first();
+        var doc = pairs.find(Filters.eq("chatId", chatId)).first();
         return (doc != null) ? doc.getString("history") : null;
     }
 }

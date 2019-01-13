@@ -49,6 +49,9 @@ public class BotConfig {
     @JsonProperty
     private String leavesticker;
 
+    @JsonProperty
+    private String[] lovearray;
+
     public String getToken() {
         return token;
     }
@@ -168,4 +171,13 @@ public class BotConfig {
     public void setLeavesticker(String leavesticker) {
         this.leavesticker = leavesticker;
     }
+
+    public String[] getLovearray() {
+        return lovearray;
+    }
+
+    public void setLovearray(String[] lovearray) {
+        this.lovearray = lovearray;
+    }
+
 }

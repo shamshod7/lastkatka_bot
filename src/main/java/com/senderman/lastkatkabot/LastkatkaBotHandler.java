@@ -174,9 +174,6 @@ public class LastkatkaBotHandler extends BotHandler {
             duelController.createNewDuel(chatId, message.getFrom());
             return null;
 
-        } else if (command.startsWith("/help")) {
-            UsercommandsHandler.help(message, this);
-            return null;
         } else if (command.startsWith("/reset") && veganTimers.containsKey(chatId)) {
             veganTimers.get(chatId).stop();
             sendMessage(chatId, "Список игроков сброшен");
@@ -218,6 +215,9 @@ public class LastkatkaBotHandler extends BotHandler {
                     break;
                 case "/bnchelp":
                     UsercommandsHandler.bnchelp(message, this);
+                    break;
+                case "/help":
+                    UsercommandsHandler.help(message, this);
                     break;
             }
         }

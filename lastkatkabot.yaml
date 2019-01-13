@@ -1,7 +1,7 @@
 token: env(token)
 username: env(username)
 
-mainAdmin: env(main_admin)
+mainAdmin: env(main_admin) # id of main admin
 
 lastvegan : -1001440160000
 tourgroup : -1001153873643
@@ -9,7 +9,7 @@ tourgroup : -1001153873643
 tourgroupname : "@bigelmogame"
 tourchannel : '@bigelmocucumber'
 
-wwBots:
+wwBots: # list of werewolf bot nicknames
 - 'werewolfbot'
 - 'werewolfbetabot'
 - 'blackwerewolfbot'
@@ -18,8 +18,8 @@ veganWarsCommands:
   - '/game@veganwarsbot'
   - '/customgame@veganwarsbot'
 
-bncphoto: env(bncphoto)
-leavesticker: env(leavesticker)
+bncphoto: env(bncphoto) # picture for /bnchelp
+leavesticker: env(leavesticker) # sticker that bot will send after someone leaves chat
 
 help: |
   Привет! Это очень полезный бот для проекта @lastkatka, который многое что умеет! Основные команды:
@@ -79,3 +79,35 @@ setuphelp: |
   Название_команды @player1 @player2 ... @playerN
   Название_команды2 @player1 @player2 ... @playerN
   Имя раунда
+
+lovearray:
+  - |-
+    Как Винко и Юни руинят в ласткатке
+    Как ебутся коты Пасюка в кустах
+    И как Мяф и Исаев сливают турнир
+    Так и эти двое всегда будут вместе: %1$d %2$d
+  - |-
+    Как Маринет и Эдриан
+    Как Бражник и бабочки
+    Как Леди Wi-Fi и интернет
+    Так и %1$d вместе с %2$d
+  - |-
+    Как огурец и молоко
+    Как шутки про веганов и пидоров
+    Как хайль и Гитлер
+    Так и эти двое отлично подходят друг другу: %1$d ❤️ %2$d
+  - |-
+    Как странник, заблудший в пустыне и набредший на оазис,
+    Как луч Солнца, спустя световой год достигший Земли,
+    Как мореход, ступивший на землю после долгого плаванья,
+    Так и встреча %1$d и %2$d ознаменует начало новой истории
+  - |-
+    Roses are red
+    Violets are blue
+    В паре произносят "Я тебя люблю" -
+    %1$d и %2$d
+  - |-
+    Будьте неразлучны как веган и хуй во рту!
+    И пусть любые невзгоды умирают, как Исма от вида натуралов!
+    И пусть каждый ваш поцелуй будет такой же крепкий, как стояк Пасюка!
+    Пара дня - %1$d и %2$d
