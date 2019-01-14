@@ -238,7 +238,6 @@ public class MongoDBService implements DBService {
     public void addToAllowedChats(long chatId, Set<Long> allowedChats) {
         allowedChatsCollection.insertOne(new Document("chatId", chatId));
         allowedChats.add(chatId);
-        chatMembersDB.createCollection(String.valueOf(chatId));
     }
 
     @Override
