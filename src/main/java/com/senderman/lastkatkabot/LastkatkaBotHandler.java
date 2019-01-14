@@ -12,6 +12,8 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.*;
 
@@ -62,6 +64,8 @@ public class LastkatkaBotHandler extends BotHandler {
                 CallbackHandler.cake(query, this, CallbackHandler.CAKE_ACTIONS.CAKE_OK);
             } else if (data.startsWith(LastkatkaBot.CALLBACK_CAKE_NOT)) {
                 CallbackHandler.cake(query, this, CallbackHandler.CAKE_ACTIONS.CAKE_NOT);
+            } else if (data.startsWith(LastkatkaBot.CALLBACK_ALLOW_CHAT)) {
+                CallbackHandler.addChat(query, this, allowedChats);
             } else {
                 switch (data) {
                     case LastkatkaBot.CALLBACK_REGISTER_IN_TOURNAMENT:
@@ -70,7 +74,7 @@ public class LastkatkaBotHandler extends BotHandler {
                     case LastkatkaBot.CALLBACK_PAY_RESPECTS:
                         CallbackHandler.payRespects(query, this);
                         break;
-                    case LastkatkaBot.JOIN_DUEL:
+                    case LastkatkaBot.CALLBACK_JOIN_DUEL:
                         duelController.joinDuel(query);
                         break;
                 }
@@ -90,10 +94,18 @@ public class LastkatkaBotHandler extends BotHandler {
 
         final long chatId = message.getChatId();
 
-        // leave from groups that not in list
+        // leave from groups that not in list and notify main admin
         if (!message.isUserMessage() && !allowedChats.contains(chatId)) {
-            sendMessage(chatId, "Какая-то левая конфа (id " + chatId + "). СЛАВА ЛАСТКАТКЕ!");
+            sendMessage(chatId, "Чата нет в списке разрешенных. Инцидент сообщён разработчику.");
             Methods.leaveChat(chatId).call(this);
+
+            var row1 = List.of(new InlineKeyboardButton()
+                    .setText("Добавить")
+                    .setCallbackData(LastkatkaBot.CALLBACK_ALLOW_CHAT + chatId));
+            var markup = new InlineKeyboardMarkup();
+            markup.setKeyboard(List.of(row1));
+            sendMessage(Methods.sendMessage((long) botConfig.getMainAdmin(), "Добавить чат " + chatId + " в список разрешенных?")
+                    .setReplyMarkup(markup));
             return null;
         }
 
@@ -236,11 +248,6 @@ public class LastkatkaBotHandler extends BotHandler {
                     break;
                 case "/announce":
                     AdminHandler.announce(message, this);
-                    break;
-                case "/addchat": // /addchat chatId
-                    ServiceHolder.db().addToAllowedChats(Long.parseLong(text.replace("/addchat ", "")),
-                            allowedChats);
-                    sendMessage(chatId, "✅ Чат добавлен!");
                     break;
                 case "/remchat":
                     ServiceHolder.db().removeFromAllowedChats(chatId, allowedChats);

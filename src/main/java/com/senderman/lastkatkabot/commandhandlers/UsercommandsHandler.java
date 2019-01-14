@@ -174,7 +174,7 @@ public class UsercommandsHandler {
         var loveStrings = lovearray[ThreadLocalRandom.current().nextInt(lovearray.length)].split("\n");
 
         try {
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < loveStrings.length - 1; i++) {
                 handler.sendMessage(chatId, loveStrings[i]);
                 Thread.sleep(1500);
             }
@@ -200,7 +200,7 @@ public class UsercommandsHandler {
                     .collect(Collectors.joining("\n"));
         }
         ServiceHolder.db().setPair(chatId, pair, history);
-        handler.sendMessage(chatId, String.format(loveStrings[3], user1.getLink(), user2.getLink()));
+        handler.sendMessage(chatId, String.format(loveStrings[loveStrings.length - 1], user1.getLink(), user2.getLink()));
     }
 
     public static void lastpairs(long chatId, LastkatkaBotHandler handler) {

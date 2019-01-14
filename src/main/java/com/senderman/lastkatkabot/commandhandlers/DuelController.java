@@ -126,7 +126,7 @@ public class DuelController {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
-                .setCallbackData(LastkatkaBot.JOIN_DUEL));
+                .setCallbackData(LastkatkaBot.CALLBACK_JOIN_DUEL));
         markup.setKeyboard(List.of(row1));
         return markup;
     }

@@ -3,7 +3,10 @@ package com.senderman.lastkatkabot.commandhandlers;
 import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
+import com.senderman.lastkatkabot.ServiceHolder;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+
+import java.util.Set;
 
 public class CallbackHandler {
 
@@ -116,6 +119,16 @@ public class CallbackHandler {
                 .call(handler);
         handler.sendMessage(handler.botConfig.getTourgroup(),
                 "✅ " + query.getFrom().getUserName() + " получил доступ к игре!");
+    }
+
+    public static void addChat(CallbackQuery query, LastkatkaBotHandler handler, Set<Long> allowedChats) {
+        var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_ALLOW_CHAT, ""));
+        ServiceHolder.db().addToAllowedChats(chatId, allowedChats);
+        Methods.editMessageText()
+                .setChatId(query.getMessage().getChatId())
+                .setText("✅ Чат добавлен в разрешенные!")
+                .setReplyMarkup(null)
+                .call(handler);
     }
 
     public enum CAKE_ACTIONS {CAKE_OK, CAKE_NOT}
