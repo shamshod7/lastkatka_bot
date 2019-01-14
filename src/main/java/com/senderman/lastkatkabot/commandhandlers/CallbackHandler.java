@@ -127,6 +127,7 @@ public class CallbackHandler {
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setText("✅ Чат добавлен в разрешенные!")
+                .setMessageId(query.getMessage().getMessageId())
                 .setReplyMarkup(null)
                 .call(handler);
     }

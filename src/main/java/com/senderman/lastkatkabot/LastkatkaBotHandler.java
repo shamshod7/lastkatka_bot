@@ -251,6 +251,8 @@ public class LastkatkaBotHandler extends BotHandler {
                     break;
                 case "/remchat":
                     ServiceHolder.db().removeFromAllowedChats(chatId, allowedChats);
+                    sendMessage(chatId, "✅ Чат удален из разрешенных. Всем пока!");
+                    Methods.leaveChat(chatId);
                     break;
             }
         }
