@@ -1,7 +1,6 @@
 package com.senderman.lastkatkabot.commandhandlers;
 
 import com.annimon.tgbotsmodule.api.methods.Methods;
-import com.annimon.tgbotsmodule.api.methods.send.SendPhotoMethod;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import com.senderman.lastkatkabot.ServiceHolder;
@@ -71,7 +70,7 @@ public class UsercommandsHandler {
 
     public static void dice(Message message, LastkatkaBotHandler handler) {
         int random;
-        String[] args = message.getText().split("\\s+", 3);
+        var args = message.getText().split("\\s+", 3);
         if (args.length == 3) {
             try {
                 int min = Integer.parseInt(args[1]);
@@ -120,7 +119,7 @@ public class UsercommandsHandler {
     }
 
     public static void bnchelp(Message message, LastkatkaBotHandler handler) {
-        SendPhotoMethod sendPhoto = Methods.sendPhoto()
+        var sendPhoto = Methods.sendPhoto()
                 .setChatId(message.getChatId())
                 .setFile(handler.botConfig.getBncphoto());
         if (message.isReply())

@@ -3,16 +3,16 @@ username: env(username)
 
 mainAdmin: env(main_admin) # id of main admin
 
-lastvegan : -1001440160000
-tourgroup : -1001153873643
+lastvegan: -1001440160000
+tourgroup: -1001153873643
 
-tourgroupname : "@bigelmogame"
-tourchannel : '@bigelmocucumber'
+tourgroupname: "@bigelmogame"
+tourchannel: '@bigelmocucumber'
 
 wwBots: # list of werewolf bot nicknames
-- 'werewolfbot'
-- 'werewolfbetabot'
-- 'blackwerewolfbot'
+  - 'werewolfbot'
+  - 'werewolfbetabot'
+  - 'blackwerewolfbot'
 
 veganWarsCommands:
   - '/game@veganwarsbot'
@@ -115,3 +115,8 @@ lovearray:
     Как русский фандаб и русские хардсабы
     Как ан и ме
     Так и %1$s с %2$s должны быть вместе!
+  - |-
+    Не учатся ничему некоторые и учиться не хотят
+    Кина американского насмотрелись или крышу срывает от жадности
+    Ты ему про аномалии, он тебе про хабар.
+    Вот и сегодня %1$s с %2$s пошли за хабаром, а попали в любовную аномалию!

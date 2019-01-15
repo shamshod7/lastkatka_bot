@@ -14,6 +14,7 @@ public class LastkatkaBot implements BotModule {
     public static final String CALLBACK_CAKE_NOT = "cake not";
     public static final String CALLBACK_JOIN_DUEL = "join_duel";
     public static final String CALLBACK_ALLOW_CHAT = "allow_chat";
+    public static final String CALLBACK_DONT_ALLOW_CHAT = "dont_allow_chat";
 
     @NotNull
     @Override

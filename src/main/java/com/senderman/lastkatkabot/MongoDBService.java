@@ -244,7 +244,6 @@ public class MongoDBService implements DBService {
     public void removeFromAllowedChats(long chatId, Set<Long> allowedChats) {
         allowedChatsCollection.deleteOne(Filters.eq("chatId", chatId));
         allowedChats.remove(chatId);
-        getChatMembersCollection(chatId).drop();
     }
 
     @Override

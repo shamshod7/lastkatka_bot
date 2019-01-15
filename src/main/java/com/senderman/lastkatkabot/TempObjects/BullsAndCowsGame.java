@@ -11,45 +11,51 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class BullsAndCowsGame {
     private final int LENGTH = 4;
+    private final Set<Integer> messagesToDelete;
+    private final Set<Integer> checkedNumbers;
     private int attempts;
     private int answer;
     private int[] answerArray;
     private long chatId;
     private LastkatkaBotHandler handler;
-    private final Set<Integer> messagesToDelete;
 
     public BullsAndCowsGame(LastkatkaBotHandler handler, long chatId) {
         this.handler = handler;
         this.chatId = chatId;
         attempts = 10;
         messagesToDelete = new HashSet<>();
-        handler.sendMessage(chatId, "Генерируем число...");
+        checkedNumbers = new HashSet<>();
+        handler.sendMessage(chatId, "Генерируем число..." );
         answer = generateRandom();
         answerArray = split(answer);
         handler.sendMessage(chatId, "Число загадано!\n" +
                 "Отправляйте в чат ваши варианты, они должны состоять только из 4 неповторяющихся чисел!\n" +
-                "Правила игры - /bnchelp");
+                "Правила игры - /bnchelp" );
     }
 
     public void check(Message message) {
 
         messagesToDelete.add(message.getMessageId());
 
-        if (message.getText().startsWith("0")) {
-            messagesToDelete.add(handler.sendMessage(chatId, "Число не начинается с 0!").getMessageId());
-            return;
-        }
-        int number = Integer.parseInt(message.getText());
+        var number = Integer.parseInt(message.getText());
 
         if (hasRepeatingDigits(split(number))) {
             messagesToDelete.add(
-                    handler.sendMessage(chatId, "Загаданное число не может содержать повторяющиеся числа!")
+                    handler.sendMessage(chatId, "Загаданное число не может содержать повторяющиеся числа!" )
                             .getMessageId());
             return;
         }
 
+        var results = calculate(split(number));
+
+        if (checkedNumbers.contains(number)) {
+            messagesToDelete.add(
+                    handler.sendMessage(chatId, number + " - уже проверяли! " +
+                            String.format("%1$dБ %2$dК", results[0], results[1])
+                    ).getMessageId());
+        }
+
         attempts--;
-        int[] results = calculate(split(number));
         if (results[0] == 4) { // win
             handler.sendMessage(chatId, String.format("%1$s выиграл за %2$d попыток! %3$d - правильный ответ!",
                     message.getFrom().getFirstName(), 10 - attempts, number));
@@ -66,6 +72,7 @@ public class BullsAndCowsGame {
             messagesToDelete.add(handler.sendMessage(chatId, String.format("%4$d: %1$dБ %2$dК, попыток: %3$d\n",
                     results[0], results[1], attempts, number))
                     .getMessageId());
+            checkedNumbers.add(number);
         } else { // lose
             handler.sendMessage(chatId, "Вы проиграли! Ответ: " + answer);
             for (int messageId : messagesToDelete) {
@@ -78,7 +85,7 @@ public class BullsAndCowsGame {
     private int generateRandom() {
         int random;
         do {
-            random = ThreadLocalRandom.current().nextInt(1000, 10000);
+            random = ThreadLocalRandom.current().nextInt(123, 10000);
         } while (hasRepeatingDigits(split(random)));
         return random;
     }
@@ -87,7 +94,7 @@ public class BullsAndCowsGame {
     private int[] split(int num) {
         int[] result = new int[LENGTH];
         for (int i = 0; i < LENGTH; i++) {
-            int t = num % 10;
+            var t = num % 10;
             result[LENGTH - 1 - i] = t;
             num /= 10;
         }
@@ -96,8 +103,8 @@ public class BullsAndCowsGame {
 
     // check that array contains only unique numbers
     private boolean hasRepeatingDigits(int[] array) {
-        for (int i = 0; i < LENGTH; i++) {
-            for (int j = i + 1; j < LENGTH; j++) {
+        for (int i = 0; i < array.length; i++) {
+            for (int j = i + 1; j < array.length; j++) {
                 if (array[i] == array[j]) {
                     return true;
                 }

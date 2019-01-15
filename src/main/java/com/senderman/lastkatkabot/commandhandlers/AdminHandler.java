@@ -34,7 +34,7 @@ public class AdminHandler {
     }
 
     public static void nekos(Message message, LastkatkaBotHandler handler) {
-        StringBuilder badnekos = new StringBuilder().append("\uD83D\uDE3E <b>Список плохих кис:</b>\n\n");
+        var badnekos = new StringBuilder().append("\uD83D\uDE3E <b>Список плохих кис:</b>\n\n" );
         var nekoSet = ServiceHolder.db().getBlackList();
         for (TgUser neko : nekoSet) {
             badnekos.append(neko.getLink()).append("\n");
@@ -71,7 +71,7 @@ public class AdminHandler {
     }
 
     public static void listOwners(Message message, LastkatkaBotHandler handler) {
-        StringBuilder owners = new StringBuilder().append("\uD83D\uDE0E <b>Админы бота:</b>\n\n");
+        var owners = new StringBuilder().append("\uD83D\uDE0E <b>Админы бота:</b>\n\n" );
         var ownersSet = ServiceHolder.db().getAdmins();
         for (TgUser owner : ownersSet) {
             owners.append(owner.getLink()).append("\n");
@@ -81,7 +81,7 @@ public class AdminHandler {
     }
 
     public static void update(Message message, LastkatkaBotHandler handler) {
-        String[] params = message.getText().split("\n");
+        var params = message.getText().split("\n" );
         if (params.length < 2) {
             handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
             return;

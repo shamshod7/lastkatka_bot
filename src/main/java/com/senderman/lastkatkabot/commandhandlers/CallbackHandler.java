@@ -130,6 +130,19 @@ public class CallbackHandler {
                 .setMessageId(query.getMessage().getMessageId())
                 .setReplyMarkup(null)
                 .call(handler);
+        handler.sendMessage(chatId, "Разработчик принял данный чат. Бот готов к работе здесь!" );
+    }
+
+    public static void denyChat(CallbackQuery query, LastkatkaBotHandler handler) {
+        var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_DONT_ALLOW_CHAT, "" ));
+        Methods.editMessageText()
+                .setChatId(query.getMessage().getChatId())
+                .setText("\uD83D\uDEAB Чат отклонен!" )
+                .setMessageId(query.getMessage().getMessageId())
+                .setReplyMarkup(null)
+                .call(handler);
+        handler.sendMessage(chatId, "Разработчик отклонил данный чат. Всем пока!" );
+        Methods.leaveChat(chatId).call(handler);
     }
 
     public enum CAKE_ACTIONS {CAKE_OK, CAKE_NOT}
