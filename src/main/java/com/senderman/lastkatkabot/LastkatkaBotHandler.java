@@ -95,9 +95,6 @@ public class LastkatkaBotHandler extends BotHandler {
 
         final var chatId = message.getChatId();
 
-        if (!allowedChats.contains(chatId) && !message.isUserMessage()) // do not respond in not allowed chats
-            return null;
-
         var newMembers = message.getNewChatMembers();
 
         if (newMembers != null) {
@@ -134,6 +131,9 @@ public class LastkatkaBotHandler extends BotHandler {
             }
             return null;
         }
+
+        if (!allowedChats.contains(chatId) && !message.isUserMessage()) // do not respond in not allowed chats
+            return null;
 
         if (message.getLeftChatMember() != null) {
             Methods.sendDocument()
