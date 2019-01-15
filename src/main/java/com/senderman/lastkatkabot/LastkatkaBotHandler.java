@@ -124,7 +124,10 @@ public class LastkatkaBotHandler extends BotHandler {
                             .setCallbackData(LastkatkaBot.CALLBACK_DONT_ALLOW_CHAT + chatId));
                     var markup = new InlineKeyboardMarkup();
                     markup.setKeyboard(List.of(row1, row2));
-                    sendMessage(Methods.sendMessage((long) botConfig.getMainAdmin(), "Добавить чат " + chatId + " в список разрешенных?" )
+                    sendMessage(Methods.sendMessage((long) botConfig.getMainAdmin(),
+                            "Добавить чат " + message.getChat().getTitle() +
+                                    " (" + chatId + ") "
+                                    + "в список разрешенных?")
                             .setReplyMarkup(markup));
                     return null;
                 }
