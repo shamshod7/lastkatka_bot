@@ -95,7 +95,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         final var chatId = message.getChatId();
 
-        if (!allowedChats.contains(chatId)) // do not respond in not allowed chats
+        if (!allowedChats.contains(chatId) && !message.isUserMessage()) // do not respond in not allowed chats
             return null;
 
         var newMembers = message.getNewChatMembers();
