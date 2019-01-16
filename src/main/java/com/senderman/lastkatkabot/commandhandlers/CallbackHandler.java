@@ -153,7 +153,7 @@ public class CallbackHandler {
                 .setCallbackQueryId(query.getId())
                 .call(handler);
         handler.sendMessage(chatId, "Разработчик решил удалить бота из данного чата. Всем пока!");
-        Methods.leaveChat(chatId);
+        Methods.leaveChat(chatId).call(handler);
         Methods.deleteMessage(query.getMessage().getChatId(), query.getMessage().getMessageId()).call(handler);
         AdminHandler.chats(query.getMessage(), handler);
     }
