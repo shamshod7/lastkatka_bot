@@ -124,7 +124,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
                     var row1 = List.of(new InlineKeyboardButton()
                             .setText("Добавить")
-                            .setCallbackData(LastkatkaBot.CALLBACK_ALLOW_CHAT + chatId));
+                            .setCallbackData(LastkatkaBot.CALLBACK_ALLOW_CHAT + chatId + "title=" + message.getChat().getTitle()));
                     var row2 = List.of(new InlineKeyboardButton()
                             .setText("Отклонить")
                             .setCallbackData(LastkatkaBot.CALLBACK_DONT_ALLOW_CHAT + chatId));

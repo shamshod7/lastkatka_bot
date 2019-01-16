@@ -210,8 +210,9 @@ public class MongoDBService implements DBService {
     }
 
     @Override
-    public void addToAllowedChats(long chatId, Set<Long> allowedChats) {
-        allowedChatsCollection.insertOne(new Document("chatId", chatId));
+    public void addToAllowedChats(long chatId, String title, Set<Long> allowedChats) {
+        allowedChatsCollection.insertOne(new Document("chatId", chatId)
+                .append("title", title));
         allowedChats.add(chatId);
     }
 

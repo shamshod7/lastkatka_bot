@@ -121,7 +121,8 @@ public class CallbackHandler {
 
     public static void addChat(CallbackQuery query, LastkatkaBotHandler handler) {
         var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_ALLOW_CHAT, ""));
-        Services.db().addToAllowedChats(chatId, handler.allowedChats);
+        var title = query.getData().replaceAll("^.*?title=", "");
+        Services.db().addToAllowedChats(chatId, title, handler.allowedChats);
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setText("✅ Чат добавлен в разрешенные!")

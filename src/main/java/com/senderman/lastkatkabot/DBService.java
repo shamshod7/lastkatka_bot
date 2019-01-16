@@ -51,7 +51,7 @@ public interface DBService {
 
     void updateAllowedChats(Set<Long> allowedChats);
 
-    void addToAllowedChats(long chatId, Set<Long> allowedChats);
+    void addToAllowedChats(long chatId, String title, Set<Long> allowedChats);
 
     void removeFromAllowedChats(long chatId, Set<Long> allowedChats);
 
