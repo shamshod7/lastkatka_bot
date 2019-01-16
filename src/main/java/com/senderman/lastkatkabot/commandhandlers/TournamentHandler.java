@@ -3,7 +3,7 @@ package com.senderman.lastkatkabot.commandhandlers;
 import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
-import com.senderman.lastkatkabot.ServiceHolder;
+import com.senderman.lastkatkabot.Services;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -59,7 +59,7 @@ public class TournamentHandler {
                 .append("\n\n/go - подтвердить, /ct - отменить");
 
         handler.sendMessage(Methods.sendMessage()
-                .setChatId(handler.botConfig.getLastvegan())
+                .setChatId(Services.botConfig().getLastvegan())
                 .setText(checkText.toString())
                 .setReplyToMessageId(message.getMessageId()));
     }
@@ -75,27 +75,27 @@ public class TournamentHandler {
         );
         var row2 = List.of(new InlineKeyboardButton()
                 .setText("Группа турнира")
-                .setUrl("https://t.me/" + handler.botConfig.getTourgroupname().replace("@", "")));
+                .setUrl("https://t.me/" + Services.botConfig().getTourgroupname().replace("@", "")));
         var row3 = List.of(new InlineKeyboardButton()
                 .setText("Канал турнира")
-                .setUrl("https://t.me/" + handler.botConfig.getTourchannel().replace("@", "")));
+                .setUrl("https://t.me/" + Services.botConfig().getTourchannel().replace("@", "")));
         markup.setKeyboard(List.of(row1, row2, row3));
 
         var toVegans = Methods.sendMessage()
-                .setChatId(handler.botConfig.getLastvegan())
+                .setChatId(Services.botConfig().getLastvegan())
                 .setText("\uD83D\uDCE3 <b>Турнир активирован!</b>\n\n"
                         + getMembersAsString() +
                         ", нажмите на кнопку ниже для снятия ограничений в группе турнира\n\n")
                 .setReplyMarkup(markup);
 
         Methods.Administration.pinChatMessage()
-                .setChatId(handler.botConfig.getLastvegan())
+                .setChatId(Services.botConfig().getLastvegan())
                 .setMessageId(handler.sendMessage(toVegans).getMessageId())
                 .setNotificationEnabled(false)
                 .call(handler);
 
         var toChannel = Methods.sendMessage()
-                .setChatId(handler.botConfig.getTourchannel());
+                .setChatId(Services.botConfig().getTourchannel());
         if (isTeamMode) {
             toChannel.setText("<b>" + roundName + "</b>\n\n"
                     + teams.toArray()[0] + " vs " + teams.toArray()[1]);
@@ -113,7 +113,7 @@ public class TournamentHandler {
         members.clear();
         if (isTeamMode)
             teams.clear();
-        handler.sendMessage(Methods.sendMessage(handler.botConfig.getLastvegan(), "\uD83D\uDEAB Действие отменено"));
+        handler.sendMessage(Methods.sendMessage(Services.botConfig().getLastvegan(), "\uD83D\uDEAB Действие отменено"));
     }
 
     private static String getScore(String[] params) {
@@ -132,17 +132,17 @@ public class TournamentHandler {
     private static void restrictMembers(LastkatkaBotHandler handler) {
         isEnabled = false;
         for (Integer memberId : membersIds) {
-            Methods.Administration.restrictChatMember(handler.botConfig.getTourgroup(), memberId).call(handler);
+            Methods.Administration.restrictChatMember(Services.botConfig().getTourgroup(), memberId).call(handler);
         }
         members.clear();
         membersIds.clear();
         if (isTeamMode)
             teams.clear();
-        Methods.Administration.unpinChatMessage(handler.botConfig.getLastvegan()).call(handler);
-        int tournamentMessage = ServiceHolder.db().getTournamentMessage();
+        Methods.Administration.unpinChatMessage(Services.botConfig().getLastvegan()).call(handler);
+        int tournamentMessage = Services.db().getTournamentMessage();
         if (tournamentMessage != 0) {
             Methods.Administration.pinChatMessage()
-                    .setChatId(handler.botConfig.getLastvegan())
+                    .setChatId(Services.botConfig().getLastvegan())
                     .setMessageId(tournamentMessage)
                     .setNotificationEnabled(false)
                     .call(handler);
@@ -156,7 +156,7 @@ public class TournamentHandler {
             return;
         }
         String score = getScore(params);
-        handler.sendMessage(Methods.sendMessage(handler.botConfig.getTourchannel(), score));
+        handler.sendMessage(Methods.sendMessage(Services.botConfig().getTourchannel(), score));
     }
 
     public static void win(Message message, LastkatkaBotHandler handler) {
@@ -175,26 +175,26 @@ public class TournamentHandler {
             goingTo = (params[5].equals("over")) ? " выиграл турнир" : " выходит в " + params[5].replace("_", " ");
 
         handler.sendMessage(Methods.sendMessage()
-                .setChatId(handler.botConfig.getTourchannel())
+                .setChatId(Services.botConfig().getTourchannel())
                 .setText(score + "\n\n" + params[1].replace("_", " ") + "<b>" + goingTo + "!</b>"));
 
         handler.sendMessage(Methods.sendMessage()
-                .setChatId(handler.botConfig.getLastvegan())
+                .setChatId(Services.botConfig().getLastvegan())
                 .setText("\uD83D\uDCE3 <b>Раунд завершен.\n\nПобедитель:</b> "
                         + params[1] + "\nБолельщики, посетите "
-                        + handler.botConfig.getTourchannel() + ", чтобы узнать подробности"));
+                        + Services.botConfig().getTourchannel() + ", чтобы узнать подробности"));
     }
 
     public static void rt(LastkatkaBotHandler handler) {
         restrictMembers(handler);
-        handler.sendMessage(handler.botConfig.getLastvegan(),
+        handler.sendMessage(Services.botConfig().getLastvegan(),
                 "\uD83D\uDEAB <b>Раунд отменен из-за непредвиденных обстоятельств!</b>");
     }
 
     public static void tourmessage(LastkatkaBotHandler handler, Message message) {
-        if (!message.getChatId().equals(handler.botConfig.getLastvegan()) || !message.isReply())
+        if (!message.getChatId().equals(Services.botConfig().getLastvegan()) || !message.isReply())
             return;
-        ServiceHolder.db().setTournamentMessage(message.getReplyToMessage().getMessageId());
+        Services.db().setTournamentMessage(message.getReplyToMessage().getMessageId());
         handler.sendMessage(message.getChatId(), "✅ Главное сообщение турнира установлено!");
     }
 

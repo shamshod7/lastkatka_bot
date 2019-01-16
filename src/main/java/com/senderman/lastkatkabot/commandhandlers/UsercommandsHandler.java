@@ -3,7 +3,7 @@ package com.senderman.lastkatkabot.commandhandlers;
 import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
-import com.senderman.lastkatkabot.ServiceHolder;
+import com.senderman.lastkatkabot.Services;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -93,11 +93,26 @@ public class UsercommandsHandler {
 
     public static void dstats(Message message, LastkatkaBotHandler handler) {
         var player = message.getFrom().getFirstName();
-        handler.sendMessage(message.getChatId(), ServiceHolder.db().getStats(message.getFrom().getId(), player));
+        var stats = Services.db().getStats(message.getFrom().getId(), player);
+        var wins = stats.get("wins");
+        var total = stats.get("total");
+        var text = "\uD83D\uDCCA Статистика " +
+                player +
+                "\nВыиграно дуэлей: " +
+                wins +
+                "\nВсего дуэлей сыграно: " +
+                total +
+                "\nВинрейт: " +
+                ((total == 0) ? 0 : 100 * wins / total) + "%" +
+                "\n\n\uD83D\uDC2E Выиграно в Быки и Коровы: "
+                + stats.get("bncwins");
+        handler.sendMessage(message.getChatId(), text);
 
     }
 
     public static void pinlist(Message message, LastkatkaBotHandler handler) {
+        if (!isFromWwBot(message))
+            return;
         Methods.Administration.pinChatMessage(message.getChatId(), message.getReplyToMessage().getMessageId())
                 .setNotificationEnabled(false).call(handler);
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
@@ -111,7 +126,7 @@ public class UsercommandsHandler {
                 message.getFrom().getFirstName() +
                 "</a>\n\n" +
                 message.getText().replace("/feedback ", "");
-        handler.sendMessage((long) handler.botConfig.getMainAdmin(), bugreport);
+        handler.sendMessage((long) Services.botConfig().getMainAdmin(), bugreport);
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
                 .setText("✅ Отправлено разрабу бота")
@@ -121,7 +136,7 @@ public class UsercommandsHandler {
     public static void bnchelp(Message message, LastkatkaBotHandler handler) {
         var sendPhoto = Methods.sendPhoto()
                 .setChatId(message.getChatId())
-                .setFile(handler.botConfig.getBncphoto());
+                .setFile(Services.botConfig().getBncphoto());
         if (message.isReply())
             sendPhoto.setReplyToMessageId(message.getReplyToMessage().getMessageId());
         else
@@ -130,12 +145,12 @@ public class UsercommandsHandler {
     }
 
     public static void help(Message message, LastkatkaBotHandler handler) {
-        var sb = new StringBuilder(handler.botConfig.getHelp());
+        var sb = new StringBuilder(Services.botConfig().getHelp());
         if (handler.admins.contains(message.getFrom().getId())) { // admins want to get extra help
-            sb.append(handler.botConfig.getAdminhelp());
+            sb.append(Services.botConfig().getAdminhelp());
         }
-        if (message.getFrom().getId().equals(handler.botConfig.getMainAdmin())) {
-            sb.append(handler.botConfig.getMainadminhelp());
+        if (message.getFrom().getId().equals(Services.botConfig().getMainAdmin())) {
+            sb.append(Services.botConfig().getMainadminhelp());
         }
         if (message.isUserMessage()) {
             var sm = Methods.sendMessage()
@@ -157,19 +172,19 @@ public class UsercommandsHandler {
     }
 
     public static void pair(long chatId, LastkatkaBotHandler handler) {
-        if (ServiceHolder.db().pairExistsToday(chatId)) {
-            var pair = ServiceHolder.db().getPairOfTheDay(chatId);
+        if (Services.db().pairExistsToday(chatId)) {
+            var pair = Services.db().getPairOfTheDay(chatId);
             pair = (pair != null) ? pair : "Ошибка, попробуйте завтра";
             handler.sendMessage(chatId, pair);
             return;
         }
 
-        var users = ServiceHolder.db().getChatMembers(chatId);
+        var users = Services.db().getChatMembers(chatId);
         if (users.size() < 3) {
             handler.sendMessage(chatId, "Недостаточно пользователей для создания пары! Подождите, пока кто-то еще напишет в чат!");
             return;
         }
-        var lovearray = handler.botConfig.getLovearray();
+        var lovearray = Services.botConfig().getLovearray();
         var loveStrings = lovearray[ThreadLocalRandom.current().nextInt(lovearray.length)].split("\n");
 
         try {
@@ -189,7 +204,7 @@ public class UsercommandsHandler {
         var user1 = users.get(random1);
         var user2 = users.get(random2);
         var pair = user1.getName() + " ❤ " + user2.getName();
-        var history = ServiceHolder.db().getPairsHistory(chatId);
+        var history = Services.db().getPairsHistory(chatId);
         if (history == null) {
             history = pair;
         } else { // update history
@@ -198,15 +213,20 @@ public class UsercommandsHandler {
                     .limit(10)
                     .collect(Collectors.joining("\n"));
         }
-        ServiceHolder.db().setPair(chatId, pair, history);
+        Services.db().setPair(chatId, pair, history);
         handler.sendMessage(chatId, String.format(loveStrings[loveStrings.length - 1], user1.getLink(), user2.getLink()));
     }
 
     public static void lastpairs(long chatId, LastkatkaBotHandler handler) {
-        var history = ServiceHolder.db().getPairsHistory(chatId);
+        var history = Services.db().getPairsHistory(chatId);
         if (history == null)
             handler.sendMessage(chatId, "В этом чате еще никогда не запускали команду /pair!");
         else
             handler.sendMessage(chatId, "<b>Последние 10 пар:</b>\n\n" + history);
+    }
+
+    private static boolean isFromWwBot(Message message) {
+        return Services.botConfig().getWwBots().contains(message.getReplyToMessage().getFrom().getUserName()) &&
+                message.getReplyToMessage().getText().contains("#players");
     }
 }

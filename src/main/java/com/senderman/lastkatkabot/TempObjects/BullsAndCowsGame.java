@@ -2,7 +2,7 @@ package com.senderman.lastkatkabot.TempObjects;
 
 import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
-import com.senderman.lastkatkabot.ServiceHolder;
+import com.senderman.lastkatkabot.Services;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.HashSet;
@@ -59,7 +59,7 @@ public class BullsAndCowsGame {
         if (results[0] == 4) { // win
             handler.sendMessage(chatId, String.format("%1$s выиграл за %2$d попыток! %3$d - правильный ответ!",
                     message.getFrom().getFirstName(), 10 - attempts, number));
-            ServiceHolder.db().incBNCWin(message.getFrom().getId());
+            Services.db().incBNCWin(message.getFrom().getId());
             for (int messageId : messagesToDelete) {
                 Methods.deleteMessage(chatId, messageId).call(handler);
             }

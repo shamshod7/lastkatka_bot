@@ -1,6 +1,9 @@
 package com.senderman.lastkatkabot;
 
-import com.mongodb.client.*;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.senderman.lastkatkabot.TempObjects.TgUser;
 import org.bson.Document;
@@ -71,28 +74,21 @@ public class MongoDBService implements DBService {
         duelstats.updateOne(Filters.eq("id", id), updateDoc);
     }
 
-    public String getStats(int id, String player) {
-        int total = 0, wins = 0, winrate = 0, bncwins = 0;
+    public Map<String, Integer> getStats(int id, String player) {
+        int total = 0, wins = 0, bncwins = 0;
         var doc = duelstats.find(Filters.eq("id", id)).first();
         if (doc == null) {
             initStats(id);
         } else {
             total = doc.getInteger("total");
             wins = doc.getInteger("wins");
-            winrate = (total == 0) ? 0 : 100 * wins / total;
             bncwins = doc.getInteger("bncwins");
         }
-        return "\uD83D\uDCCA Статистика " +
-                player +
-                "\nВыиграно дуэлей: " +
-                wins +
-                "\nВсего дуэлей сыграно: " +
-                total +
-                "\nВинрейт: " +
-                winrate +
-                "%" +
-                "\n\n\uD83D\uDC2E Выиграно в Быки и Коровы: "
-                + bncwins;
+        Map<String, Integer> stats = new HashMap<>();
+        stats.put("total", total);
+        stats.put("wins", wins);
+        stats.put("bncwins", bncwins);
+        return stats;
     }
 
     public void addToBlacklist(int id, String name, Set<Integer> blacklistSet) {
@@ -108,22 +104,16 @@ public class MongoDBService implements DBService {
 
     public Set<TgUser> getBlackList() {
         Set<TgUser> result = new HashSet<>();
-        try (MongoCursor<Document> cursor = blacklist.find().iterator()) {
-            while (cursor.hasNext()) {
-                var doc = cursor.next();
-                result.add(new TgUser(doc.getInteger("id"), doc.getString("name")));
-            }
+        for (Document doc : blacklist.find()) {
+            result.add(new TgUser(doc.getInteger("id"), doc.getString("name")));
         }
         return result;
     }
 
     public void updateBlacklist(Set<Integer> blacklistSet) {
         blacklistSet.clear();
-        try (MongoCursor<Document> cursor = blacklist.find().iterator()) {
-            while (cursor.hasNext()) {
-                var doc = cursor.next();
-                blacklistSet.add(doc.getInteger("id"));
-            }
+        for (Document doc : blacklist.find()) {
+            blacklistSet.add(doc.getInteger("id"));
         }
     }
 
@@ -145,32 +135,23 @@ public class MongoDBService implements DBService {
 
     public Set<TgUser> getAdmins() {
         Set<TgUser> result = new HashSet<>();
-        try (MongoCursor<Document> cursor = admins.find().iterator()) {
-            while (cursor.hasNext()) {
-                var doc = cursor.next();
-                result.add(new TgUser(doc.getInteger("id"), doc.getString("name")));
-            }
+        for (Document doc : admins.find()) {
+            result.add(new TgUser(doc.getInteger("id"), doc.getString("name")));
         }
         return result;
     }
 
     public void updateAdmins(Set<Integer> adminsSet) {
         adminsSet.clear();
-        try (MongoCursor<Document> cursor = admins.find().iterator()) {
-            while (cursor.hasNext()) {
-                var doc = cursor.next();
-                adminsSet.add(doc.getInteger("id"));
-            }
+        for (Document doc : admins.find()) {
+            adminsSet.add(doc.getInteger("id"));
         }
     }
 
     public Set<Integer> getPlayersIds() {
         Set<Integer> players = new HashSet<>();
-        try (MongoCursor<Document> cursor = duelstats.find().iterator()) {
-            while (cursor.hasNext()) {
-                var doc = cursor.next();
-                players.add(doc.getInteger("id"));
-            }
+        for (Document doc : duelstats.find()) {
+            players.add(doc.getInteger("id"));
         }
         return players;
     }
@@ -195,11 +176,8 @@ public class MongoDBService implements DBService {
     public List<TgUser> getChatMembers(long chatId) {
         var chat = getChatMembersCollection(chatId);
         ArrayList<TgUser> members = new ArrayList<>();
-        try (MongoCursor<Document> cursor = chat.find().iterator()) {
-            while (cursor.hasNext()) {
-                var doc = cursor.next();
-                members.add(new TgUser(doc.getInteger("id"), doc.getString("name")));
-            }
+        for (Document doc : chat.find()) {
+            members.add(new TgUser(doc.getInteger("id"), doc.getString("name")));
         }
         return members;
     }
@@ -226,11 +204,8 @@ public class MongoDBService implements DBService {
 
     @Override
     public void updateAllowedChats(Set<Long> allowedChats) {
-        try (MongoCursor<Document> cursor = allowedChatsCollection.find().iterator()) {
-            while (cursor.hasNext()) {
-                var doc = cursor.next();
-                allowedChats.add(doc.getLong("chatId"));
-            }
+        for (Document doc : allowedChatsCollection.find()) {
+            allowedChats.add(doc.getLong("chatId"));
         }
     }
 
@@ -244,6 +219,15 @@ public class MongoDBService implements DBService {
     public void removeFromAllowedChats(long chatId, Set<Long> allowedChats) {
         allowedChatsCollection.deleteOne(Filters.eq("chatId", chatId));
         allowedChats.remove(chatId);
+    }
+
+    @Override
+    public Map<Long, String> getAllowedChats() {
+        Map<Long, String> chats = new HashMap<>();
+        for (Document doc : allowedChatsCollection.find()) {
+            chats.put(doc.getLong("chatId"), doc.getString("title"));
+        }
+        return chats;
     }
 
     @Override

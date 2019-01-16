@@ -3,10 +3,8 @@ package com.senderman.lastkatkabot.commandhandlers;
 import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
-import com.senderman.lastkatkabot.ServiceHolder;
+import com.senderman.lastkatkabot.Services;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-
-import java.util.Set;
 
 public class CallbackHandler {
 
@@ -106,7 +104,7 @@ public class CallbackHandler {
 
         TournamentHandler.membersIds.add(memberId);
         Methods.Administration.restrictChatMember()
-                .setChatId(handler.botConfig.getTourgroup())
+                .setChatId(Services.botConfig().getTourgroup())
                 .setUserId(memberId)
                 .setCanSendMessages(true)
                 .setCanSendMediaMessages(true)
@@ -117,32 +115,54 @@ public class CallbackHandler {
                 .setText("✅ Вам даны права на отправку сообщений в группе турнира!")
                 .setShowAlert(true)
                 .call(handler);
-        handler.sendMessage(handler.botConfig.getTourgroup(),
+        handler.sendMessage(Services.botConfig().getTourgroup(),
                 "✅ " + query.getFrom().getUserName() + " получил доступ к игре!");
     }
 
-    public static void addChat(CallbackQuery query, LastkatkaBotHandler handler, Set<Long> allowedChats) {
+    public static void addChat(CallbackQuery query, LastkatkaBotHandler handler) {
         var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_ALLOW_CHAT, ""));
-        ServiceHolder.db().addToAllowedChats(chatId, allowedChats);
+        Services.db().addToAllowedChats(chatId, handler.allowedChats);
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setText("✅ Чат добавлен в разрешенные!")
                 .setMessageId(query.getMessage().getMessageId())
                 .setReplyMarkup(null)
                 .call(handler);
-        handler.sendMessage(chatId, "Разработчик принял данный чат. Бот готов к работе здесь!" );
+        handler.sendMessage(chatId, "Разработчик принял данный чат. Бот готов к работе здесь!\n" +
+                "Для некоторых фичей бота требуются права админа на удаление и закреп сообщений.");
     }
 
     public static void denyChat(CallbackQuery query, LastkatkaBotHandler handler) {
-        var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_DONT_ALLOW_CHAT, "" ));
+        var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_DONT_ALLOW_CHAT, ""));
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
-                .setText("\uD83D\uDEAB Чат отклонен!" )
                 .setMessageId(query.getMessage().getMessageId())
+                .setText("\uD83D\uDEAB Чат отклонен!")
                 .setReplyMarkup(null)
                 .call(handler);
-        handler.sendMessage(chatId, "Разработчик отклонил данный чат. Всем пока!" );
+        handler.sendMessage(chatId, "Разработчик отклонил данный чат. Всем пока!");
         Methods.leaveChat(chatId).call(handler);
+    }
+
+    public static void deleteChat(CallbackQuery query, LastkatkaBotHandler handler) {
+        var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_DELETE_CHAT, ""));
+        Services.db().removeFromAllowedChats(chatId, handler.allowedChats);
+        Methods.answerCallbackQuery()
+                .setShowAlert(true)
+                .setText("Чат удален!")
+                .setCallbackQueryId(query.getId())
+                .call(handler);
+        Methods.deleteMessage(query.getMessage().getChatId(), query.getMessage().getMessageId()).call(handler);
+        AdminHandler.chats(query.getMessage(), handler);
+    }
+
+    public static void closeMenu(CallbackQuery query, LastkatkaBotHandler handler) {
+        Methods.editMessageText()
+                .setChatId(query.getMessage().getChatId())
+                .setMessageId(query.getMessage().getMessageId())
+                .setText("Меню закрыто")
+                .setReplyMarkup(null)
+                .call(handler);
     }
 
     public enum CAKE_ACTIONS {CAKE_OK, CAKE_NOT}

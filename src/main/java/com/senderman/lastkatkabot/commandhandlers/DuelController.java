@@ -3,9 +3,10 @@ package com.senderman.lastkatkabot.commandhandlers;
 import com.annimon.tgbotsmodule.api.methods.Methods;
 import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
-import com.senderman.lastkatkabot.ServiceHolder;
+import com.senderman.lastkatkabot.Services;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -26,7 +27,10 @@ public class DuelController {
         duels = new ConcurrentHashMap<>();
     }
 
-    public void createNewDuel(long chatId, User player1) {
+    public void createNewDuel(long chatId, Message message) {
+        if (message.isUserMessage())
+            return;
+        var player1 = message.getFrom();
         var sm = Methods.sendMessage()
                 .setChatId(chatId)
                 .setText("\uD83C\uDFAF Набор на дуэль! Жмите кнопку ниже\nДжойнулись:\n" + player1.getFirstName());
@@ -81,14 +85,14 @@ public class DuelController {
                     .append(loserName).append(" успевает выстрелить в голову ").append(winnerName).append("! ")
                     .append(winnerName).append(" падает замертво!")
                     .append("\n\n\uD83D\uDC80 <b>Дуэль окончилась ничьей!</b>");
-            ServiceHolder.db().incDuelLoses(winner.getId());
-            ServiceHolder.db().incDuelLoses(loser.getId());
+            Services.db().incDuelLoses(winner.getId());
+            Services.db().incDuelLoses(loser.getId());
         } else {
             messageText
                     .append("\n\n\uD83D\uDC51 <b>")
                     .append(winnerName).append(" выиграл дуэль!</b>");
-            ServiceHolder.db().incDuelWins(winner.getId());
-            ServiceHolder.db().incDuelLoses(loser.getId());
+            Services.db().incDuelWins(winner.getId());
+            Services.db().incDuelLoses(loser.getId());
         }
         editDuelMessage(duel, messageText.toString());
 

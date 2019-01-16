@@ -19,7 +19,6 @@ import java.util.*;
 
 public class LastkatkaBotHandler extends BotHandler {
 
-    public final BotConfig botConfig;
     public final Set<Integer> admins;
     public final Set<Long> allowedChats;
     public final Set<Integer> blacklist;
@@ -28,29 +27,29 @@ public class LastkatkaBotHandler extends BotHandler {
     public Map<Long, BullsAndCowsGame> bullsAndCowsGames;
 
     LastkatkaBotHandler(BotConfig botConfig) {
-        this.botConfig = botConfig;
-        sendMessage((long) botConfig.getMainAdmin(), "Инициализация..." );
+        sendMessage((long) botConfig.getMainAdmin(), "Инициализация...");
 
         // settings
-        ServiceHolder.setDBService(new MongoDBService());
+        Services.setBotConfig(botConfig);
+        Services.setDBService(new MongoDBService());
 
         admins = new HashSet<>();
-        ServiceHolder.db().updateAdmins(admins);
+        Services.db().updateAdmins(admins);
 
         blacklist = new HashSet<>();
-        ServiceHolder.db().updateBlacklist(blacklist);
+        Services.db().updateBlacklist(blacklist);
 
         allowedChats = new HashSet<>();
         allowedChats.add(botConfig.getLastvegan());
         allowedChats.add(botConfig.getTourgroup());
-        ServiceHolder.db().updateAllowedChats(allowedChats);
+        Services.db().updateAllowedChats(allowedChats);
 
         duelController = new DuelController(this);
         veganTimers = new HashMap<>();
         bullsAndCowsGames = new HashMap<>();
 
         // notify main admin about launch
-        sendMessage((long) botConfig.getMainAdmin(), "Бот готов к работе!" );
+        sendMessage((long) botConfig.getMainAdmin(), "Бот готов к работе!");
     }
 
     @Override
@@ -65,9 +64,11 @@ public class LastkatkaBotHandler extends BotHandler {
             } else if (data.startsWith(LastkatkaBot.CALLBACK_CAKE_NOT)) {
                 CallbackHandler.cake(query, this, CallbackHandler.CAKE_ACTIONS.CAKE_NOT);
             } else if (data.startsWith(LastkatkaBot.CALLBACK_ALLOW_CHAT)) {
-                CallbackHandler.addChat(query, this, allowedChats);
+                CallbackHandler.addChat(query, this);
             } else if (data.startsWith(LastkatkaBot.CALLBACK_DONT_ALLOW_CHAT)) {
                 CallbackHandler.denyChat(query, this);
+            } else if (data.startsWith(LastkatkaBot.CALLBACK_DELETE_CHAT)) {
+                CallbackHandler.deleteChat(query, this);
             } else {
                 switch (data) {
                     case LastkatkaBot.CALLBACK_REGISTER_IN_TOURNAMENT:
@@ -75,6 +76,9 @@ public class LastkatkaBotHandler extends BotHandler {
                         break;
                     case LastkatkaBot.CALLBACK_PAY_RESPECTS:
                         CallbackHandler.payRespects(query, this);
+                        break;
+                    case LastkatkaBot.CALLBACK_CLOSE_MENU:
+                        CallbackHandler.closeMenu(query, this);
                         break;
                     case LastkatkaBot.CALLBACK_JOIN_DUEL:
                         duelController.joinDuel(query);
@@ -98,11 +102,11 @@ public class LastkatkaBotHandler extends BotHandler {
         var newMembers = message.getNewChatMembers();
 
         if (newMembers != null) {
-            if (chatId == botConfig.getTourgroup()) { // restrict any user who isn't in tournament
+            if (chatId == Services.botConfig().getTourgroup()) { // restrict any user who isn't in tournament
                 for (User user : newMembers) {
                     if (TournamentHandler.membersIds == null || !TournamentHandler.membersIds.contains(user.getId())) {
                         Methods.Administration.restrictChatMember()
-                                .setChatId(botConfig.getTourgroup())
+                                .setChatId(Services.botConfig().getTourgroup())
                                 .setUserId(user.getId())
                                 .setCanSendMessages(false).call(this);
                     }
@@ -112,24 +116,23 @@ public class LastkatkaBotHandler extends BotHandler {
 
             if (newMembers.get(0).getUserName().equalsIgnoreCase(getBotUsername())) {
                 if (allowedChats.contains(chatId)) {// Say hello to new group if chat is allowed
-                    sendMessage(chatId, "Этот чат находится в списке разрешенных. Бот готов к работе здесь." );
+                    sendMessage(chatId, "Этот чат находится в списке разрешенных. Бот готов к работе здесь.");
                 } else {
-                    sendMessage(chatId, "Чата нет в списке разрешенных. Дождитесь решения разработчика" );
+                    sendMessage(chatId, "Чата нет в списке разрешенных. Дождитесь решения разработчика");
 
                     var row1 = List.of(new InlineKeyboardButton()
-                            .setText("Добавить" )
+                            .setText("Добавить")
                             .setCallbackData(LastkatkaBot.CALLBACK_ALLOW_CHAT + chatId));
                     var row2 = List.of(new InlineKeyboardButton()
-                            .setText("Отклонить" )
+                            .setText("Отклонить")
                             .setCallbackData(LastkatkaBot.CALLBACK_DONT_ALLOW_CHAT + chatId));
                     var markup = new InlineKeyboardMarkup();
                     markup.setKeyboard(List.of(row1, row2));
-                    sendMessage(Methods.sendMessage((long) botConfig.getMainAdmin(),
+                    sendMessage(Methods.sendMessage((long) Services.botConfig().getMainAdmin(),
                             "Добавить чат " + message.getChat().getTitle() +
                                     " (" + chatId + ") "
                                     + "в список разрешенных?")
                             .setReplyMarkup(markup));
-                    return null;
                 }
             }
             return null;
@@ -141,14 +144,14 @@ public class LastkatkaBotHandler extends BotHandler {
         if (message.getLeftChatMember() != null) {
             Methods.sendDocument()
                     .setChatId(chatId)
-                    .setFile(botConfig.getLeavesticker())
+                    .setFile(Services.botConfig().getLeavesticker())
                     .setReplyToMessageId(message.getMessageId())
                     .call(this);
-            ServiceHolder.db().removeUserFromDB(message.getLeftChatMember(), chatId);
+            Services.db().removeUserFromDB(message.getLeftChatMember(), chatId);
         }
 
         if (message.isGroupMessage() || message.isSuperGroupMessage()) // add user to DB
-            ServiceHolder.db().addUserToDB(message.getFrom(), chatId);
+            Services.db().addUserToDB(message.getFrom(), chatId);
 
         if (!message.hasText())
             return null;
@@ -156,7 +159,7 @@ public class LastkatkaBotHandler extends BotHandler {
         var text = message.getText();
 
         // for bulls and cows
-        if (text.matches("\\d{4}" ) && bullsAndCowsGames.containsKey(chatId)) {
+        if (text.matches("\\d{4}") && bullsAndCowsGames.containsKey(chatId)) {
             bullsAndCowsGames.get(chatId).check(message);
             return null;
         }
@@ -167,43 +170,37 @@ public class LastkatkaBotHandler extends BotHandler {
         /* bot should only trigger on general commands (like /command) or on commands for this bot (/command@mybot),
          * and NOT on commands for another bots (like /command@notmybot) except @veganwarsbot
          */
-        var command = text.split("\\s+", 2)[0].toLowerCase(Locale.ENGLISH).replace("@" + getBotUsername(), "" );
+        var command = text.split("\\s+", 2)[0].toLowerCase(Locale.ENGLISH).replace("@" + getBotUsername(), "");
 
-        if (botConfig.getVeganWarsCommands().contains(text) && !veganTimers.containsKey(chatId)) { // start veganwars timer
+        if (Services.botConfig().getVeganWarsCommands().contains(text) && !veganTimers.containsKey(chatId)) { // start veganwars timer
             veganTimers.put(chatId, new VeganTimer(chatId, this));
 
-        } else if (text.startsWith("/join" ) && veganTimers.containsKey(chatId)) {
+        } else if (text.startsWith("/join") && veganTimers.containsKey(chatId)) {
             veganTimers.get(chatId).addPlayer(message.getFrom().getId(), message);
 
-        } else if (text.startsWith("/flee" ) && veganTimers.containsKey(chatId)) {
+        } else if (text.startsWith("/flee") && veganTimers.containsKey(chatId)) {
             veganTimers.get(chatId).removePlayer(message.getFrom().getId());
 
-        } else if (text.startsWith("/fight" ) && veganTimers.containsKey(chatId)) {
+        } else if (text.startsWith("/fight") && veganTimers.containsKey(chatId)) {
             if (veganTimers.get(chatId).getVegansAmount() > 1) {
                 veganTimers.get(chatId).stop();
             }
 
-        } else if (command.contains("@" ))
+        } else if (command.contains("@"))
             return null;
 
-        if (command.startsWith("/pinlist" ) && isFromWwBot(message)) {
-            UsercommandsHandler.pinlist(message, this);
-            return null;
-
-        } else if (command.startsWith("/duel" ) && !message.isUserMessage() && isNotInBlacklist(message)) {
-            Methods.deleteMessage(chatId, message.getMessageId()).call(this);
-            duelController.createNewDuel(chatId, message.getFrom());
-            return null;
-
-        } else if (command.startsWith("/reset" ) && veganTimers.containsKey(chatId)) {
+        if (command.startsWith("/reset") && veganTimers.containsKey(chatId)) {
             veganTimers.get(chatId).stop();
-            sendMessage(chatId, "Список игроков сброшен" );
+            sendMessage(chatId, "Список игроков сброшен");
 
         }
 
         // users in blacklist are not allowed to use this commands
         if (isNotInBlacklist(message)) {
             switch (command) {
+                case "/pinlist":
+                    UsercommandsHandler.pinlist(message, this);
+                    break;
                 case "/pair":
                     UsercommandsHandler.pair(chatId, this);
                     break;
@@ -222,8 +219,8 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/cake":
                     UsercommandsHandler.cake(message, this);
                     break;
-                case "/feedback":
-                    UsercommandsHandler.feedback(message, this);
+                case "/duel":
+                    duelController.createNewDuel(chatId, message);
                     break;
                 case "/stats":
                     UsercommandsHandler.dstats(message, this);
@@ -232,10 +229,13 @@ public class LastkatkaBotHandler extends BotHandler {
                     if (!bullsAndCowsGames.containsKey(chatId))
                         bullsAndCowsGames.put(chatId, new BullsAndCowsGame(this, chatId));
                     else
-                        sendMessage(chatId, "В этом чате игра уже идет!" );
+                        sendMessage(chatId, "В этом чате игра уже идет!");
                     break;
                 case "/bnchelp":
                     UsercommandsHandler.bnchelp(message, this);
+                    break;
+                case "/feedback":
+                    UsercommandsHandler.feedback(message, this);
                     break;
                 case "/help":
                     UsercommandsHandler.help(message, this);
@@ -244,7 +244,7 @@ public class LastkatkaBotHandler extends BotHandler {
         }
 
         // commands for main admin only
-        if (message.getFrom().getId().equals(botConfig.getMainAdmin())) {
+        if (message.getFrom().getId().equals(Services.botConfig().getMainAdmin())) {
             switch (command) {
                 case "/owner":
                     AdminHandler.owner(message, this);
@@ -258,10 +258,8 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/announce":
                     AdminHandler.announce(message, this);
                     break;
-                case "/remchat":
-                    ServiceHolder.db().removeFromAllowedChats(chatId, allowedChats);
-                    sendMessage(chatId, "✅ Чат удален из разрешенных. Всем пока!" );
-                    Methods.leaveChat(chatId).call(this);
+                case "/chats":
+                    AdminHandler.chats(message, this);
                     break;
             }
         }
@@ -326,12 +324,12 @@ public class LastkatkaBotHandler extends BotHandler {
 
     @Override
     public String getBotUsername() {
-        return botConfig.getUsername();
+        return Services.botConfig().getUsername();
     }
 
     @Override
     public String getBotToken() {
-        return botConfig.getToken();
+        return Services.botConfig().getToken();
     }
 
     private boolean isFromAdmin(Message message) {
@@ -344,11 +342,6 @@ public class LastkatkaBotHandler extends BotHandler {
             Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(this);
         }
         return !result;
-    }
-
-    private boolean isFromWwBot(Message message) {
-        return botConfig.getWwBots().contains(message.getReplyToMessage().getFrom().getUserName()) &&
-                message.getReplyToMessage().getText().contains("#players" );
     }
 
     public Message sendMessage(long chatId, String text) {

@@ -4,6 +4,7 @@ import com.senderman.lastkatkabot.TempObjects.TgUser;
 import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface DBService {
@@ -16,7 +17,7 @@ public interface DBService {
 
     void incBNCWin(int id);
 
-    String getStats(int id, String player);
+    Map<String, Integer> getStats(int id, String player);
 
     void addToBlacklist(int id, String name, Set<Integer> blacklistSet);
 
@@ -53,6 +54,8 @@ public interface DBService {
     void addToAllowedChats(long chatId, Set<Long> allowedChats);
 
     void removeFromAllowedChats(long chatId, Set<Long> allowedChats);
+
+    Map<Long, String> getAllowedChats();
 
     boolean pairExistsToday(long chatId);
 
