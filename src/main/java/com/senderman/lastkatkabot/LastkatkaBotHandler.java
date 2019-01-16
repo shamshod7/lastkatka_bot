@@ -23,11 +23,13 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Long> allowedChats;
     public final Set<Integer> blacklist;
     private final DuelController duelController;
+    private final BotConfig botConfig;
     public Map<Long, VeganTimer> veganTimers;
     public Map<Long, BullsAndCowsGame> bullsAndCowsGames;
 
     LastkatkaBotHandler(BotConfig botConfig) {
-        sendMessage((long) botConfig.getMainAdmin(), "Инициализация...");
+        this.botConfig = botConfig;
+        sendMessage((long) this.botConfig.getMainAdmin(), "Инициализация...");
 
         // settings
         Services.setBotConfig(botConfig);
@@ -49,7 +51,7 @@ public class LastkatkaBotHandler extends BotHandler {
         bullsAndCowsGames = new HashMap<>();
 
         // notify main admin about launch
-        sendMessage((long) botConfig.getMainAdmin(), "Бот готов к работе!");
+        sendMessage((long) this.botConfig.getMainAdmin(), "Бот готов к работе!");
     }
 
     @Override
@@ -324,12 +326,12 @@ public class LastkatkaBotHandler extends BotHandler {
 
     @Override
     public String getBotUsername() {
-        return Services.botConfig().getUsername();
+        return botConfig.getUsername();
     }
 
     @Override
     public String getBotToken() {
-        return Services.botConfig().getToken();
+        return botConfig.getToken();
     }
 
     private boolean isFromAdmin(Message message) {
