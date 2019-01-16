@@ -113,7 +113,7 @@ public class AdminHandler {
                     .setCallbackData(LastkatkaBot.CALLBACK_DELETE_CHAT + chatId)));
         }
         rows.add(List.of(new InlineKeyboardButton()
-                .setText("Закрыть менб")
+                .setText("Закрыть меню")
                 .setCallbackData(LastkatkaBot.CALLBACK_CLOSE_MENU)));
         markup.setKeyboard(rows);
         handler.sendMessage(Methods.sendMessage(message.getChatId(), "Для удаления чата нажите на него")
