@@ -102,8 +102,10 @@ public class AdminHandler {
     }
 
     public static void chats(Message message, LastkatkaBotHandler handler) {
-        if (!message.isUserMessage())
+        if (!message.isUserMessage()) {
             handler.sendMessage(message.getChatId(), "Команду можно использовать только в лс бота!");
+            return;
+        }
         var markup = new InlineKeyboardMarkup();
         ArrayList<List<InlineKeyboardButton>> rows = new ArrayList<>();
         var chats = Services.db().getAllowedChats();
