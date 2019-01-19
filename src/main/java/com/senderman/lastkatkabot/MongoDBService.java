@@ -237,21 +237,33 @@ public class MongoDBService implements DBService {
         if (doc == null)
             return false;
         else {
-            var format = new SimpleDateFormat("yyyyMMdd");
-            var today = format.format(new Date());
-            return doc.getLong("date") == Long.parseLong(today);
+            var date = new Date();
+            var today = new SimpleDateFormat("yyyyMMdd").format(date);
+            if (doc.getLong("date") < Long.parseLong(today))
+                return false;
+            else {
+                var hoursFormat = new SimpleDateFormat("HH");
+                var hours = Integer.parseInt(hoursFormat.format(date) + 3);
+                hours = (hours < 12) ? 0 : 12;
+                return doc.getInteger("hours") == hours;
+            }
         }
     }
 
     @Override
     public void setPair(long chatId, String pair, String history) {
         pairs.deleteOne(Filters.eq("chatId", chatId));
-        var format = new SimpleDateFormat("yyyyMMdd");
+        var date = new Date();
+        var dateFormat = new SimpleDateFormat("yyyyMMdd");
+        var hoursFormat = new SimpleDateFormat("HH");
+        var hours = Integer.parseInt(hoursFormat.format(date) + 3);
+        hours = (hours < 12) ? 0 : 12;
         pairs.insertOne(new Document()
                 .append("chatId", chatId)
                 .append("pair", pair)
                 .append("history", history)
-                .append("date", Long.parseLong(format.format(new Date()))));
+                .append("date", Long.parseLong(dateFormat.format(date)))
+                .append("hours", hours));
     }
 
     @Override
