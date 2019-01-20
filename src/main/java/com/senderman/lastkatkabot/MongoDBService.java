@@ -243,8 +243,8 @@ public class MongoDBService implements DBService {
                 return false;
             else {
                 var hoursFormat = new SimpleDateFormat("HH");
-                var hours = Integer.parseInt(hoursFormat.format(date) + 3);
-                hours = (hours < 12) ? 0 : 12;
+                var hours = Integer.parseInt(hoursFormat.format(date)) - 3;
+                hours = (hours >= 0 && hours < 12) ? 0 : 12;
                 return doc.getInteger("hours") == hours;
             }
         }
@@ -256,8 +256,8 @@ public class MongoDBService implements DBService {
         var date = new Date();
         var dateFormat = new SimpleDateFormat("yyyyMMdd");
         var hoursFormat = new SimpleDateFormat("HH");
-        var hours = Integer.parseInt(hoursFormat.format(date) + 3);
-        hours = (hours < 12) ? 0 : 12;
+        var hours = Integer.parseInt(hoursFormat.format(date)) - 3;
+        hours = (hours >= 0 && hours < 12) ? 0 : 12;
         pairs.insertOne(new Document()
                 .append("chatId", chatId)
                 .append("pair", pair)
