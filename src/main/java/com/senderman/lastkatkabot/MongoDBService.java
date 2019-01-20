@@ -237,13 +237,14 @@ public class MongoDBService implements DBService {
         if (doc == null)
             return false;
         else {
-            var date = new Date();
-            var today = new SimpleDateFormat("yyyyMMdd").format(date);
+            var dateFormat = new SimpleDateFormat("yyyyMMdd");
+            var date = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow")).getTime();
+            var today = dateFormat.format(date);
             if (doc.getLong("date") < Long.parseLong(today))
                 return false;
             else {
                 var hoursFormat = new SimpleDateFormat("HH");
-                var hours = Integer.parseInt(hoursFormat.format(date)) - 3;
+                var hours = Integer.parseInt(hoursFormat.format(date));
                 hours = (hours >= 0 && hours < 12) ? 0 : 12;
                 return doc.getInteger("hours") == hours;
             }
@@ -253,10 +254,10 @@ public class MongoDBService implements DBService {
     @Override
     public void setPair(long chatId, String pair, String history) {
         pairs.deleteOne(Filters.eq("chatId", chatId));
-        var date = new Date();
+        var date = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow")).getTime();
         var dateFormat = new SimpleDateFormat("yyyyMMdd");
         var hoursFormat = new SimpleDateFormat("HH");
-        var hours = Integer.parseInt(hoursFormat.format(date)) - 3;
+        var hours = Integer.parseInt(hoursFormat.format(date));
         hours = (hours >= 0 && hours < 12) ? 0 : 12;
         pairs.insertOne(new Document()
                 .append("chatId", chatId)
