@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class MongoDBService implements DBService {
+    private final TimeZone timeZone = TimeZone.getTimeZone("Europe/Moscow");
     private final MongoClient client = MongoClients.create(System.getenv("database"));
     private final MongoDatabase lastkatkaDB = client.getDatabase("lastkatka");
     private final MongoDatabase chatMembersDB = client.getDatabase("chatmembers");
@@ -238,12 +239,14 @@ public class MongoDBService implements DBService {
             return false;
         else {
             var dateFormat = new SimpleDateFormat("yyyyMMdd");
+            dateFormat.setTimeZone(timeZone);
             var date = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow")).getTime();
             var today = dateFormat.format(date);
             if (doc.getLong("date") < Long.parseLong(today))
                 return false;
             else {
                 var hoursFormat = new SimpleDateFormat("HH");
+                hoursFormat.setTimeZone(timeZone);
                 var hours = Integer.parseInt(hoursFormat.format(date));
                 hours = (hours >= 0 && hours < 12) ? 0 : 12;
                 return doc.getInteger("hours") == hours;
@@ -257,6 +260,8 @@ public class MongoDBService implements DBService {
         var date = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow")).getTime();
         var dateFormat = new SimpleDateFormat("yyyyMMdd");
         var hoursFormat = new SimpleDateFormat("HH");
+        dateFormat.setTimeZone(timeZone);
+        hoursFormat.setTimeZone(timeZone);
         var hours = Integer.parseInt(hoursFormat.format(date));
         hours = (hours >= 0 && hours < 12) ? 0 : 12;
         pairs.insertOne(new Document()

@@ -12,10 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -179,10 +176,6 @@ public class UsercommandsHandler {
             var pair = Services.db().getPairOfTheDay(chatId);
             pair = (pair != null) ? pair : "Ошибка, попробуйте завтра";
             handler.sendMessage(chatId, pair);
-            var date = new Date();
-            var f = new SimpleDateFormat("yyyy-MM-dd-HH");
-            f.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-            handler.sendMessage(chatId, f.format(date));
             return;
         }
 
