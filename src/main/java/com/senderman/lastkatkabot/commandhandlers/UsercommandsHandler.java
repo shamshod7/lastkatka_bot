@@ -13,7 +13,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.ThreadLocalRandom;
@@ -179,10 +179,10 @@ public class UsercommandsHandler {
             var pair = Services.db().getPairOfTheDay(chatId);
             pair = (pair != null) ? pair : "Ошибка, попробуйте завтра";
             handler.sendMessage(chatId, pair);
-            var calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            calendar.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+            var date = new Date();
             var f = new SimpleDateFormat("yyyy-MM-dd-HH");
-            handler.sendMessage(chatId, f.format(calendar.getTime()));
+            f.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+            handler.sendMessage(chatId, f.format(date));
             return;
         }
 
