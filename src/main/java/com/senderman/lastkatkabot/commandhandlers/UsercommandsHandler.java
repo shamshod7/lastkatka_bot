@@ -179,9 +179,10 @@ public class UsercommandsHandler {
             var pair = Services.db().getPairOfTheDay(chatId);
             pair = (pair != null) ? pair : "Ошибка, попробуйте завтра";
             handler.sendMessage(chatId, pair);
-            var date = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow")).getTime();
+            var calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            calendar.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
             var f = new SimpleDateFormat("yyyy-MM-dd-HH");
-            handler.sendMessage(chatId, f.format(date));
+            handler.sendMessage(chatId, f.format(calendar.getTime()));
             return;
         }
 
