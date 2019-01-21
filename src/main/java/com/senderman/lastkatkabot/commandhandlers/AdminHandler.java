@@ -126,7 +126,7 @@ public class AdminHandler {
         if (!message.isReply())
             return;
         handler.sendMessage(message.getChatId(), message.getReplyToMessage()
-                .toString().replaceAll("([ ,]*\\w+)='?null'?", ""));
+                .toString().replaceAll("[ ,]*\\w+='?null'?", ""));
     }
 
     public static void announce(Message message, LastkatkaBotHandler handler) {
