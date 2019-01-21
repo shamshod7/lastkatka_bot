@@ -19,25 +19,25 @@ public interface DBService {
 
     Map<String, Integer> getStats(int id, String player);
 
-    void addToBlacklist(int id, String name, Set<Integer> blacklistSet);
+    void addToBlacklist(int id, String name);
 
-    void removeFromBlacklist(int id, Set<Integer> blacklistSet);
+    void removeFromBlacklist(int id);
 
-    Set<TgUser> getBlackList();
+    Set<TgUser> getBlackListUsers();
 
-    void updateBlacklist(Set<Integer> blacklistSet);
+    Set<Integer> getBlacklistIds();
 
-    void resetBlackList(Set<Integer> blacklistSet);
+    void resetBlackList();
 
-    void addAdmin(int id, String name, Set<Integer> adminsSet);
+    void addAdmin(int id, String name);
 
-    void removeAdmin(int id, Set<Integer> adminsSet);
+    void removeAdmin(int id);
 
     Set<TgUser> getAdmins();
 
-    void updateAdmins(Set<Integer> adminsSet);
+    Set<Integer> getAdminsIds();
 
-    Set<Integer> getPlayersIds();
+    Set<Integer> getAllUsersIds();
 
     void addUserToDB(User user, long chatId);
 
@@ -49,11 +49,11 @@ public interface DBService {
 
     void setTournamentMessage(int messageId);
 
-    void updateAllowedChats(Set<Long> allowedChats);
+    Set<Long> getAllowedChatsSet();
 
-    void addAllowedChat(long chatId, String title, Set<Long> allowedChats);
+    void addAllowedChat(long chatId, String title);
 
-    void removeAllowedChat(long chatId, Set<Long> allowedChats);
+    void removeAllowedChat(long chatId);
 
     Map<Long, String> getAllowedChats();
 

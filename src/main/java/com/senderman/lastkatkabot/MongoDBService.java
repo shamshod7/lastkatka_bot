@@ -92,18 +92,16 @@ public class MongoDBService implements DBService {
         return stats;
     }
 
-    public void addToBlacklist(int id, String name, Set<Integer> blacklistSet) {
+    public void addToBlacklist(int id, String name) {
         blacklist.insertOne(new Document("id", id)
                 .append("name", name));
-        blacklistSet.add(id);
     }
 
-    public void removeFromBlacklist(int id, Set<Integer> blacklistSet) {
+    public void removeFromBlacklist(int id) {
         blacklist.deleteOne(Filters.eq("id", id));
-        blacklistSet.remove(id);
     }
 
-    public Set<TgUser> getBlackList() {
+    public Set<TgUser> getBlackListUsers() {
         Set<TgUser> result = new HashSet<>();
         for (Document doc : blacklist.find()) {
             result.add(new TgUser(doc.getInteger("id"), doc.getString("name")));
@@ -111,27 +109,25 @@ public class MongoDBService implements DBService {
         return result;
     }
 
-    public void updateBlacklist(Set<Integer> blacklistSet) {
-        blacklistSet.clear();
+    public Set<Integer> getBlacklistIds() {
+        Set<Integer> blacklistSet = new HashSet<>();
         for (Document doc : blacklist.find()) {
             blacklistSet.add(doc.getInteger("id"));
         }
+        return blacklistSet;
     }
 
-    public void resetBlackList(Set<Integer> blacklistSet) {
-        blacklistSet.clear();
+    public void resetBlackList() {
         blacklist.deleteMany(new Document());
     }
 
-    public void addAdmin(int id, String name, Set<Integer> adminsSet) {
+    public void addAdmin(int id, String name) {
         admins.insertOne(new Document("id", id)
                 .append("name", name));
-        adminsSet.add(id);
     }
 
-    public void removeAdmin(int id, Set<Integer> adminsSet) {
+    public void removeAdmin(int id) {
         admins.deleteOne(Filters.eq("id", id));
-        adminsSet.remove(id);
     }
 
     public Set<TgUser> getAdmins() {
@@ -142,19 +138,20 @@ public class MongoDBService implements DBService {
         return result;
     }
 
-    public void updateAdmins(Set<Integer> adminsSet) {
-        adminsSet.clear();
+    public Set<Integer> getAdminsIds() {
+        Set<Integer> adminsSet = new HashSet<>();
         for (Document doc : admins.find()) {
             adminsSet.add(doc.getInteger("id"));
         }
+        return adminsSet;
     }
 
-    public Set<Integer> getPlayersIds() {
-        Set<Integer> players = new HashSet<>();
-        for (Document doc : duelstats.find()) {
-            players.add(doc.getInteger("id"));
+    public Set<Integer> getAllUsersIds() {
+        Set<Integer> userIds = new HashSet<>();
+        for (Document document : chatMembersDB.listCollections()) {
+            userIds.add(document.getInteger("id"));
         }
-        return players;
+        return userIds;
     }
 
     @Override
@@ -204,23 +201,23 @@ public class MongoDBService implements DBService {
     }
 
     @Override
-    public void updateAllowedChats(Set<Long> allowedChats) {
+    public Set<Long> getAllowedChatsSet() {
+        Set<Long> allowedChats = new HashSet<>();
         for (Document doc : allowedChatsCollection.find()) {
             allowedChats.add(doc.getLong("chatId"));
         }
+        return allowedChats;
     }
 
     @Override
-    public void addAllowedChat(long chatId, String title, Set<Long> allowedChats) {
+    public void addAllowedChat(long chatId, String title) {
         allowedChatsCollection.insertOne(new Document("chatId", chatId)
                 .append("title", title));
-        allowedChats.add(chatId);
     }
 
     @Override
-    public void removeAllowedChat(long chatId, Set<Long> allowedChats) {
+    public void removeAllowedChat(long chatId) {
         allowedChatsCollection.deleteOne(Filters.eq("chatId", chatId));
-        allowedChats.remove(chatId);
     }
 
     @Override

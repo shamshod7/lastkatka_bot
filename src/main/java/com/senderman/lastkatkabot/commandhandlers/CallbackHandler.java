@@ -122,7 +122,8 @@ public class CallbackHandler {
     public static void addChat(CallbackQuery query, LastkatkaBotHandler handler) {
         var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_ALLOW_CHAT, ""));
         var title = query.getData().replaceAll("^.*?title=", "");
-        Services.db().addAllowedChat(chatId, title, handler.allowedChats);
+        Services.db().addAllowedChat(chatId, title);
+        handler.allowedChats.add(chatId);
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setText("✅ Чат добавлен в разрешенные!")
@@ -147,7 +148,8 @@ public class CallbackHandler {
 
     public static void deleteChat(CallbackQuery query, LastkatkaBotHandler handler) {
         var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_DELETE_CHAT, ""));
-        Services.db().removeAllowedChat(chatId, handler.allowedChats);
+        Services.db().removeAllowedChat(chatId);
+        handler.allowedChats.remove(chatId);
         Methods.answerCallbackQuery()
                 .setShowAlert(true)
                 .setText("Чат удален!")
@@ -161,7 +163,8 @@ public class CallbackHandler {
 
     public static void deleteAdmin(CallbackQuery query, LastkatkaBotHandler handler) {
         var adminId = Integer.parseInt(query.getData().replace(LastkatkaBot.CALLBACK_DELETE_ADMIN, ""));
-        Services.db().removeAdmin(adminId, handler.admins);
+        Services.db().removeAdmin(adminId);
+        handler.admins.remove(adminId);
         Methods.answerCallbackQuery()
                 .setShowAlert(true)
                 .setText("Админ удален!")

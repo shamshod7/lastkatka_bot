@@ -23,35 +23,29 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Long> allowedChats;
     public final Set<Integer> blacklist;
     private final DuelController duelController;
-    private final BotConfig botConfig;
     public Map<Long, VeganTimer> veganTimers;
     public Map<Long, BullsAndCowsGame> bullsAndCowsGames;
 
     LastkatkaBotHandler(BotConfig botConfig) {
-        this.botConfig = botConfig;
-        sendMessage(this.botConfig.getMainAdmin(), "Инициализация...");
+        sendMessage(botConfig.getMainAdmin(), "Инициализация...");
 
         // settings
         Services.setBotConfig(botConfig);
         Services.setDBService(new MongoDBService());
 
-        admins = new HashSet<>();
-        Services.db().updateAdmins(admins);
+        admins = Services.db().getAdminsIds();
+        blacklist = Services.db().getBlacklistIds();
 
-        blacklist = new HashSet<>();
-        Services.db().updateBlacklist(blacklist);
-
-        allowedChats = new HashSet<>();
+        allowedChats = Services.db().getAllowedChatsSet();
         allowedChats.add(botConfig.getLastvegan());
         allowedChats.add(botConfig.getTourgroup());
-        Services.db().updateAllowedChats(allowedChats);
 
         duelController = new DuelController(this);
         veganTimers = new HashMap<>();
         bullsAndCowsGames = new HashMap<>();
 
         // notify main admin about launch
-        sendMessage(this.botConfig.getMainAdmin(), "Бот готов к работе!");
+        sendMessage(botConfig.getMainAdmin(), "Бот готов к работе!");
     }
 
     @Override
@@ -327,12 +321,12 @@ public class LastkatkaBotHandler extends BotHandler {
 
     @Override
     public String getBotUsername() {
-        return botConfig.getUsername();
+        return Services.botConfig().getUsername();
     }
 
     @Override
     public String getBotToken() {
-        return botConfig.getToken();
+        return Services.botConfig().getToken();
     }
 
     private boolean isFromAdmin(Message message) {

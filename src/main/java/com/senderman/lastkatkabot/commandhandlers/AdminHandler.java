@@ -24,8 +24,8 @@ public class AdminHandler {
             return;
         }
         Services.db().addToBlacklist(message.getReplyToMessage().getFrom().getId(),
-                message.getReplyToMessage().getFrom().getFirstName(),
-                handler.blacklist);
+                message.getReplyToMessage().getFrom().getFirstName());
+        handler.blacklist.add(message.getReplyToMessage().getFrom().getId());
         handler.sendMessage(message.getChatId(), "\uD83D\uDE3E " + message.getReplyToMessage().getFrom().getUserName() +
                 " - плохая киса!");
     }
@@ -33,15 +33,15 @@ public class AdminHandler {
     public static void goodneko(Message message, LastkatkaBotHandler handler) {
         if (!message.isReply())
             return;
-        Services.db().removeFromBlacklist(message.getReplyToMessage().getFrom().getId(),
-                handler.blacklist);
+        Services.db().removeFromBlacklist(message.getReplyToMessage().getFrom().getId());
+        handler.blacklist.remove(message.getReplyToMessage().getFrom().getId());
         handler.sendMessage(message.getChatId(), "\uD83D\uDE38 " + message.getReplyToMessage().getFrom().getUserName() +
                 " - хорошая киса!");
     }
 
     public static void nekos(Message message, LastkatkaBotHandler handler) {
         var badnekos = new StringBuilder().append("\uD83D\uDE3E <b>Список плохих кис:</b>\n\n");
-        var nekoSet = Services.db().getBlackList();
+        var nekoSet = Services.db().getBlackListUsers();
         for (TgUser neko : nekoSet) {
             badnekos.append(neko.getLink()).append("\n");
         }
@@ -50,7 +50,8 @@ public class AdminHandler {
     }
 
     public static void loveneko(Message message, LastkatkaBotHandler handler) {
-        Services.db().resetBlackList(handler.blacklist);
+        Services.db().resetBlackList();
+        handler.blacklist.clear();
         handler.sendMessage(message.getChatId(), "❤️ Все кисы - хорошие!");
     }
 
@@ -61,8 +62,8 @@ public class AdminHandler {
             return;
         }
         Services.db().addAdmin(message.getReplyToMessage().getFrom().getId(),
-                message.getReplyToMessage().getFrom().getFirstName(),
-                handler.admins);
+                message.getReplyToMessage().getFrom().getFirstName());
+        handler.admins.add(message.getReplyToMessage().getFrom().getId());
         handler.sendMessage(message.getChatId(), "✅" + message.getReplyToMessage().getFrom().getFirstName() +
                 " теперь мой хозяин!");
     }
@@ -135,11 +136,11 @@ public class AdminHandler {
         handler.sendMessage(message.getChatId(), "Рассылка запущена. На время рассылки бот будет недоступен");
         var text = message.getText();
         text = "\uD83D\uDCE3 <b>Объявление</b>\n\n" + text.split("\\s+", 2)[1];
-        var players = Services.db().getPlayersIds();
+        var usersIds = Services.db().getAllUsersIds();
         int counter = 0;
-        for (int player : players) {
+        for (int userId : usersIds) {
             try {
-                handler.execute(new SendMessage((long) player, text).enableHtml(true));
+                handler.execute(new SendMessage((long) userId, text).enableHtml(true));
                 counter++;
             } catch (TelegramApiException e) {
                 BotLogger.error("ANNOUNCE", e.toString());
