@@ -60,30 +60,32 @@ public class AdminHandler {
         if (handler.admins.contains(message.getReplyToMessage().getFrom().getId())) {
             return;
         }
-        Services.db().addToAdmins(message.getReplyToMessage().getFrom().getId(),
+        Services.db().addAdmin(message.getReplyToMessage().getFrom().getId(),
                 message.getReplyToMessage().getFrom().getFirstName(),
                 handler.admins);
         handler.sendMessage(message.getChatId(), "✅" + message.getReplyToMessage().getFrom().getFirstName() +
                 " теперь мой хозяин!");
     }
 
-    public static void remOwner(Message message, LastkatkaBotHandler handler) {
-        if (!message.isReply())
-            return;
-        Services.db().removeFromAdmins(message.getReplyToMessage().getFrom().getId(),
-                handler.admins);
-        handler.sendMessage(message.getChatId(), "\uD83D\uDEAB " + message.getReplyToMessage().getFrom().getFirstName() +
-                " больше не мой хозяин!");
-    }
-
     public static void listOwners(Message message, LastkatkaBotHandler handler) {
-        var owners = new StringBuilder().append("\uD83D\uDE0E <b>Админы бота:</b>\n\n");
-        var ownersSet = Services.db().getAdmins();
-        for (TgUser owner : ownersSet) {
-            owners.append(owner.getLink()).append("\n");
+        if (!message.isUserMessage()) {
+            handler.sendMessage(message.getChatId(), "Команду можно использовать только в лс бота!");
+            return;
         }
-        handler.sendMessage(Methods.sendMessage(message.getChatId(), owners.toString())
-                .disableNotification());
+        var ownersSet = Services.db().getAdmins();
+        var markup = new InlineKeyboardMarkup();
+        ArrayList<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        for (TgUser owner : ownersSet) {
+            rows.add(List.of(new InlineKeyboardButton()
+                    .setText(owner.getName())
+                    .setCallbackData(LastkatkaBot.CALLBACK_DELETE_ADMIN + owner.getId())));
+        }
+        rows.add(List.of(new InlineKeyboardButton()
+                .setText("Закрыть меню")
+                .setCallbackData(LastkatkaBot.CALLBACK_CLOSE_MENU)));
+        markup.setKeyboard(rows);
+        handler.sendMessage(Methods.sendMessage(message.getChatId(), "Для удаления админа нажмите на него")
+                .setReplyMarkup(markup));
     }
 
     public static void update(Message message, LastkatkaBotHandler handler) {

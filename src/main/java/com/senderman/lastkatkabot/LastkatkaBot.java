@@ -17,6 +17,7 @@ public class LastkatkaBot implements BotModule {
     public static final String CALLBACK_DONT_ALLOW_CHAT = "dont_allow_chat";
     public static final String CALLBACK_DELETE_CHAT = "delete_chat";
     public static final String CALLBACK_CLOSE_MENU = "close_menu";
+    public static final String CALLBACK_DELETE_ADMIN = "delete_admin";
 
     @NotNull
     @Override

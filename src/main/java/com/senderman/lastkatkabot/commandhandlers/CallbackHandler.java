@@ -122,7 +122,7 @@ public class CallbackHandler {
     public static void addChat(CallbackQuery query, LastkatkaBotHandler handler) {
         var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_ALLOW_CHAT, ""));
         var title = query.getData().replaceAll("^.*?title=", "");
-        Services.db().addToAllowedChats(chatId, title, handler.allowedChats);
+        Services.db().addAllowedChat(chatId, title, handler.allowedChats);
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setText("✅ Чат добавлен в разрешенные!")
@@ -147,7 +147,7 @@ public class CallbackHandler {
 
     public static void deleteChat(CallbackQuery query, LastkatkaBotHandler handler) {
         var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_DELETE_CHAT, ""));
-        Services.db().removeFromAllowedChats(chatId, handler.allowedChats);
+        Services.db().removeAllowedChat(chatId, handler.allowedChats);
         Methods.answerCallbackQuery()
                 .setShowAlert(true)
                 .setText("Чат удален!")
@@ -157,6 +157,19 @@ public class CallbackHandler {
         Methods.leaveChat(chatId).call(handler);
         Methods.deleteMessage(query.getMessage().getChatId(), query.getMessage().getMessageId()).call(handler);
         AdminHandler.chats(query.getMessage(), handler);
+    }
+
+    public static void deleteAdmin(CallbackQuery query, LastkatkaBotHandler handler) {
+        var adminId = Integer.parseInt(query.getData().replace(LastkatkaBot.CALLBACK_DELETE_ADMIN, ""));
+        Services.db().removeAdmin(adminId, handler.admins);
+        Methods.answerCallbackQuery()
+                .setShowAlert(true)
+                .setText("Админ удален!")
+                .setCallbackQueryId(query.getId())
+                .call(handler);
+        handler.sendMessage(adminId, "Разработчик удалил вас из админов бота!");
+        Methods.deleteMessage(query.getMessage().getChatId(), query.getMessage().getMessageId()).call(handler);
+        AdminHandler.listOwners(query.getMessage(), handler);
     }
 
     public static void closeMenu(CallbackQuery query, LastkatkaBotHandler handler) {

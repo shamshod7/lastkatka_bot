@@ -123,13 +123,13 @@ public class MongoDBService implements DBService {
         blacklist.deleteMany(new Document());
     }
 
-    public void addToAdmins(int id, String name, Set<Integer> adminsSet) {
+    public void addAdmin(int id, String name, Set<Integer> adminsSet) {
         admins.insertOne(new Document("id", id)
                 .append("name", name));
         adminsSet.add(id);
     }
 
-    public void removeFromAdmins(int id, Set<Integer> adminsSet) {
+    public void removeAdmin(int id, Set<Integer> adminsSet) {
         admins.deleteOne(Filters.eq("id", id));
         adminsSet.remove(id);
     }
@@ -211,14 +211,14 @@ public class MongoDBService implements DBService {
     }
 
     @Override
-    public void addToAllowedChats(long chatId, String title, Set<Long> allowedChats) {
+    public void addAllowedChat(long chatId, String title, Set<Long> allowedChats) {
         allowedChatsCollection.insertOne(new Document("chatId", chatId)
                 .append("title", title));
         allowedChats.add(chatId);
     }
 
     @Override
-    public void removeFromAllowedChats(long chatId, Set<Long> allowedChats) {
+    public void removeAllowedChat(long chatId, Set<Long> allowedChats) {
         allowedChatsCollection.deleteOne(Filters.eq("chatId", chatId));
         allowedChats.remove(chatId);
     }

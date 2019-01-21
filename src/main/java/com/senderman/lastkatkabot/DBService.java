@@ -29,9 +29,9 @@ public interface DBService {
 
     void resetBlackList(Set<Integer> blacklistSet);
 
-    void addToAdmins(int id, String name, Set<Integer> adminsSet);
+    void addAdmin(int id, String name, Set<Integer> adminsSet);
 
-    void removeFromAdmins(int id, Set<Integer> adminsSet);
+    void removeAdmin(int id, Set<Integer> adminsSet);
 
     Set<TgUser> getAdmins();
 
@@ -51,9 +51,9 @@ public interface DBService {
 
     void updateAllowedChats(Set<Long> allowedChats);
 
-    void addToAllowedChats(long chatId, String title, Set<Long> allowedChats);
+    void addAllowedChat(long chatId, String title, Set<Long> allowedChats);
 
-    void removeFromAllowedChats(long chatId, Set<Long> allowedChats);
+    void removeAllowedChat(long chatId, Set<Long> allowedChats);
 
     Map<Long, String> getAllowedChats();
 

@@ -29,7 +29,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
     LastkatkaBotHandler(BotConfig botConfig) {
         this.botConfig = botConfig;
-        sendMessage((long) this.botConfig.getMainAdmin(), "Инициализация...");
+        sendMessage(this.botConfig.getMainAdmin(), "Инициализация...");
 
         // settings
         Services.setBotConfig(botConfig);
@@ -51,7 +51,7 @@ public class LastkatkaBotHandler extends BotHandler {
         bullsAndCowsGames = new HashMap<>();
 
         // notify main admin about launch
-        sendMessage((long) this.botConfig.getMainAdmin(), "Бот готов к работе!");
+        sendMessage(this.botConfig.getMainAdmin(), "Бот готов к работе!");
     }
 
     @Override
@@ -61,6 +61,7 @@ public class LastkatkaBotHandler extends BotHandler {
         if (update.hasCallbackQuery()) {
             CallbackQuery query = update.getCallbackQuery();
             String data = query.getData();
+
             if (data.startsWith(LastkatkaBot.CALLBACK_CAKE_OK)) {
                 CallbackHandler.cake(query, this, CallbackHandler.CAKE_ACTIONS.CAKE_OK);
             } else if (data.startsWith(LastkatkaBot.CALLBACK_CAKE_NOT)) {
@@ -71,7 +72,10 @@ public class LastkatkaBotHandler extends BotHandler {
                 CallbackHandler.denyChat(query, this);
             } else if (data.startsWith(LastkatkaBot.CALLBACK_DELETE_CHAT)) {
                 CallbackHandler.deleteChat(query, this);
+            } else if (data.startsWith(LastkatkaBot.CALLBACK_DELETE_ADMIN)) {
+                CallbackHandler.deleteAdmin(query, this);
             } else {
+
                 switch (data) {
                     case LastkatkaBot.CALLBACK_REGISTER_IN_TOURNAMENT:
                         CallbackHandler.registerInTournament(query, this);
@@ -251,14 +255,14 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/owner":
                     AdminHandler.owner(message, this);
                     break;
-                case "/remowner":
-                    AdminHandler.remOwner(message, this);
-                    break;
                 case "/update":
                     AdminHandler.update(message, this);
                     break;
                 case "/announce":
                     AdminHandler.announce(message, this);
+                    break;
+                case "/owners":
+                    AdminHandler.listOwners(message, this);
                     break;
                 case "/chats":
                     AdminHandler.chats(message, this);
@@ -269,9 +273,6 @@ public class LastkatkaBotHandler extends BotHandler {
         // commands for all admins
         if (isFromAdmin(message)) {
             switch (command) {
-                case "/owners":
-                    AdminHandler.listOwners(message, this);
-                    break;
                 case "/badneko":
                     AdminHandler.badneko(message, this);
                     break;
