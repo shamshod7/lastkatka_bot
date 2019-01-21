@@ -152,7 +152,9 @@ public class MongoDBService implements DBService {
             for (Document doc : chatMembersDB.getCollection(collName).find()) {
                 userIds.add(doc.getInteger("id"));
             }
-
+        }
+        for (Document doc : duelstats.find()) {
+            userIds.add(doc.getInteger("id"));
         }
         return userIds;
     }
