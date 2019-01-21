@@ -146,7 +146,7 @@ public class AdminHandler {
                 BotLogger.error("ANNOUNCE", e.toString());
             }
         }
-        handler.sendMessage(message.getChatId(), "Объявление получили " + counter + " человек");
+        handler.sendMessage(message.getChatId(), String.format("Объявление получили %1$d/%2$d человек", counter, usersIds.size()));
     }
 
     public static void setupHelp(Message message, LastkatkaBotHandler handler) {
