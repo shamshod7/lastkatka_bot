@@ -28,10 +28,10 @@ public class LastkatkaBotHandler extends BotHandler {
     public Map<Long, BullsAndCowsGame> bullsAndCowsGames;
 
     LastkatkaBotHandler(BotConfig botConfig) {
+        this.botConfig = botConfig;
         sendMessage(botConfig.getMainAdmin(), "Инициализация...");
 
         // settings
-        this.botConfig = botConfig;
         Services.setBotConfig(botConfig);
         Services.setDBService(new MongoDBService());
 
