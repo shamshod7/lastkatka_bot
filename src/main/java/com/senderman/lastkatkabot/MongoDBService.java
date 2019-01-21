@@ -148,8 +148,11 @@ public class MongoDBService implements DBService {
 
     public Set<Integer> getAllUsersIds() {
         Set<Integer> userIds = new HashSet<>();
-        for (Document document : chatMembersDB.listCollections()) {
-            userIds.add(document.getInteger("id"));
+        for (String collName : chatMembersDB.listCollectionNames()) {
+            for (Document doc : chatMembersDB.getCollection(collName).find()) {
+                userIds.add(doc.getInteger("id"));
+            }
+
         }
         return userIds;
     }
