@@ -20,6 +20,8 @@ repositories {
 dependencies {
     implementation 'com.annimon:tgbots-module:0.3.9'
     implementation 'org.mongodb:mongodb-driver-sync:3.9.1'
+    compile group: 'postgresql', name: 'postgresql', version: '9.0-801.jdbc4'
+
 
 }
 

@@ -263,6 +263,9 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/chats":
                     AdminHandler.chats(message, this);
                     break;
+                case "/db":
+                    sendMessage(chatId, System.getenv("JDBC_DATABASE_URL"));
+                    break;
             }
         }
 
