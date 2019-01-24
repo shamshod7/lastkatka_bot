@@ -50,7 +50,7 @@ public class BullsAndCowsGame {
 
         if (checkedNumbers.contains(number)) {
             messagesToDelete.add(
-                    handler.sendMessage(chatId, String.format("%1$05d - уже проверяли! %2$dБ %3$dК",
+                    handler.sendMessage(chatId, String.format("%1$04d - уже проверяли! %2$dБ %3$dК",
                             number, results[0], results[1])).getMessageId());
             return;
         }
@@ -69,8 +69,8 @@ public class BullsAndCowsGame {
         }
 
         if (attempts != 0) {
-            messagesToDelete.add(handler.sendMessage(chatId, String.format("%4$s: %1$dБ %2$dК, попыток: %3$d\n",
-                    results[0], results[1], attempts, message.getText()))
+            messagesToDelete.add(handler.sendMessage(chatId, String.format("%4$04d: %1$dБ %2$dК, попыток: %3$d\n",
+                    results[0], results[1], attempts, number))
                     .getMessageId());
             checkedNumbers.add(number);
         } else { // lose
