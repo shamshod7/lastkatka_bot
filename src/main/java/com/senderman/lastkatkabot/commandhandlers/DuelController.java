@@ -139,7 +139,8 @@ public class DuelController {
         Methods.answerCallbackQuery()
                 .setText(text)
                 .setCallbackQueryId(query.getId())
-                .setShowAlert(showAsAlert);
+                .setShowAlert(showAsAlert)
+                .call(handler);
     }
 
     private ChatDuels getChatDuels(long chatId) {
