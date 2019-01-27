@@ -163,11 +163,15 @@ public class MongoDBService implements DBService {
     public void addUserToDB(User user, long chatId) {
         var chat = getChatMembersCollection(chatId);
         var doc = chat.find(Filters.eq("id", user.getId())).first();
-        if (doc != null)
-            return;
-        chat.insertOne(new Document()
-                .append("name", user.getFirstName())
-                .append("id", user.getId()));
+        if (doc != null) {
+            if (!doc.getString("name").equals(user.getFirstName()))
+            chat.updateOne(Filters.eq("id", user.getId()),
+                    new Document("$set", new Document("name", user.getFirstName())));
+        } else {
+            chat.insertOne(new Document()
+                    .append("name", user.getFirstName())
+                    .append("id", user.getId()));
+        }
     }
 
     @Override

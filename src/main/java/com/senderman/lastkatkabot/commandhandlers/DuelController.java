@@ -20,7 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class DuelController {
 
     private final LastkatkaBotHandler handler;
-    private final Map<Long, ChatDuels> duels;
+    private final Map<Long, Map<Integer, Duel>> duels;
 
     public DuelController(LastkatkaBotHandler handler) {
         this.handler = handler;
@@ -37,7 +37,7 @@ public class DuelController {
         var duelMessageId = handler.sendMessage(sm).getMessageId();
         var duel = new Duel(chatId, duelMessageId);
         duel.player1 = player1;
-        getChatDuels(chatId).createDuel(duelMessageId, duel);
+        getChatDuels(chatId).put(duelMessageId, duel);
         setReplyMarkup(chatId, duelMessageId);
     }
 
@@ -45,12 +45,12 @@ public class DuelController {
         var duelMessageId = query.getMessage().getMessageId();
         var chatDuels = getChatDuels(query.getMessage().getChatId());
         var player2 = query.getFrom();
-        if (!chatDuels.hasDuel(duelMessageId)) {
+        if (!chatDuels.containsKey(duelMessageId)) {
             answerCallbackQuery(query, "⏰ Дуэль устарела", true);
             return;
         }
 
-        var duel = chatDuels.getDuel(duelMessageId);
+        var duel = chatDuels.get(duelMessageId);
         if (duel.player2 != null) {
             answerCallbackQuery(query, "\uD83D\uDEAB Дуэлянтов уже набрали, увы", true);
             return;
@@ -63,7 +63,7 @@ public class DuelController {
         duel.player2 = player2;
         answerCallbackQuery(query, "✅ Вы успешно присоединились к дуэли!", false);
         startDuel(duel);
-        chatDuels.removeDuel(duelMessageId);
+        chatDuels.remove(duelMessageId);
     }
 
     private void startDuel(Duel duel) {
@@ -71,30 +71,37 @@ public class DuelController {
         var winner = (randomInt < 50) ? duel.player1 : duel.player2;
         var loser = (randomInt < 50) ? duel.player2 : duel.player1;
 
-        var winnerName = name(winner);
-        var loserName = name(loser);
+        var winnerName = nameOf(winner);
+        var loserName = nameOf(loser);
 
-        var messageText = new StringBuilder();
-        messageText.append("<b>Дуэль</b>\n")
-                .append(name(duel.player1)).append(" vs ").append(name(duel.player2))
-                .append("\n\nПротивники разошлись в разные стороны, развернулись лицом друг к другу, и ")
-                .append(winnerName).append(" выстрелил первым!\n")
-                .append(loserName).append(" лежит на земле, истекая кровью!\n");
+        var duelResult = new StringBuilder();
+        duelResult.append(String.format(
+                "<b>Дуэль</b>\n" +
+                        "%1$s vs %2$s\n\n" +
+                        "Противники разошлись в разные стороны, развернулись лицом друг к другу, и %3$s выстрелил первым\n" +
+                        "%4$s лежит на земле, истекая кровью!\n\n",
+                nameOf(duel.player1), nameOf(duel.player2), winnerName, loserName));
+
         if (ThreadLocalRandom.current().nextInt(100) < 20) {
-            messageText.append("\nНо, умирая, ")
-                    .append(loserName).append(" успевает выстрелить в голову ").append(winnerName).append("! ")
-                    .append(winnerName).append(" падает замертво!")
-                    .append("\n\n\uD83D\uDC80 <b>Дуэль окончилась ничьей!</b>");
+            duelResult.append(String.format("Но, умирая, %1$s успевает выстрелить в голову %2$s!\n" +
+                            "%2$s падает замертво!\n\n" +
+                            "\uD83D\uDC80 <b>Дуэль окончилась ничьей!</b>",
+                    loserName, winnerName));
             Services.db().incDuelLoses(winner.getId());
             Services.db().incDuelLoses(loser.getId());
+
         } else {
-            messageText
-                    .append("\n\n\uD83D\uDC51 <b>")
-                    .append(winnerName).append(" выиграл дуэль!</b>");
+            duelResult.append(String.format("\uD83D\uDC51 <b>%1$s выиграл дуэль!</b>", winnerName));
             Services.db().incDuelWins(winner.getId());
             Services.db().incDuelLoses(loser.getId());
         }
-        editDuelMessage(duel, messageText.toString());
+
+        Methods.editMessageText()
+                .setChatId(duel.chatId)
+                .setMessageId(duel.messageId)
+                .setText(duelResult.toString())
+                .setParseMode(ParseMode.HTML)
+                .call(handler);
 
     }
 
@@ -103,36 +110,23 @@ public class DuelController {
         handler.sendMessage(chatId, "✅ Все неначатые дуэли были очищены!");
     }
 
-    private String name(User user) {
+    private String nameOf(User user) {
         return user.getFirstName()
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");
     }
 
     private void setReplyMarkup(long chatId, int duelMessageId) {
-        Methods.editMessageReplyMarkup()
-                .setChatId(chatId)
-                .setMessageId(duelMessageId)
-                .setReplyMarkup(getMarkupForDuel())
-                .call(handler);
-    }
-
-    private void editDuelMessage(Duel duel, String text) {
-        Methods.editMessageText()
-                .setChatId(duel.chatId)
-                .setMessageId(duel.messageId)
-                .setText(text)
-                .setParseMode(ParseMode.HTML)
-                .call(handler);
-    }
-
-    private InlineKeyboardMarkup getMarkupForDuel() {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                 .setText("Присоединиться")
                 .setCallbackData(LastkatkaBot.CALLBACK_JOIN_DUEL));
         markup.setKeyboard(List.of(row1));
-        return markup;
+        Methods.editMessageReplyMarkup()
+                .setChatId(chatId)
+                .setMessageId(duelMessageId)
+                .setReplyMarkup(markup)
+                .call(handler);
     }
 
     private void answerCallbackQuery(CallbackQuery query, String text, boolean showAsAlert) {
@@ -143,35 +137,15 @@ public class DuelController {
                 .call(handler);
     }
 
-    private ChatDuels getChatDuels(long chatId) {
+    private Map<Integer, Duel> getChatDuels(long chatId) {
         if (duels.containsKey(chatId)) {
             return duels.get(chatId);
         } else {
-            var chatDuels = new ChatDuels();
+            var chatDuels = new HashMap<Integer, Duel>();
             duels.put(chatId, chatDuels);
             return chatDuels;
         }
     }
-
-    static class ChatDuels extends HashMap<Integer, Duel> {
-
-        void createDuel(Integer messageId, Duel duel) {
-            super.put(messageId, duel);
-        }
-
-        boolean hasDuel(Integer messageId) {
-            return super.containsKey(messageId);
-        }
-
-        Duel getDuel(Integer messageId) {
-            return super.get(messageId);
-        }
-
-        void removeDuel(Integer messageId) {
-            super.remove(messageId);
-        }
-    }
-
 
     static class Duel {
         private final long chatId;
