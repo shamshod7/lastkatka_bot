@@ -1,7 +1,7 @@
 .idea
 .gradle
-/build/
+build
 out
 gen
+cert
 *.iml
-cert/gen.sh

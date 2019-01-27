@@ -8,21 +8,23 @@ public class BotConfig {
 
     @JsonProperty(required = true)
     private String token;
+    
     @JsonProperty(required = true)
     private String username;
 
-    @JsonProperty(required = true)
+    @JsonProperty
     private int mainAdmin;
 
-    @JsonProperty(required = true)
+    @JsonProperty
     private long lastvegan;
-    @JsonProperty(required = true)
+    
+    @JsonProperty
     private long tourgroup;
 
-    @JsonProperty(required = true)
+    @JsonProperty
     private String tourchannel;
 
-    @JsonProperty(required = true)
+    @JsonProperty
     private String tourgroupname;
 
     @JsonProperty

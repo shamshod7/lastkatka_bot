@@ -172,7 +172,7 @@ public class LastkatkaBotHandler extends BotHandler {
         /* bot should only trigger on general commands (like /command) or on commands for this bot (/command@mybot),
          * and NOT on commands for another bots (like /command@notmybot) except @veganwarsbot
          */
-        var command = text.split("\\s+", 2)[0].toLowerCase(Locale.ENGLISH).replace("@" + getBotUsername(), "");
+        final var command = text.split("\\s+", 2)[0].toLowerCase(Locale.ENGLISH).replace("@" + getBotUsername(), "");
 
         if (Services.botConfig().getVeganWarsCommands().contains(text) && !veganTimers.containsKey(chatId)) { // start veganwars timer
             veganTimers.put(chatId, new VeganTimer(chatId, this));
