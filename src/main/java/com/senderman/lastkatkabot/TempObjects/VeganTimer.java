@@ -21,8 +21,7 @@ public class VeganTimer {
     }
 
     private void startVeganTimer() {
-        for (int i = 299; i > 0; i--) {
-            if (!runTimer) break;
+        for (int i = 299; i > 0 && runTimer; i--) {
 
             if (i % 60 == 0) {
                 handler.sendMessage(chatId,
@@ -36,7 +35,6 @@ public class VeganTimer {
                 handler.sendMessage(chatId, "Ошибка, таймер остановлен");
             }
         }
-        stop();
     }
 
     public void stop() {
