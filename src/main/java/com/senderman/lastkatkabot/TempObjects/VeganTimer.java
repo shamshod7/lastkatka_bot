@@ -35,6 +35,7 @@ public class VeganTimer {
                 handler.sendMessage(chatId, "Ошибка, таймер остановлен");
             }
         }
+        stop();
     }
 
     public void stop() {

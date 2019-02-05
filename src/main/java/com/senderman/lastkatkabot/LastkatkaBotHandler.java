@@ -170,7 +170,7 @@ public class LastkatkaBotHandler extends BotHandler {
             return null;
 
         /* bot should only trigger on general commands (like /command) or on commands for this bot (/command@mybot),
-         * and NOT on commands for another bots (like /command@notmybot) except @veganwarsbot
+         * and NOT on commands for another bots (like /command@notmybot) except for @veganwarsbot
          */
         final var command = text.split("\\s+", 2)[0].toLowerCase(Locale.ENGLISH).replace("@" + getBotUsername(), "");
 
