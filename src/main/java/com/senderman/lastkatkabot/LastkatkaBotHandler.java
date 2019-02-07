@@ -22,6 +22,9 @@ public class LastkatkaBotHandler extends BotHandler {
     public final Set<Integer> admins;
     public final Set<Long> allowedChats;
     public final Set<Integer> blacklist;
+    private final AdminHandler adminHandler;
+    private final UsercommandsHandler usercommandsHandler;
+    private final CallbackHandler callbackHandler;
     private final DuelController duelController;
     private final BotConfig botConfig;
     public Map<Long, VeganTimer> veganTimers;
@@ -42,6 +45,9 @@ public class LastkatkaBotHandler extends BotHandler {
         allowedChats.add(botConfig.getLastvegan());
         allowedChats.add(botConfig.getTourgroup());
 
+        adminHandler = new AdminHandler(this);
+        usercommandsHandler = new UsercommandsHandler(this);
+        callbackHandler = new CallbackHandler(this);
         duelController = new DuelController(this);
         veganTimers = new HashMap<>();
         bullsAndCowsGames = new HashMap<>();
@@ -59,28 +65,30 @@ public class LastkatkaBotHandler extends BotHandler {
             String data = query.getData();
 
             if (data.startsWith(LastkatkaBot.CALLBACK_CAKE_OK)) {
-                CallbackHandler.cake(query, this, CallbackHandler.CAKE_ACTIONS.CAKE_OK);
+                callbackHandler.cake(query, CallbackHandler.CAKE_ACTIONS.CAKE_OK);
             } else if (data.startsWith(LastkatkaBot.CALLBACK_CAKE_NOT)) {
-                CallbackHandler.cake(query, this, CallbackHandler.CAKE_ACTIONS.CAKE_NOT);
+                callbackHandler.cake(query, CallbackHandler.CAKE_ACTIONS.CAKE_NOT);
             } else if (data.startsWith(LastkatkaBot.CALLBACK_ALLOW_CHAT)) {
-                CallbackHandler.addChat(query, this);
+                callbackHandler.addChat(query);
             } else if (data.startsWith(LastkatkaBot.CALLBACK_DONT_ALLOW_CHAT)) {
-                CallbackHandler.denyChat(query, this);
+                callbackHandler.denyChat(query);
             } else if (data.startsWith(LastkatkaBot.CALLBACK_DELETE_CHAT)) {
-                CallbackHandler.deleteChat(query, this);
+                callbackHandler.deleteChat(query);
+                adminHandler.chats(query.getMessage());
             } else if (data.startsWith(LastkatkaBot.CALLBACK_DELETE_ADMIN)) {
-                CallbackHandler.deleteAdmin(query, this);
+                callbackHandler.deleteAdmin(query);
+                adminHandler.listOwners(query.getMessage());
             } else {
 
                 switch (data) {
                     case LastkatkaBot.CALLBACK_REGISTER_IN_TOURNAMENT:
-                        CallbackHandler.registerInTournament(query, this);
+                        callbackHandler.registerInTournament(query);
                         break;
                     case LastkatkaBot.CALLBACK_PAY_RESPECTS:
-                        CallbackHandler.payRespects(query, this);
+                        callbackHandler.payRespects(query);
                         break;
                     case LastkatkaBot.CALLBACK_CLOSE_MENU:
-                        CallbackHandler.closeMenu(query, this);
+                        callbackHandler.closeMenu(query);
                         break;
                     case LastkatkaBot.CALLBACK_JOIN_DUEL:
                         duelController.joinDuel(query);
@@ -201,31 +209,31 @@ public class LastkatkaBotHandler extends BotHandler {
         if (isNotInBlacklist(message)) {
             switch (command) {
                 case "/pinlist":
-                    UsercommandsHandler.pinlist(message, this);
+                    usercommandsHandler.pinlist(message);
                     break;
                 case "/pair":
-                    UsercommandsHandler.pair(chatId, this);
+                    usercommandsHandler.pair(chatId);
                     break;
                 case "/lastpairs":
-                    UsercommandsHandler.lastpairs(chatId, this);
+                    usercommandsHandler.lastpairs(chatId);
                     break;
                 case "/action":
-                    UsercommandsHandler.action(message, this);
+                    usercommandsHandler.action(message);
                     break;
                 case "/f":
-                    UsercommandsHandler.payRespects(message, this);
+                    usercommandsHandler.payRespects(message);
                     break;
                 case "/dice":
-                    UsercommandsHandler.dice(message, this);
+                    usercommandsHandler.dice(message);
                     break;
                 case "/cake":
-                    UsercommandsHandler.cake(message, this);
+                    usercommandsHandler.cake(message);
                     break;
                 case "/duel":
                     duelController.createNewDuel(chatId, message);
                     break;
                 case "/stats":
-                    UsercommandsHandler.dstats(message, this);
+                    usercommandsHandler.dstats(message);
                     break;
                 case "/bnc":
                     if (!bullsAndCowsGames.containsKey(chatId))
@@ -234,13 +242,13 @@ public class LastkatkaBotHandler extends BotHandler {
                         sendMessage(chatId, "В этом чате игра уже идет!");
                     break;
                 case "/bnchelp":
-                    UsercommandsHandler.bnchelp(message, this);
+                    usercommandsHandler.bnchelp(message);
                     break;
                 case "/feedback":
-                    UsercommandsHandler.feedback(message, this);
+                    usercommandsHandler.feedback(message);
                     break;
                 case "/help":
-                    UsercommandsHandler.help(message, this);
+                    usercommandsHandler.help(message);
                     break;
             }
         }
@@ -249,19 +257,19 @@ public class LastkatkaBotHandler extends BotHandler {
         if (message.getFrom().getId().equals(Services.botConfig().getMainAdmin())) {
             switch (command) {
                 case "/owner":
-                    AdminHandler.owner(message, this);
+                    adminHandler.owner(message);
                     break;
                 case "/update":
-                    AdminHandler.update(message, this);
+                    adminHandler.update(message);
                     break;
                 case "/announce":
-                    AdminHandler.announce(message, this);
+                    adminHandler.announce(message);
                     break;
                 case "/owners":
-                    AdminHandler.listOwners(message, this);
+                    adminHandler.listOwners(message);
                     break;
                 case "/chats":
-                    AdminHandler.chats(message, this);
+                    adminHandler.chats(message);
                     break;
             }
         }
@@ -270,19 +278,19 @@ public class LastkatkaBotHandler extends BotHandler {
         if (isFromAdmin(message)) {
             switch (command) {
                 case "/badneko":
-                    AdminHandler.badneko(message, this);
+                    adminHandler.badneko(message);
                     break;
                 case "/goodneko":
-                    AdminHandler.goodneko(message, this);
+                    adminHandler.goodneko(message);
                     break;
                 case "/nekos":
-                    AdminHandler.nekos(message, this);
+                    adminHandler.nekos(message);
                     break;
                 case "/loveneko":
-                    AdminHandler.loveneko(message, this);
+                    adminHandler.loveneko(message);
                     break;
                 case "/getinfo":
-                    AdminHandler.getinfo(message, this);
+                    adminHandler.getinfo(message);
                     break;
                 case "/critical":
                     duelController.critical(chatId);
@@ -297,7 +305,7 @@ public class LastkatkaBotHandler extends BotHandler {
                     TournamentHandler.cancelSetup(this);
                     break;
                 case "/tourhelp":
-                    AdminHandler.setupHelp(message, this);
+                    adminHandler.setupHelp(message);
                     break;
                 case "/tourmessage":
                     TournamentHandler.tourmessage(this, message);

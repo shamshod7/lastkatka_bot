@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
 
 public class UsercommandsHandler {
 
+    private final LastkatkaBotHandler handler;
+
+    public UsercommandsHandler(LastkatkaBotHandler handler) {
+        this.handler = handler;
+    }
+
     static InlineKeyboardMarkup getMarkupForPayingRespects() {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
@@ -27,7 +33,7 @@ public class UsercommandsHandler {
         return markup;
     }
 
-    public static void action(Message message, LastkatkaBotHandler handler) {
+    public void action(Message message) {
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
         if (message.getText().split("\\s+").length == 1) {
             return;
@@ -41,7 +47,7 @@ public class UsercommandsHandler {
         handler.sendMessage(sm);
     }
 
-    public static void payRespects(Message message, LastkatkaBotHandler handler) { // /f
+    public void payRespects(Message message) { // /f
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
@@ -49,7 +55,7 @@ public class UsercommandsHandler {
                 .setReplyMarkup(getMarkupForPayingRespects()));
     }
 
-    public static void cake(Message message, LastkatkaBotHandler handler) {
+    public void cake(Message message) {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                         .setText("Принять")
@@ -68,7 +74,7 @@ public class UsercommandsHandler {
                 .setReplyMarkup(markup));
     }
 
-    public static void dice(Message message, LastkatkaBotHandler handler) {
+    public void dice(Message message) {
         int random;
         var args = message.getText().split("\\s+", 3);
         if (args.length == 3) {
@@ -91,7 +97,7 @@ public class UsercommandsHandler {
                 .setReplyToMessageId(message.getMessageId()));
     }
 
-    public static void dstats(Message message, LastkatkaBotHandler handler) {
+    public void dstats(Message message) {
         var player = message.getFrom().getFirstName();
         var stats = Services.db().getStats(message.getFrom().getId(), player);
         var wins = stats.get("wins");
@@ -110,7 +116,7 @@ public class UsercommandsHandler {
 
     }
 
-    public static void pinlist(Message message, LastkatkaBotHandler handler) {
+    public void pinlist(Message message) {
         if (!isFromWwBot(message))
             return;
         Methods.Administration.pinChatMessage(message.getChatId(), message.getReplyToMessage().getMessageId())
@@ -118,7 +124,7 @@ public class UsercommandsHandler {
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
     }
 
-    public static void feedback(Message message, LastkatkaBotHandler handler) {
+    public void feedback(Message message) {
         String bugreport = "⚠️ <b>Багрепорт</b>\n\nОт: " +
                 "<a href=\"tg://user?id=" +
                 message.getFrom().getId() +
@@ -133,7 +139,7 @@ public class UsercommandsHandler {
                 .setReplyToMessageId(message.getMessageId()));
     }
 
-    public static void bnchelp(Message message, LastkatkaBotHandler handler) {
+    public void bnchelp(Message message) {
         var sendPhoto = Methods.sendPhoto()
                 .setChatId(message.getChatId())
                 .setFile(Services.botConfig().getBncphoto());
@@ -144,7 +150,7 @@ public class UsercommandsHandler {
         sendPhoto.call(handler);
     }
 
-    public static void help(Message message, LastkatkaBotHandler handler) {
+    public void help(Message message) {
         var sb = new StringBuilder(Services.botConfig().getHelp());
         if (handler.admins.contains(message.getFrom().getId())) { // admins want to get extra help
             sb.append(Services.botConfig().getAdminhelp());
@@ -171,7 +177,7 @@ public class UsercommandsHandler {
         }
     }
 
-    public static void pair(long chatId, LastkatkaBotHandler handler) {
+    public void pair(long chatId) {
         if (Services.db().pairExistsToday(chatId)) {
             var pair = Services.db().getPairOfTheDay(chatId);
             pair = (pair != null) ? pair : "Ошибка, попробуйте завтра";
@@ -217,7 +223,7 @@ public class UsercommandsHandler {
         handler.sendMessage(chatId, String.format(loveStrings[loveStrings.length - 1], user1.getLink(), user2.getLink()));
     }
 
-    public static void lastpairs(long chatId, LastkatkaBotHandler handler) {
+    public void lastpairs(long chatId) {
         var history = Services.db().getPairsHistory(chatId);
         if (history == null)
             handler.sendMessage(chatId, "В этом чате еще никогда не запускали команду /pair!");
@@ -225,7 +231,7 @@ public class UsercommandsHandler {
             handler.sendMessage(chatId, "<b>Последние 10 пар:</b>\n\n" + history);
     }
 
-    private static boolean isFromWwBot(Message message) {
+    private boolean isFromWwBot(Message message) {
         return Services.botConfig().getWwBots().contains(message.getReplyToMessage().getFrom().getUserName()) &&
                 message.getReplyToMessage().getText().contains("#players");
     }

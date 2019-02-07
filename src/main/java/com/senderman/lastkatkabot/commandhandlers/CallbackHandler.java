@@ -8,8 +8,13 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 
 public class CallbackHandler {
 
+    private final LastkatkaBotHandler handler;
 
-    public static void payRespects(CallbackQuery query, LastkatkaBotHandler handler) {
+    public CallbackHandler(LastkatkaBotHandler handler) {
+        this.handler = handler;
+    }
+
+    public void payRespects(CallbackQuery query) {
         if (query.getMessage().getText().contains(query.getFrom().getFirstName())) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
@@ -31,7 +36,7 @@ public class CallbackHandler {
                 .call(handler);
     }
 
-    public static void cake(CallbackQuery query, LastkatkaBotHandler handler, CAKE_ACTIONS actions) {
+    public void cake(CallbackQuery query, CAKE_ACTIONS actions) {
         if (!query.getFrom().getId().equals(query.getMessage().getReplyToMessage().getFrom().getId())) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
@@ -72,7 +77,7 @@ public class CallbackHandler {
         emt.call(handler);
     }
 
-    public static void registerInTournament(CallbackQuery query, LastkatkaBotHandler handler) {
+    public void registerInTournament(CallbackQuery query) {
         int memberId = query.getFrom().getId();
 
         if (!TournamentHandler.isEnabled) {
@@ -119,7 +124,7 @@ public class CallbackHandler {
                 "✅ " + query.getFrom().getUserName() + " получил доступ к игре!");
     }
 
-    public static void addChat(CallbackQuery query, LastkatkaBotHandler handler) {
+    public void addChat(CallbackQuery query) {
         var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_ALLOW_CHAT, ""));
         var title = query.getData().replaceAll("^.*?title=", "");
         Services.db().addAllowedChat(chatId, title);
@@ -134,7 +139,7 @@ public class CallbackHandler {
                 "Для некоторых фичей бота требуются права админа на удаление и закреп сообщений.");
     }
 
-    public static void denyChat(CallbackQuery query, LastkatkaBotHandler handler) {
+    public void denyChat(CallbackQuery query) {
         var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_DONT_ALLOW_CHAT, ""));
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
@@ -146,7 +151,7 @@ public class CallbackHandler {
         Methods.leaveChat(chatId).call(handler);
     }
 
-    public static void deleteChat(CallbackQuery query, LastkatkaBotHandler handler) {
+    public void deleteChat(CallbackQuery query) {
         var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_DELETE_CHAT, ""));
         Services.db().removeAllowedChat(chatId);
         handler.allowedChats.remove(chatId);
@@ -158,10 +163,9 @@ public class CallbackHandler {
         handler.sendMessage(chatId, "Разработчик решил удалить бота из данного чата. Всем пока!");
         Methods.leaveChat(chatId).call(handler);
         Methods.deleteMessage(query.getMessage().getChatId(), query.getMessage().getMessageId()).call(handler);
-        AdminHandler.chats(query.getMessage(), handler);
     }
 
-    public static void deleteAdmin(CallbackQuery query, LastkatkaBotHandler handler) {
+    public void deleteAdmin(CallbackQuery query) {
         var adminId = Integer.parseInt(query.getData().replace(LastkatkaBot.CALLBACK_DELETE_ADMIN, ""));
         Services.db().removeAdmin(adminId);
         handler.admins.remove(adminId);
@@ -172,10 +176,9 @@ public class CallbackHandler {
                 .call(handler);
         handler.sendMessage(adminId, "Разработчик удалил вас из админов бота!");
         Methods.deleteMessage(query.getMessage().getChatId(), query.getMessage().getMessageId()).call(handler);
-        AdminHandler.listOwners(query.getMessage(), handler);
     }
 
-    public static void closeMenu(CallbackQuery query, LastkatkaBotHandler handler) {
+    public void closeMenu(CallbackQuery query) {
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setMessageId(query.getMessage().getMessageId())

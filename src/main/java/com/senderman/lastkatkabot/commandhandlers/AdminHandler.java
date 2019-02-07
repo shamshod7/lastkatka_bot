@@ -17,7 +17,13 @@ import java.util.List;
 
 public class AdminHandler {
 
-    public static void badneko(Message message, LastkatkaBotHandler handler) {
+    private final LastkatkaBotHandler handler;
+
+    public AdminHandler(LastkatkaBotHandler handler) {
+        this.handler = handler;
+    }
+
+    public void badneko(Message message) {
         if (!message.isReply())
             return;
         if (handler.blacklist.contains(message.getReplyToMessage().getFrom().getId())) {
@@ -30,7 +36,7 @@ public class AdminHandler {
                 " - плохая киса!");
     }
 
-    public static void goodneko(Message message, LastkatkaBotHandler handler) {
+    public void goodneko(Message message) {
         if (!message.isReply())
             return;
         Services.db().removeFromBlacklist(message.getReplyToMessage().getFrom().getId());
@@ -39,7 +45,7 @@ public class AdminHandler {
                 " - хорошая киса!");
     }
 
-    public static void nekos(Message message, LastkatkaBotHandler handler) {
+    public void nekos(Message message) {
         var badnekos = new StringBuilder().append("\uD83D\uDE3E <b>Список плохих кис:</b>\n\n");
         var nekoSet = Services.db().getBlackListUsers();
         for (TgUser neko : nekoSet) {
@@ -49,13 +55,13 @@ public class AdminHandler {
                 .disableNotification());
     }
 
-    public static void loveneko(Message message, LastkatkaBotHandler handler) {
+    public void loveneko(Message message) {
         Services.db().resetBlackList();
         handler.blacklist.clear();
         handler.sendMessage(message.getChatId(), "❤️ Все кисы - хорошие!");
     }
 
-    public static void owner(Message message, LastkatkaBotHandler handler) {
+    public void owner(Message message) {
         if (!message.isReply())
             return;
         if (handler.admins.contains(message.getReplyToMessage().getFrom().getId())) {
@@ -68,7 +74,7 @@ public class AdminHandler {
                 " теперь мой хозяин!");
     }
 
-    public static void listOwners(Message message, LastkatkaBotHandler handler) {
+    public void listOwners(Message message) {
         if (!message.isUserMessage()) {
             handler.sendMessage(message.getChatId(), "Команду можно использовать только в лс бота!");
             return;
@@ -89,7 +95,7 @@ public class AdminHandler {
                 .setReplyMarkup(markup));
     }
 
-    public static void update(Message message, LastkatkaBotHandler handler) {
+    public void update(Message message) {
         var params = message.getText().split("\n");
         if (params.length < 2) {
             handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
@@ -104,7 +110,7 @@ public class AdminHandler {
         }
     }
 
-    public static void chats(Message message, LastkatkaBotHandler handler) {
+    public void chats(Message message) {
         if (!message.isUserMessage()) {
             handler.sendMessage(message.getChatId(), "Команду можно использовать только в лс бота!");
             return;
@@ -125,14 +131,14 @@ public class AdminHandler {
                 .setReplyMarkup(markup));
     }
 
-    public static void getinfo(Message message, LastkatkaBotHandler handler) {
+    public void getinfo(Message message) {
         if (!message.isReply())
             return;
         handler.sendMessage(message.getChatId(), message.getReplyToMessage()
                 .toString().replaceAll("[ ,]*\\w+='?null'?", ""));
     }
 
-    public static void announce(Message message, LastkatkaBotHandler handler) {
+    public void announce(Message message) {
         handler.sendMessage(message.getChatId(), "Рассылка запущена. На время рассылки бот будет недоступен");
         var text = message.getText();
         text = "\uD83D\uDCE3 <b>Объявление</b>\n\n" + text.split("\\s+", 2)[1];
@@ -149,7 +155,7 @@ public class AdminHandler {
         handler.sendMessage(message.getChatId(), String.format("Объявление получили %1$d/%2$d человек", counter, usersIds.size()));
     }
 
-    public static void setupHelp(Message message, LastkatkaBotHandler handler) {
+    public void setupHelp(Message message) {
         handler.sendMessage(Methods.sendMessage(message.getChatId(), Services.botConfig().getSetuphelp()));
     }
 }
