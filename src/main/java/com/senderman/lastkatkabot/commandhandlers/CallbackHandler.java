@@ -125,7 +125,9 @@ public class CallbackHandler {
     }
 
     public void addChat(CallbackQuery query) {
-        var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_ALLOW_CHAT, ""));
+        var chatId = Long.parseLong(query.getData()
+                .replace(LastkatkaBot.CALLBACK_ALLOW_CHAT, "")
+                .replaceAll("title=.*$", ""));
         var title = query.getData().replaceAll("^.*?title=", "");
         Services.db().addAllowedChat(chatId, title);
         handler.allowedChats.add(chatId);
