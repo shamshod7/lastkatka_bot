@@ -25,12 +25,7 @@ public class MongoDBService implements DBService {
     private final MongoCollection<Document> allowedChatsCollection = lastkatkaDB.getCollection("allowedchats");
 
     private MongoCollection<Document> getChatMembersCollection(long chatId) {
-        var collection = chatMembersDB.getCollection(String.valueOf(chatId));
-        if (collection == null) {
-            chatMembersDB.createCollection(String.valueOf(chatId));
-            collection = chatMembersDB.getCollection(String.valueOf(chatId));
-        }
-        return collection;
+        return chatMembersDB.getCollection(String.valueOf(chatId));
     }
 
     public void initStats(int id) {
@@ -46,11 +41,15 @@ public class MongoDBService implements DBService {
         if (doc == null) {
             initStats(id);
         }
-        var updateDoc = new Document()
+        /*var updateDoc = new Document()
                 .append("$inc", new Document("wins", 1));
         duelstats.updateOne(Filters.eq("id", id), updateDoc);
         updateDoc = new Document()
                 .append("$inc", new Document("total", 1));
+                */
+        var updateDoc = new Document() // maybe works
+                .append("$inc", new Document("wins", 1).append("total", 1));
+
         duelstats.updateOne(Filters.eq("id", id), updateDoc);
     }
 
