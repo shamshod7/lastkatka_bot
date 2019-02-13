@@ -55,12 +55,6 @@ public class AdminHandler {
                 .disableNotification());
     }
 
-    public void loveneko(Message message) {
-        Services.db().resetBlackList();
-        handler.blacklist.clear();
-        handler.sendMessage(message.getChatId(), "❤️ Все кисы - хорошие!");
-    }
-
     public void owner(Message message) {
         if (!message.isReply())
             return;
@@ -85,7 +79,7 @@ public class AdminHandler {
         for (TgUser owner : ownersSet) {
             rows.add(List.of(new InlineKeyboardButton()
                     .setText(owner.getName())
-                    .setCallbackData(LastkatkaBot.CALLBACK_DELETE_ADMIN + owner.getId())));
+                    .setCallbackData(LastkatkaBot.CALLBACK_DELETE_ADMIN + " " + owner.getId())));
         }
         rows.add(List.of(new InlineKeyboardButton()
                 .setText("Закрыть меню")
@@ -121,7 +115,7 @@ public class AdminHandler {
         for (long chatId : chats.keySet()) {
             rows.add(List.of(new InlineKeyboardButton()
                     .setText(chats.get(chatId))
-                    .setCallbackData(LastkatkaBot.CALLBACK_DELETE_CHAT + chatId)));
+                    .setCallbackData(LastkatkaBot.CALLBACK_DELETE_CHAT + " " + chatId)));
         }
         rows.add(List.of(new InlineKeyboardButton()
                 .setText("Закрыть меню")

@@ -27,8 +27,6 @@ public interface DBService {
 
     Set<Integer> getBlacklistIds();
 
-    void resetBlackList();
-
     void addAdmin(int id, String name);
 
     void removeAdmin(int id);

@@ -154,7 +154,7 @@ public class CallbackHandler {
     }
 
     public void deleteChat(CallbackQuery query) {
-        var chatId = Long.parseLong(query.getData().replace(LastkatkaBot.CALLBACK_DELETE_CHAT, ""));
+        var chatId = Long.parseLong(query.getData().split(" ")[1]);
         Services.db().removeAllowedChat(chatId);
         handler.allowedChats.remove(chatId);
         Methods.answerCallbackQuery()
@@ -168,7 +168,7 @@ public class CallbackHandler {
     }
 
     public void deleteAdmin(CallbackQuery query) {
-        var adminId = Integer.parseInt(query.getData().replace(LastkatkaBot.CALLBACK_DELETE_ADMIN, ""));
+        var adminId = Integer.parseInt(query.getData().split(" ")[1]);
         Services.db().removeAdmin(adminId);
         handler.admins.remove(adminId);
         Methods.answerCallbackQuery()

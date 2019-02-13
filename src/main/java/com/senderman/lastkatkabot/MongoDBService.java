@@ -41,12 +41,6 @@ public class MongoDBService implements DBService {
         if (doc == null) {
             initStats(id);
         }
-        /*var updateDoc = new Document()
-                .append("$inc", new Document("wins", 1));
-        duelstats.updateOne(Filters.eq("id", id), updateDoc);
-        updateDoc = new Document()
-                .append("$inc", new Document("total", 1));
-                */
         var updateDoc = new Document() // maybe works
                 .append("$inc", new Document("wins", 1).append("total", 1));
 
@@ -114,10 +108,6 @@ public class MongoDBService implements DBService {
             blacklistSet.add(doc.getInteger("id"));
         }
         return blacklistSet;
-    }
-
-    public void resetBlackList() {
-        blacklist.deleteMany(new Document());
     }
 
     public void addAdmin(int id, String name) {
