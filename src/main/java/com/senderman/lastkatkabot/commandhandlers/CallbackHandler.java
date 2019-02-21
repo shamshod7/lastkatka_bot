@@ -137,7 +137,7 @@ public class CallbackHandler {
                 .setMessageId(query.getMessage().getMessageId())
                 .setReplyMarkup(null)
                 .call(handler);
-        handler.sendMessage(chatId, "Yaratuvchi chatga ruhsat etdi. Bot faoiliyatga tayyor!\n" +
+        handler.sendMessage(chatId, "Yaratuvchi chatga ruhsat etdi. Bot faoliyatga tayyor!\n" +
                 "Bazi ishlar uchun botga adminlik huquqi zarur.");
     }
 
