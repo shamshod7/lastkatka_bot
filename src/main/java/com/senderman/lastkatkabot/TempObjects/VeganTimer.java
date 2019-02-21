@@ -25,14 +25,14 @@ public class VeganTimer {
 
             if (i % 60 == 0) {
                 handler.sendMessage(chatId,
-                        "Осталось " + (i / 60) + " минуты чтобы джойнуться\n\nДжоин --> /join@veganwarsbot");
+                        "Qo'shilishga " + (i / 60) + " minut qoldi.\n\nQo'shil --> /join@huntuzbot");
             }
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 stop();
                 BotLogger.error("THREAD SLEEP", e.toString());
-                handler.sendMessage(chatId, "Ошибка, таймер остановлен");
+                handler.sendMessage(chatId, "Xatolik, timer to'xtatildi");
             }
         }
         stop();
@@ -49,9 +49,9 @@ public class VeganTimer {
 
         vegans.add(id);
         int count = vegans.size();
-        String toSend = "Джойнулось " + count + " игроков";
+        String toSend = " " + count + " ta o'yinchi qo'shildi";
         if (count % 2 != 0 && count > 2) {
-            toSend += "\nБудет крыса!";
+            toSend += "\nSichqon bo'ldi!";
         }
         handler.sendMessage(chatId, toSend);
     }
@@ -62,9 +62,9 @@ public class VeganTimer {
 
         vegans.remove(id);
         int count = getVegansAmount();
-        String toSend = "Осталось " + count + " игроков";
+        String toSend = " " + count + " ta o'yinchi qoldi";
         if (count % 2 != 0 && count > 2) {
-            toSend += "\nБудет крыса!";
+            toSend += "\nSichqon bo'ldi!";
         }
         handler.sendMessage(chatId, toSend);
     }
