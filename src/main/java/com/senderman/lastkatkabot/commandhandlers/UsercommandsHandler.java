@@ -104,13 +104,13 @@ public class UsercommandsHandler {
         var total = stats.get("total");
         var text = "\uD83D\uDCCA Statistika " +
                 player +
-                "\nDuellar g'alaba qilingan: " +
+                "\nG'alaba qilingan duellar soni: " +
                 wins +
                 "\nUmumiy o'ynalgan duellar soni: " +
                 total +
                 "\nYutuq: " +
                 ((total == 0) ? 0 : 100 * wins / total) + "%" +
-                "\n\n\uD83D\uDC2E Bir sonni o'yladim o'yini: "
+                "\n\n\uD83D\uDC2E *Bir sonni o'yladim* o'yinidagi g'alabalar soni: "
                 + stats.get("bncwins");
         handler.sendMessage(message.getChatId(), text);
 
