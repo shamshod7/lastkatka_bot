@@ -22,60 +22,60 @@ bncphoto: env(bncphoto) # picture for /bnchelp
 leavesticker: env(leavesticker) # sticker that bot will send after someone leaves chat
 
 help: |
-  Привет! Это очень полезный бот для проекта @lastkatka, который многое что умеет! Основные команды:
+  Salom! Это очень полезный бот для проекта @lastkatka, который многое что умеет! Asosiy buyuruqlar:
 
-  /pinlist - ответьте этой командой на сообщение со списоком игроков от любого вв-бота, чтобы запинить его!
-  /pair - пара дня
-  /lastpairs - последние 10 пар
-  /action действие - ответьте этим сообщением на сообщение того, с кем хотите сделать ДЕЙСТВИЕ
-  /f - press F to pay respects
-  /dice - бросить кубик. Можно указать диапазон, напр /dice 1 25, или только максимальное, /dice 25
-  /cake с чем (напр /cake с клубникой) - подарить тортик (просто /cake для торта без начинки)
-  /duel - начать дуэль
-  /stats - статистика по мини-играм
-  /bnc - начать игру "Быки и Коровы"
-  /bnchelp - правила игры "Быки и Коровы"
-  /feedback сообщение - отзыв/багрепорт о боте
-  /reset - сброс веганотаймера в чате
+  /pinlist - qopqon bot listini pin qilish uchun!
+  /pair - kun juftligi
+  /lastpairs - ohirgi 10 ta juftlik
+  /action ushbu xat bilan kimga qanday jarayon qilmoqchiligizni belgilang
+  /f - respekt berish uchun
+  /dice - kubik tashlash uchun. Diapazonni ko'rsatishingiz mumkin, misol /dice 1 25, yoki faqat maksimumni ko'rsatib, /dice 25
+  /cake tort nima bilan (misol /cake qulupnayli) - to'rt sovg'a qilish uchun
+  /duel - duelni boshlash uchun
+  /stats - mini o'yinlar statistikasi
+  /bnc - "Быки и Коровы" o'yinini boshlash
+  /bnchelp - "Быки и Коровы" o'yinini qoidalari
+  /feedback xat - yaratuvchiga arz va takliflar
+  /reset - chatdagi hunt timerni yangilash uchun
 
 adminhelp: |
 
-  <b>Информация для админов бота</b>
+  <b>Bot adminlari uchun ma'lumot</b>
 
-  /setup - помощь по этой команде - /tourhelp
-  /score name1 score1 name2 score2 - сообщить счет
-  /win winner score loser score типСледующегоРаунда - завершить турнир (если текущий раунд - финал, используйте тип раунда over)
-  /rt - отменить турнир
-  /tourmessage - ответьте этим на главный пост турнира
+  /setup - ushbu buyuruq orqali ma'lumot olasiz - /tourhelp
+  /score name1 score1 name2 score2 - natijani ma'lum qilish
+  /win winner score loser score Keyingi raund tipi - turnirni yakunlash (agar shu raund yakunlovchi - final bo'lsa, tipga overni ishlating)
+  /rt - turnirni bekor qilish
+  /tourmessage - turnirni asosiy postini belgilash uchun
 
-  /badneko - запретить пользователю юзать команды для пользователей
-  /goodneko - разрешить пользователю юзать команды для пользователей
-  /nekos - посмотреть кто был плохой кошечкой
-  /critical - сброс всех дуэлей
-  /getinfo - реплай этим на сбщ для получения инфы о сбщ
+  /badneko - bot buyuruqlarini ishlatishni taqiqlash uchun
+  /goodneko - bot buyuruqlarini ishlatishga ruhsat berish uchun
+  /nekos - kimlar yomon mushukcha bo'lganini ko'rish uchun
+  /critical - barcha duellarni yangilash uchun
+  /getinfo - ma'lumot olish uchun reply qiling
 
 mainadminhelp: |
 
-  <b>Информация для главного админа бота</b>
+  <b>Bot yaratuvchisi uchun ma'lumot</b>
 
-  /owner (reply) - добавить админа
-  /announce сообщение - рассылка сообщения всем в личку
-  /update сообщение - рассылка информации по обновлениям в чаты. Обновления писать построчно
-  /owners - управление админами бота
-  /chats - управление чатами
+  /owner (reply) -admin qo'shish uchun
+  /announce сообщение - hammani lichkasiga ma'lumot tashlash uchun
+  /update сообщение - chatdagi yangilanishlar haqida ma'lumot yuborish uchun. Yangilanish qatorma qatorma yozilsin
+  /owners - bot adminlarini boshqarish uchun
+  /chats - chatlarni boshqarish uchun
 
 setuphelp: |
-  Есть два режима турнира - командный и дуэль. Дуэль вызывается так:
+  Turnirni 2xil rejimi bor - guruhli va duelli. Duelni quyidagicha chiqariladi:
   /setup
   @player1
   @player2
-  Имя раунда
+  Raund nomi
 
-  Командный:
+  Guruhiy bo'lsa:
   /setup
-  Название_команды @player1 @player2 ... @playerN
-  Название_команды2 @player1 @player2 ... @playerN
-  Имя раунда
+  Guruh_nomi1 @player1 @player2 ... @playerN
+  Guruh_nomi2 @player1 @player2 ... @playerN
+  Raund nomi
 
 lovearray:
   - |-
