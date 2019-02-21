@@ -69,7 +69,7 @@ public class BullsAndCowsGame {
         }
 
         if (attempts != 0) {
-            messagesToDelete.add(handler.sendMessage(chatId, String.format("%4$04d: %1$dБ %2$dК, попыток: %3$d\n",
+            messagesToDelete.add(handler.sendMessage(chatId, String.format("%4$04d: %1$dБ %2$dК, imkoniyatlar: %3$d\n",
                     results[0], results[1], attempts, number))
                     .getMessageId());
             checkedNumbers.add(number);
