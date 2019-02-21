@@ -25,12 +25,12 @@ public class BullsAndCowsGame {
         attempts = 10;
         messagesToDelete = new HashSet<>();
         checkedNumbers = new HashSet<>();
-        handler.sendMessage(chatId, "Генерируем число...");
+        handler.sendMessage(chatId, "Sonni tanlayabmiz...");
         answer = generateRandom();
         answerArray = split(answer);
-        handler.sendMessage(chatId, "Число загадано!\n" +
-                "Отправляйте в чат ваши варианты, они должны состоять только из 4 неповторяющихся чисел!\n" +
-                "Правила игры - /bnchelp");
+        handler.sendMessage(chatId, "Men bir son o'yladim!\n" +
+                "Chatga o'z variantlaringizni jo'nating, u faqat 4ta takrorlanmaydigan sonlardan tashkil topishi lozim!\n" +
+                "O'yin qoidalari - /bnchelp");
     }
 
     public void check(Message message) {
@@ -41,7 +41,7 @@ public class BullsAndCowsGame {
 
         if (hasRepeatingDigits(split(number))) {
             messagesToDelete.add(
-                    handler.sendMessage(chatId, "Загаданное число не может содержать повторяющиеся числа!")
+                    handler.sendMessage(chatId, "O'yalagan sonim takrorlanuvchi sonlardan iborat emas!")
                             .getMessageId());
             return;
         }
@@ -50,14 +50,14 @@ public class BullsAndCowsGame {
 
         if (checkedNumbers.contains(number)) {
             messagesToDelete.add(
-                    handler.sendMessage(chatId, String.format("%1$04d - уже проверяли! %2$dБ %3$dК",
+                    handler.sendMessage(chatId, String.format("%1$04d - oldin tekshirgandingiz! %2$dБ %3$dК",
                             number, results[0], results[1])).getMessageId());
             return;
         }
 
         attempts--;
         if (results[0] == 4) { // win
-            handler.sendMessage(chatId, String.format("%1$s выиграл за %2$d попыток! %3$04d - правильный ответ!",
+            handler.sendMessage(chatId, String.format("%1$s g'alaba qildi %2$d ta imkoniyatdan! %3$04d - to'g'ri javob!",
                     message.getFrom().getFirstName(), 10 - attempts, answer));
             Services.db().incBNCWin(message.getFrom().getId());
             for (int messageId : messagesToDelete) {
@@ -74,7 +74,7 @@ public class BullsAndCowsGame {
                     .getMessageId());
             checkedNumbers.add(number);
         } else { // lose
-            handler.sendMessage(chatId, String.format("Вы проиграли! Ответ: %1$04d", answer));
+            handler.sendMessage(chatId, String.format("Mag'lubiyatga uchradingiz! Javob: %1$04d", answer));
             for (int messageId : messagesToDelete) {
                 Methods.deleteMessage(chatId, messageId).call(handler);
             }
