@@ -18,21 +18,21 @@ public class CallbackHandler {
         if (query.getMessage().getText().contains(query.getFrom().getFirstName())) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
-                    .setText("You've already payed respects! (or you've tried to pay respects to yourself)")
+                    .setText("Siz allaqachon respekt bergansiz! (yoki siz o'zizga o'ziz ovoz beryabsiz)")
                     .setShowAlert(true)
                     .call(handler);
             return;
         }
         Methods.answerCallbackQuery()
                 .setCallbackQueryId(query.getId())
-                .setText("You've payed respects")
+                .setText("Siz respekt berdingiz")
                 .setShowAlert(true)
                 .call(handler);
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setMessageId(query.getMessage().getMessageId())
                 .setReplyMarkup(UsercommandsHandler.getMarkupForPayingRespects())
-                .setText(query.getMessage().getText() + "\n" + query.getFrom().getFirstName() + " have payed respects")
+                .setText(query.getMessage().getText() + "\n" + query.getFrom().getFirstName() + " respekt berdi")
                 .call(handler);
     }
 
@@ -40,7 +40,7 @@ public class CallbackHandler {
         if (!query.getFrom().getId().equals(query.getMessage().getReplyToMessage().getFrom().getId())) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
-                    .setText("Этот тортик не вам!")
+                    .setText("Bu tort sizga emas!")
                     .setShowAlert(true)
                     .call(handler);
             return;
@@ -48,12 +48,12 @@ public class CallbackHandler {
         if (query.getMessage().getDate() + 2400 < System.currentTimeMillis() / 1000) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
-                    .setText("Тортик испорчен!")
+                    .setText("Tort buzildi!")
                     .setShowAlert(true)
                     .call(handler);
             Methods.editMessageText()
                     .setChatId(query.getMessage().getChatId())
-                    .setText("\uD83E\uDD22 Тортик испортился!")
+                    .setText("\uD83E\uDD22 Tort buzilib qoldi!")
                     .setMessageId(query.getMessage().getMessageId())
                     .setReplyMarkup(null)
                     .call(handler);
@@ -65,12 +65,12 @@ public class CallbackHandler {
                 .setMessageId(query.getMessage().getMessageId())
                 .setReplyMarkup(null);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
-            acq.setText("n p u я m н o r o  a n n e m u m a");
-            emt.setText("\uD83C\uDF82 " + query.getFrom().getFirstName() + " принял тортик"
+            acq.setText("y o q i m l i  i sh t a h a");
+            emt.setText("\uD83C\uDF82 " + query.getFrom().getFirstName() + " tortni oldi"
                     + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, ""));
         } else {
-            acq.setText("Ну и ладно");
-            emt.setText("\uD83D\uDEAB \uD83C\uDF82 " + query.getFrom().getFirstName() + " отказался от тортика"
+            acq.setText("Ha mayli");
+            emt.setText("\uD83D\uDEAB \uD83C\uDF82 " + query.getFrom().getFirstName() + " tortni rad etdi"
                     + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_NOT, ""));
         }
         acq.call(handler);
@@ -83,7 +83,7 @@ public class CallbackHandler {
         if (!TournamentHandler.isEnabled) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
-                    .setText("⚠️ На данный момент нет открытых раундов!")
+                    .setText("⚠️ Ayni damda ochiq raundlar yo'q!")
                     .setShowAlert(true)
                     .call(handler);
             return;
@@ -92,7 +92,7 @@ public class CallbackHandler {
         if (TournamentHandler.membersIds.contains(memberId)) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
-                    .setText("⚠️ Вы уже получили разрешение на отправку сообщений!")
+                    .setText("⚠️ Siz allaqachon xatni jo'natishga ruhsat olgansiz!")
                     .setShowAlert(true)
                     .call(handler);
             return;
@@ -101,7 +101,7 @@ public class CallbackHandler {
         if (!TournamentHandler.members.contains(query.getFrom().getUserName())) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
-                    .setText("\uD83D\uDEAB Вы не являетесь участником текущего раунда!")
+                    .setText("\uD83D\uDEAB Siz ushbu raund o'yinchisi emassiz!")
                     .setShowAlert(true)
                     .call(handler);
             return;
@@ -117,11 +117,11 @@ public class CallbackHandler {
                 .call(handler);
         Methods.answerCallbackQuery()
                 .setCallbackQueryId(query.getId())
-                .setText("✅ Вам даны права на отправку сообщений в группе турнира!")
+                .setText("✅ Turnir guruhida xat yozishga ruhsat berildi!")
                 .setShowAlert(true)
                 .call(handler);
         handler.sendMessage(Services.botConfig().getTourgroup(),
-                "✅ " + query.getFrom().getUserName() + " получил доступ к игре!");
+                "✅ " + query.getFrom().getUserName() + " o'yin uchun ruhsat oldi!");
     }
 
     public void addChat(CallbackQuery query) {
@@ -133,12 +133,12 @@ public class CallbackHandler {
         handler.allowedChats.add(chatId);
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
-                .setText("✅ Чат добавлен в разрешенные!")
+                .setText("✅ Chatga ruhsat etildi!")
                 .setMessageId(query.getMessage().getMessageId())
                 .setReplyMarkup(null)
                 .call(handler);
-        handler.sendMessage(chatId, "Разработчик принял данный чат. Бот готов к работе здесь!\n" +
-                "Для некоторых фичей бота требуются права админа на удаление и закреп сообщений.");
+        handler.sendMessage(chatId, "Yaratuvchi chatga ruhsat etdi. Bot faoiliyatga tayyor!\n" +
+                "Bazi ishlar uchun botga adminlik huquqi zarur.");
     }
 
     public void denyChat(CallbackQuery query) {
@@ -146,10 +146,10 @@ public class CallbackHandler {
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setMessageId(query.getMessage().getMessageId())
-                .setText("\uD83D\uDEAB Чат отклонен!")
+                .setText("\uD83D\uDEAB Chat chetlashtiradi!")
                 .setReplyMarkup(null)
                 .call(handler);
-        handler.sendMessage(chatId, "Разработчик отклонил данный чат. Всем пока!");
+        handler.sendMessage(chatId, "Yaratuvchi ushbu botni chetlashtirdi. Hammaga hayr!");
         Methods.leaveChat(chatId).call(handler);
     }
 
@@ -159,10 +159,10 @@ public class CallbackHandler {
         handler.allowedChats.remove(chatId);
         Methods.answerCallbackQuery()
                 .setShowAlert(true)
-                .setText("Чат удален!")
+                .setText("Chat o'chirildi!")
                 .setCallbackQueryId(query.getId())
                 .call(handler);
-        handler.sendMessage(chatId, "Разработчик решил удалить бота из данного чата. Всем пока!");
+        handler.sendMessage(chatId, "Yaratuvchi ushbu chatni o'chirishga qaror qildi. Hammaga hayr!");
         Methods.leaveChat(chatId).call(handler);
         Methods.deleteMessage(query.getMessage().getChatId(), query.getMessage().getMessageId()).call(handler);
     }
@@ -173,10 +173,10 @@ public class CallbackHandler {
         handler.admins.remove(adminId);
         Methods.answerCallbackQuery()
                 .setShowAlert(true)
-                .setText("Админ удален!")
+                .setText("Admin o'chirildi!")
                 .setCallbackQueryId(query.getId())
                 .call(handler);
-        handler.sendMessage(adminId, "Разработчик удалил вас из админов бота!");
+        handler.sendMessage(adminId, "Yaratuvchi sizdan bot adminlaridan o'chirdi!");
         Methods.deleteMessage(query.getMessage().getChatId(), query.getMessage().getMessageId()).call(handler);
     }
 
@@ -184,7 +184,7 @@ public class CallbackHandler {
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setMessageId(query.getMessage().getMessageId())
-                .setText("Меню закрыто")
+                .setText("Menyuni yopish")
                 .setReplyMarkup(null)
                 .call(handler);
     }
