@@ -53,7 +53,7 @@ public class LastkatkaBotHandler extends BotHandler {
         bullsAndCowsGames = new HashMap<>();
 
         // notify main admin about launch
-        sendMessage(botConfig.getMainAdmin(), "Бот готов к работе!");
+        sendMessage(botConfig.getMainAdmin(), "Bot faoliyatga tayyor!");
     }
 
     @Override
@@ -126,22 +126,22 @@ public class LastkatkaBotHandler extends BotHandler {
 
             if (newMembers.get(0).getUserName().equalsIgnoreCase(getBotUsername())) {
                 if (allowedChats.contains(chatId)) {// Say hello to new group if chat is allowed
-                    sendMessage(chatId, "Этот чат находится в списке разрешенных. Бот готов к работе здесь.");
+                    sendMessage(chatId, "Ushbu chat faoliyatiga ruhsat berildi. Bot ishga tayyor.");
                 } else {
-                    sendMessage(chatId, "Чата нет в списке разрешенных. Дождитесь решения разработчика");
+                    sendMessage(chatId, "Ruhsat etilgan chatlar orasida ushbu guruh yo'q. Yaratuvchi fikrini kuting!");
 
                     var row1 = List.of(new InlineKeyboardButton()
-                            .setText("Добавить")
+                            .setText("Qo'shish")
                             .setCallbackData(LastkatkaBot.CALLBACK_ALLOW_CHAT + chatId + "title=" + message.getChat().getTitle()));
                     var row2 = List.of(new InlineKeyboardButton()
-                            .setText("Отклонить")
+                            .setText("Kechiktirish")
                             .setCallbackData(LastkatkaBot.CALLBACK_DONT_ALLOW_CHAT + chatId));
                     var markup = new InlineKeyboardMarkup();
                     markup.setKeyboard(List.of(row1, row2));
                     sendMessage(Methods.sendMessage((long) Services.botConfig().getMainAdmin(),
-                            "Добавить чат " + message.getChat().getTitle() +
+                            "Chat - " + message.getChat().getTitle() +
                                     " (" + chatId + ") "
-                                    + "в список разрешенных?")
+                                    + "ga ruhsat etilsinmi?")
                             .setReplyMarkup(markup));
                 }
             }
@@ -201,7 +201,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
         if (command.startsWith("/reset") && veganTimers.containsKey(chatId)) {
             veganTimers.get(chatId).stop();
-            sendMessage(chatId, "Список игроков сброшен");
+            sendMessage(chatId, "O'yinchilar jadvali o'chirildi");
 
         }
 
@@ -239,7 +239,7 @@ public class LastkatkaBotHandler extends BotHandler {
                     if (!bullsAndCowsGames.containsKey(chatId))
                         bullsAndCowsGames.put(chatId, new BullsAndCowsGame(this, chatId));
                     else
-                        sendMessage(chatId, "В этом чате игра уже идет!");
+                        sendMessage(chatId, "Ushbu chatda allaqachon o'yin ketayabdi!");
                     break;
                 case "/bnchelp":
                     usercommandsHandler.bnchelp(message);
