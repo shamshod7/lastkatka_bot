@@ -6,7 +6,7 @@ mainAdmin: env(main_admin) # id of main admin
 lastvegan: -1001258818954
 tourgroup: -1001485493717
 
-tourgroupname: "@HuntUz"
+tourgroupname: "@AllSpy"
 tourchannel: '@Janglar_saltanati'
 
 wwBots: # list of werewolf bot nicknames
