@@ -149,7 +149,7 @@ public class CallbackHandler {
                 .setText("\uD83D\uDEAB Chat chetlashtiradi!")
                 .setReplyMarkup(null)
                 .call(handler);
-        handler.sendMessage(chatId, "Yaratuvchi ushbu botni chetlashtirdi. Hammaga hayr!");
+        handler.sendMessage(chatId, "Yaratuvchi ushbu guruhni chetlashtirdi. Hammaga hayr!");
         Methods.leaveChat(chatId).call(handler);
     }
 
@@ -176,7 +176,7 @@ public class CallbackHandler {
                 .setText("Admin o'chirildi!")
                 .setCallbackQueryId(query.getId())
                 .call(handler);
-        handler.sendMessage(adminId, "Yaratuvchi sizdan bot adminlaridan o'chirdi!");
+        handler.sendMessage(adminId, "Yaratuvchi sizni bot adminlaridan o'chirdi!");
         Methods.deleteMessage(query.getMessage().getChatId(), query.getMessage().getMessageId()).call(handler);
     }
 
