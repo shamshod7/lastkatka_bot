@@ -51,25 +51,25 @@ public class UsercommandsHandler {
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
-                .setText("\uD83D\uDD6F Press F to pay respects to " + message.getReplyToMessage().getFrom().getFirstName())
+                .setText("\uD83D\uDD6F respekt berish uchun f knopkasini bosing - " + message.getReplyToMessage().getFrom().getFirstName())
                 .setReplyMarkup(getMarkupForPayingRespects()));
     }
 
     public void cake(Message message) {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
-                        .setText("Принять")
+                        .setText("Qabul qilish")
                         .setCallbackData(LastkatkaBot.CALLBACK_CAKE_OK + message.getText().replace("/cake", "")),
                 new InlineKeyboardButton()
-                        .setText("Отказаться")
+                        .setText("Inkor etish")
                         .setCallbackData(LastkatkaBot.CALLBACK_CAKE_NOT + message.getText().replace("/cake", "")));
         markup.setKeyboard(List.of(row1));
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
                 .setText("\uD83C\uDF82 " + message.getReplyToMessage().getFrom().getFirstName()
-                        + ", пользователь " + message.getFrom().getFirstName()
-                        + " подарил вам тортик" + message.getText().replace("/cake", ""))
+                        + ", foydalanuvchi " + message.getFrom().getFirstName()
+                        + " sizga tort sovg'a qildi" + message.getText().replace("/cake", ""))
                 .setReplyToMessageId(message.getReplyToMessage().getMessageId())
                 .setReplyMarkup(markup));
     }
@@ -93,7 +93,7 @@ public class UsercommandsHandler {
 
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
-                .setText("\uD83C\uDFB2 Кубик брошен. Результат: " + random)
+                .setText("\uD83C\uDFB2 Kubik tashlandi. Natija: " + random)
                 .setReplyToMessageId(message.getMessageId()));
     }
 
@@ -102,15 +102,15 @@ public class UsercommandsHandler {
         var stats = Services.db().getStats(message.getFrom().getId(), player);
         var wins = stats.get("wins");
         var total = stats.get("total");
-        var text = "\uD83D\uDCCA Статистика " +
+        var text = "\uD83D\uDCCA Statistika " +
                 player +
-                "\nВыиграно дуэлей: " +
+                "\nDuellar g'alaba qilingan: " +
                 wins +
-                "\nВсего дуэлей сыграно: " +
+                "\nUmumiy o'ynalgan duellar soni: " +
                 total +
-                "\nВинрейт: " +
+                "\nYutuq: " +
                 ((total == 0) ? 0 : 100 * wins / total) + "%" +
-                "\n\n\uD83D\uDC2E Выиграно в Быки и Коровы: "
+                "\n\n\uD83D\uDC2E Bir sonni o'yladim o'yini: "
                 + stats.get("bncwins");
         handler.sendMessage(message.getChatId(), text);
 
@@ -125,7 +125,7 @@ public class UsercommandsHandler {
     }
 
     public void feedback(Message message) {
-        String bugreport = "⚠️ <b>Багрепорт</b>\n\nОт: " +
+        String bugreport = "⚠️ <b>BagReport</b>\n\nОт: " +
                 "<a href=\"tg://user?id=" +
                 message.getFrom().getId() +
                 "\">" +
@@ -135,7 +135,7 @@ public class UsercommandsHandler {
         handler.sendMessage((long) Services.botConfig().getMainAdmin(), bugreport);
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
-                .setText("✅ Отправлено разрабу бота")
+                .setText("✅ Bot xo'jayiniga jo'natildi")
                 .setReplyToMessageId(message.getMessageId()));
     }
 
@@ -168,11 +168,11 @@ public class UsercommandsHandler {
                 handler.execute(new SendMessage((long) message.getFrom().getId(), sb.toString())
                         .setParseMode(ParseMode.HTML));
             } catch (TelegramApiException e) {
-                handler.sendMessage(Methods.sendMessage(message.getChatId(), "Пожалуйста, начните диалог со мной в лс, чтобы я мог отправить вам помощь")
+                handler.sendMessage(Methods.sendMessage(message.getChatId(), "Iltimos sizga yordam bera olishim uchun menga lichkada start bering.")
                         .setReplyToMessageId(message.getMessageId()));
                 return;
             }
-            handler.sendMessage(Methods.sendMessage(message.getChatId(), "✅ Помощь была отправлена вам в лс")
+            handler.sendMessage(Methods.sendMessage(message.getChatId(), "✅ Yordam lichkaga jo'natildi.")
                     .setReplyToMessageId(message.getMessageId()));
         }
     }
@@ -180,14 +180,14 @@ public class UsercommandsHandler {
     public void pair(long chatId) {
         if (Services.db().pairExistsToday(chatId)) {
             var pair = Services.db().getPairOfTheDay(chatId);
-            pair = (pair != null) ? pair : "Ошибка, попробуйте завтра";
+            pair = (pair != null) ? pair : "Xatolik ertaga yana urinib ko'ring.";
             handler.sendMessage(chatId, pair);
             return;
         }
 
         var users = Services.db().getChatMembers(chatId);
         if (users.size() < 3) {
-            handler.sendMessage(chatId, "Недостаточно пользователей для создания пары! Подождите, пока кто-то еще напишет в чат!");
+            handler.sendMessage(chatId, "Juftlarni yaratilishi uchun azolar soni yetarli emas! Yana kimdir guruhga yozishini kuting!");
             return;
         }
         var lovearray = Services.botConfig().getLovearray();
@@ -199,7 +199,7 @@ public class UsercommandsHandler {
                 Thread.sleep(1500);
             }
         } catch (InterruptedException e) {
-            BotLogger.error("PAIR", "Ошибка таймера");
+            BotLogger.error("PAIR", "Taymer xatoligi");
         }
         int random1 = ThreadLocalRandom.current().nextInt(users.size());
         int random2;
@@ -226,9 +226,9 @@ public class UsercommandsHandler {
     public void lastpairs(long chatId) {
         var history = Services.db().getPairsHistory(chatId);
         if (history == null)
-            handler.sendMessage(chatId, "В этом чате еще никогда не запускали команду /pair!");
+            handler.sendMessage(chatId, "Bu chatda holi /pair buyurig'i ishlatilmagan!");
         else
-            handler.sendMessage(chatId, "<b>Последние 10 пар:</b>\n\n" + history);
+            handler.sendMessage(chatId, "<b>Ohirgi 10 ta juftlik:</b>\n\n" + history);
     }
 
     private boolean isFromWwBot(Message message) {
