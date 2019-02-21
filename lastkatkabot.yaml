@@ -22,7 +22,7 @@ bncphoto: env(bncphoto) # picture for /bnchelp
 leavesticker: env(leavesticker) # sticker that bot will send after someone leaves chat
 
 help: |
-  Salom! Bu @AllSpy proekti uchun yaratilgan maxsus bot! Asosiy buyuruqlar:
+  Salom! Ushbu bot @AllSpy loyihasi uchun maxsus yaratilgan! Asosiy buyuruqlar:
 
   /pinlist - qopqon bot listini pin qilish uchun!
   /pair - kun juftligi
