@@ -271,7 +271,7 @@ public class MongoDBService implements DBService {
     public String getPairOfTheDay(long chatId) {
         var doc = pairs.find(Filters.eq("chatId", chatId)).first();
         if (doc != null) {
-            return "Пара дня: " + doc.getString("pair");
+            return "Kun juftligi: " + doc.getString("pair");
         } else
             return null;
     }
