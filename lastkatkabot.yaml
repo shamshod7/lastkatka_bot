@@ -33,8 +33,8 @@ help: |
   /cake tort nima bilan (misol /cake qulupnayli) - to'rt sovg'a qilish uchun
   /duel - duelni boshlash uchun
   /stats - mini o'yinlar statistikasi
-  /bnc - "Быки и Коровы" o'yinini boshlash
-  /bnchelp - "Быки и Коровы" o'yinini qoidalari
+  /bnc - "Son o'yladim" o'yinini boshlash
+  /bnchelp - "Son o'yladim" o'yinini qoidalari
   /feedback xat - yaratuvchiga arz va takliflar
   /reset - chatdagi hunt timerni yangilash uchun
 
