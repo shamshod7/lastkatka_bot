@@ -32,7 +32,7 @@ public class LastkatkaBotHandler extends BotHandler {
 
     LastkatkaBotHandler(BotConfig botConfig) {
         this.botConfig = botConfig;
-        sendMessage(botConfig.getMainAdmin(), "Инициализация...");
+        sendMessage(botConfig.getMainAdmin(), "Yuklanmoqda...");
 
         // settings
         Services.setBotConfig(botConfig);
