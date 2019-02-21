@@ -33,7 +33,7 @@ public class AdminHandler {
                 message.getReplyToMessage().getFrom().getFirstName());
         handler.blacklist.add(message.getReplyToMessage().getFrom().getId());
         handler.sendMessage(message.getChatId(), "\uD83D\uDE3E " + message.getReplyToMessage().getFrom().getUserName() +
-                " - плохая киса!");
+                " - yomon mushukcha!");
     }
 
     public void goodneko(Message message) {
@@ -42,11 +42,11 @@ public class AdminHandler {
         Services.db().removeFromBlacklist(message.getReplyToMessage().getFrom().getId());
         handler.blacklist.remove(message.getReplyToMessage().getFrom().getId());
         handler.sendMessage(message.getChatId(), "\uD83D\uDE38 " + message.getReplyToMessage().getFrom().getUserName() +
-                " - хорошая киса!");
+                " - yaxshi mushukcha!");
     }
 
     public void nekos(Message message) {
-        var badnekos = new StringBuilder().append("\uD83D\uDE3E <b>Список плохих кис:</b>\n\n");
+        var badnekos = new StringBuilder().append("\uD83D\uDE3E <b>Yomon mushukchalar jadvali:</b>\n\n");
         var nekoSet = Services.db().getBlackListUsers();
         for (TgUser neko : nekoSet) {
             badnekos.append(neko.getLink()).append("\n");
@@ -65,12 +65,12 @@ public class AdminHandler {
                 message.getReplyToMessage().getFrom().getFirstName());
         handler.admins.add(message.getReplyToMessage().getFrom().getId());
         handler.sendMessage(message.getChatId(), "✅" + message.getReplyToMessage().getFrom().getFirstName() +
-                " теперь мой хозяин!");
+                " endi meni xo'jayinim!");
     }
 
     public void listOwners(Message message) {
         if (!message.isUserMessage()) {
-            handler.sendMessage(message.getChatId(), "Команду можно использовать только в лс бота!");
+            handler.sendMessage(message.getChatId(), "Buyuruqni faqat bot lichkasida ishlatish mumkin!");
             return;
         }
         var ownersSet = Services.db().getAdmins();
@@ -82,20 +82,20 @@ public class AdminHandler {
                     .setCallbackData(LastkatkaBot.CALLBACK_DELETE_ADMIN + " " + owner.getId())));
         }
         rows.add(List.of(new InlineKeyboardButton()
-                .setText("Закрыть меню")
+                .setText("Menyuni yopish")
                 .setCallbackData(LastkatkaBot.CALLBACK_CLOSE_MENU)));
         markup.setKeyboard(rows);
-        handler.sendMessage(Methods.sendMessage(message.getChatId(), "Для удаления админа нажмите на него")
+        handler.sendMessage(Methods.sendMessage(message.getChatId(), "Adminni o'chirish uchun uni nomini ustiga bosing")
                 .setReplyMarkup(markup));
     }
 
     public void update(Message message) {
         var params = message.getText().split("\n");
         if (params.length < 2) {
-            handler.sendMessage(message.getChatId(), "Неверное количество аргументов!");
+            handler.sendMessage(message.getChatId(), "Argumenlar miqdori kamlik qiladi!");
             return;
         }
-        var update = new StringBuilder().append("\uD83D\uDCE3 <b>ВАЖНОЕ ОБНОВЛЕНИЕ:</b> \n\n");
+        var update = new StringBuilder().append("\uD83D\uDCE3 <b>MUHIM YANGILIK:</b> \n\n");
         for (int i = 1; i < params.length; i++) {
             update.append("* ").append(params[i]).append("\n");
         }
@@ -106,7 +106,7 @@ public class AdminHandler {
 
     public void chats(Message message) {
         if (!message.isUserMessage()) {
-            handler.sendMessage(message.getChatId(), "Команду можно использовать только в лс бота!");
+            handler.sendMessage(message.getChatId(), "Buyuruqni faqat bot lichkasida ishlatish mumkin!");
             return;
         }
         var markup = new InlineKeyboardMarkup();
@@ -118,10 +118,10 @@ public class AdminHandler {
                     .setCallbackData(LastkatkaBot.CALLBACK_DELETE_CHAT + " " + chatId)));
         }
         rows.add(List.of(new InlineKeyboardButton()
-                .setText("Закрыть меню")
+                .setText("Menyuni yopish")
                 .setCallbackData(LastkatkaBot.CALLBACK_CLOSE_MENU)));
         markup.setKeyboard(rows);
-        handler.sendMessage(Methods.sendMessage(message.getChatId(), "Для удаления чата нажите на него")
+        handler.sendMessage(Methods.sendMessage(message.getChatId(), "O'chirish uchun uni nomini ustiga bosing")
                 .setReplyMarkup(markup));
     }
 
@@ -133,9 +133,9 @@ public class AdminHandler {
     }
 
     public void announce(Message message) {
-        handler.sendMessage(message.getChatId(), "Рассылка запущена. На время рассылки бот будет недоступен");
+        handler.sendMessage(message.getChatId(), "Xat jo'natildi. Jo'natilish vaqtida bot javob bermasligi mumkin");
         var text = message.getText();
-        text = "\uD83D\uDCE3 <b>Объявление</b>\n\n" + text.split("\\s+", 2)[1];
+        text = "\uD83D\uDCE3 <b>Yangilik</b>\n\n" + text.split("\\s+", 2)[1];
         var usersIds = Services.db().getAllUsersIds();
         int counter = 0;
         for (int userId : usersIds) {
@@ -146,7 +146,7 @@ public class AdminHandler {
                 BotLogger.error("ANNOUNCE", e.toString());
             }
         }
-        handler.sendMessage(message.getChatId(), String.format("Объявление получили %1$d/%2$d человек", counter, usersIds.size()));
+        handler.sendMessage(message.getChatId(), String.format("Yangilikni %1$d/%2$d ta odam qabul qildi", counter, usersIds.size()));
     }
 
     public void setupHelp(Message message) {
