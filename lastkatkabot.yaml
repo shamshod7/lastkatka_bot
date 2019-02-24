@@ -3,7 +3,7 @@ username: env(username)
 
 mainAdmin: env(main_admin) # id of main admin
 
-lastvegan: -1001218871013
+lastvegan: -1001485493717
 tourgroup: -1001218871013
 
 tourgroupname: "@HuntUz"
