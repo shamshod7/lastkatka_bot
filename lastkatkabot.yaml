@@ -3,10 +3,10 @@ username: env(username)
 
 mainAdmin: env(main_admin) # id of main admin
 
-lastvegan: -1001258818954
-tourgroup: -1001485493717
+lastvegan: -1001485493717
+tourgroup: -1001218871013
 
-tourgroupname: "@AllSpy"
+tourgroupname: "@HuntUz"
 tourchannel: '@Janglar_saltanati'
 
 wwBots: # list of werewolf bot nicknames
