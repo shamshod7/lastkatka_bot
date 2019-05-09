@@ -15,7 +15,7 @@ wwBots: # list of werewolf bot nicknames
   - 'blackwerewolfbot'
 
 veganWarsCommands:
-  - '/game@huntuzbot'
+  - '/game@HuntUzBot'
   - '/customgame@huntuzbot'
 
 bncphoto: env(bncphoto) # picture for /bnchelp
