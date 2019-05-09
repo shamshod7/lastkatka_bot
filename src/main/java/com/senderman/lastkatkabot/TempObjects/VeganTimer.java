@@ -51,7 +51,7 @@ public class VeganTimer {
         int count = vegans.size();
         String toSend = " " + count + " ta o'yinchi qo'shildi";
         if (count % 2 != 0 && count > 2) {
-            toSend += "\nSichqon bo'ldi!";
+            toSend += "\nKalamush bo'ladi o'yinda!";
         }
         handler.sendMessage(chatId, toSend);
     }
