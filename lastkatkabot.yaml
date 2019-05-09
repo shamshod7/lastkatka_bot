@@ -3,7 +3,7 @@ username: env(username)
 
 mainAdmin: env(main_admin) # id of main admin
 
-lastvegan: -1001485493717
+lastvegan: -1001258818954
 tourgroup: -1001218871013
 
 tourgroupname: "@HuntUz"
@@ -22,7 +22,7 @@ bncphoto: env(bncphoto) # picture for /bnchelp
 leavesticker: env(leavesticker) # sticker that bot will send after someone leaves chat
 
 help: |
-  Salom! Ushbu bot @AllSpy loyihasi uchun maxsus yaratilgan! Asosiy buyuruqlar:
+  Salom! Ushbu bot @HuntUz loyihasi uchun maxsus yaratilgan! Asosiy buyuruqlar:
 
   /pinlist - qopqon bot listini pin qilish uchun!
   /pair - kun juftligi
