@@ -244,9 +244,6 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/bnchelp":
                     usercommandsHandler.bnchelp(message);
                     break;
-                case "/regtest":
-                    usercommandsHandler.testRegex(message);
-                    break;                    
                 case "/feedback":
                     usercommandsHandler.feedback(message);
                     break;
