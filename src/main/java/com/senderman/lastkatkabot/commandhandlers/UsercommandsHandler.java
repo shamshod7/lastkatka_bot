@@ -12,8 +12,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
+import javax.management.timer.Timer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 public class UsercommandsHandler {
@@ -136,6 +142,24 @@ public class UsercommandsHandler {
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
                 .setText("✅ Bot xo'jayiniga jo'natildi")
+                .setReplyToMessageId(message.getMessageId()));
+    }
+
+    public void testRegex(Message message) {
+        var chatId = message.getChatId();
+        var params = message.getText().split("\n");
+        if (params.length != 3) {
+            handler.sendMessage(chatId, Services.i18n().getString("argsError", message));
+            return;
+        }
+        var regex = params[1];
+        try {
+            Pattern.compile(regex);
+        } catch (PatternSyntaxException e) {
+            handler.sendMessage(chatId, "Invalid regex");
+            return;
+        }
+        handler.sendMessage(Methods.sendMessage(chatId, (params[2].matches(regex) ? "✅" : "❌"))
                 .setReplyToMessageId(message.getMessageId()));
     }
 
