@@ -283,6 +283,9 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/goodneko":
                     adminHandler.goodneko(message);
                     break;
+                case "/regtest":
+                    usercommandsHandler.testRegex(message);
+                    return null;                    
                 case "/nekos":
                     adminHandler.nekos(message);
                     break;
