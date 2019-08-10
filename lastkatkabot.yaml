@@ -4,10 +4,10 @@ username: env(username)
 mainAdmin: env(main_admin) # id of main admin
 
 lastvegan: -1001258818954
-tourgroup: -1001218871013
+tourgroup: -1001469299463
 
-tourgroupname: "@HuntUz"
-tourchannel: '@Janglar_saltanati'
+tourgroupname: "@raunduz"
+tourchannel: '@huntuzb'
 
 wwBots: # list of werewolf bot nicknames
   - 'werewolfbot'
@@ -15,8 +15,8 @@ wwBots: # list of werewolf bot nicknames
   - 'blackwerewolfbot'
 
 veganWarsCommands:
-  - '/game@HuntUzBot'
-  - '/customgame@huntuzbot'
+  - '/lololo'
+  - '/lololo'
 
 bncphoto: env(bncphoto) # picture for /bnchelp
 leavesticker: env(leavesticker) # sticker that bot will send after someone leaves chat
