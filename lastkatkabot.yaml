@@ -4,7 +4,7 @@ username: env(username)
 mainAdmin: env(main_admin) # id of main admin
 
 lastvegan: -1001258818954
-tourgroup: -1001469299463
+tourgroup: -1001469299461
 
 tourgroupname: "@raunduz"
 tourchannel: '@huntuzb'
