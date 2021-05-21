@@ -51,7 +51,7 @@ public class UsercommandsHandler {
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
-                .setText(message.getReplyToMessage().getFrom().getFirstName() + "ga hurmat bildirish uchun pastdagi tugmani bosing!")
+                .setText("*" + message.getReplyToMessage().getFrom().getFirstName() + "*ga hurmat bildirish uchun pastdagi tugmani bosing!")
                 .setReplyMarkup(getMarkupForPayingRespects()));
     }
 
