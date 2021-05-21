@@ -223,7 +223,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 case "/f":
                     usercommandsHandler.payRespects(message);
                     break;
-                case "/dice":
+                case "/tosh":
                     usercommandsHandler.dice(message);
                     break;
                 case "/cake":
