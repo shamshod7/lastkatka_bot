@@ -52,7 +52,7 @@ public class UsercommandsHandler {
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
                 .setParseMode(ParseMode.HTML)
-                .setText("😎" + message.getReplyToMessage().getFrom().getFirstName() + "ga <b>hurmat</b> bildirish uchun pastdagi tugmani bosing!")
+                .setText("😎<b>" + message.getReplyToMessage().getFrom().getFirstName() + "</b>ga hurmat bildirish uchun pastdagi tugmani bosing!")
                 .setReplyMarkup(getMarkupForPayingRespects()));
     }
 
