@@ -27,7 +27,7 @@ public class UsercommandsHandler {
     static InlineKeyboardMarkup getMarkupForPayingRespects() {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
-                .setText("F")
+                .setText("👍🏻")
                 .setCallbackData(LastkatkaBot.CALLBACK_PAY_RESPECTS));
         markup.setKeyboard(List.of(row1));
         return markup;
