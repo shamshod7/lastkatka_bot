@@ -128,7 +128,7 @@ public class LastkatkaBotHandler extends BotHandler {
                 if (allowedChats.contains(chatId)) {// Say hello to new group if chat is allowed
                     sendMessage(chatId, "Ushbu chat faoliyatiga ruhsat berildi. Bot ishga tayyor.");
                 } else {
-                    sendMessage(chatId, "Ruhsat etilgan chatlar orasida ushbu guruh yo'q. Yaratuvchi fikrini kuting!");
+                    sendMessage(chatId, "🤹‍♂️Ruhsat etilgan chatlar orasida ushbu guruh yo'q. Yaratuvchi fikrini kuting!");
 
                     var row1 = List.of(new InlineKeyboardButton()
                             .setText("Qo'shish")
@@ -208,46 +208,46 @@ public class LastkatkaBotHandler extends BotHandler {
         // users in blacklist are not allowed to use this commands
         if (isNotInBlacklist(message)) {
             switch (command) {
-                case "/pinlist":
+                case "/pin":
                     usercommandsHandler.pinlist(message);
                     break;
-                case "/pair":
+                case "/juftlash":
                     usercommandsHandler.pair(chatId);
                     break;
-                case "/lastpairs":
+                case "/ohirgijuftlar":
                     usercommandsHandler.lastpairs(chatId);
                     break;
-                case "/action":
+                case "/xat":
                     usercommandsHandler.action(message);
                     break;
-                case "/f":
+                case "/zorsan":
                     usercommandsHandler.payRespects(message);
                     break;
                 case "/tosh":
                     usercommandsHandler.dice(message);
                     break;
-                case "/cake":
+                case "/tort":
                     usercommandsHandler.cake(message);
                     break;
                 case "/duel":
                     duelController.createNewDuel(chatId, message);
                     break;
-                case "/stats":
+                case "/natija":
                     usercommandsHandler.dstats(message);
                     break;
-                case "/bnc":
+                case "/oyin":
                     if (!bullsAndCowsGames.containsKey(chatId))
                         bullsAndCowsGames.put(chatId, new BullsAndCowsGame(this, chatId));
                     else
                         sendMessage(chatId, "Ushbu chatda allaqachon o'yin ketayabdi!");
                     break;
-                case "/bnchelp":
+                case "/oyinhaqida":
                     usercommandsHandler.bnchelp(message);
                     break;
-                case "/feedback":
+                case "/ariza":
                     usercommandsHandler.feedback(message);
                     break;
-                case "/help":
+                case "/yordam":
                     usercommandsHandler.help(message);
                     break;
             }
@@ -256,19 +256,19 @@ public class LastkatkaBotHandler extends BotHandler {
         // commands for main admin only
         if (message.getFrom().getId().equals(Services.botConfig().getMainAdmin())) {
             switch (command) {
-                case "/owner":
+                case "/ega":
                     adminHandler.owner(message);
                     break;
-                case "/update":
+                case "/yangilanish":
                     adminHandler.update(message);
                     break;
-                case "/announce":
+                case "/yangilik":
                     adminHandler.announce(message);
                     break;
-                case "/owners":
+                case "/egalar":
                     adminHandler.listOwners(message);
                     break;
-                case "/chats":
+                case "/chatlar":
                     adminHandler.chats(message);
                     break;
             }
@@ -277,16 +277,16 @@ public class LastkatkaBotHandler extends BotHandler {
         // commands for all admins
         if (isFromAdmin(message)) {
             switch (command) {
-                case "/badneko":
+                case "/yomonmushukcha":
                     adminHandler.badneko(message);
                     break;
-                case "/goodneko":
+                case "/yaxshimushukcha":
                     adminHandler.goodneko(message);
                     break;
-                case "/nekos":
+                case "/mushuklar":
                     adminHandler.nekos(message);
                     break;
-                case "/getinfo":
+                case "/id":
                     adminHandler.getinfo(message);
                     break;
                 case "/critical":
