@@ -22,47 +22,39 @@ bncphoto: env(bncphoto) # picture for /bnchelp
 leavesticker: env(leavesticker) # sticker that bot will send after someone leaves chat
 
 help: |
-  Salom! Ushbu bot @HuntUz loyihasi uchun maxsus yaratilgan! Asosiy buyuruqlar:
+  Salom! Ushbu bot @WarsUz loyihasi uchun maxsus yaratilgan! Asosiy buyuruqlar:
 
-  /pinlist - qopqon bot listini pin qilish uchun!
-  /pair - kun juftligi
-  /lastpairs - ohirgi 10 ta juftlik
-  /action ushbu xat bilan kimga qanday jarayon qilmoqchiligizni belgilang
-  /f - respekt berish uchun
-  /dice - kubik tashlash uchun. Diapazonni ko'rsatishingiz mumkin, misol /dice 1 25, yoki faqat maksimumni ko'rsatib, /dice 25
-  /cake tort nima bilan (misol /cake qulupnayli) - to'rt sovg'a qilish uchun
-  /duel - duelni boshlash uchun
-  /stats - mini o'yinlar statistikasi
-  /bnc - "Son o'yladim" o'yinini boshlash
-  /bnchelp - "Son o'yladim" o'yinini qoidalari
-  /feedback xat - yaratuvchiga arz va takliflar
-  /reset - chatdagi hunt timerni yangilash uchun
+  /pin - xatni pin qilish uchun📌
+  /juftlash - kun juftligi💞
+  /ohirgijuftlar - ohirgi 10 ta juftlik💕
+  /xat ushbu xat bilan kimga qanday jarayon qilmoqchiligizni belgilang📝
+  /zorsan - respekt berish uchun👍🏻
+  /tosh - kubik tashlash uchun. Diapazonni ko'rsatishingiz mumkin, misol /dice 1 25, yoki faqat maksimumni ko'rsatib, /dice 25🎲
+  /tort tort nima bilan (misol /cake qulupnayli) - to'rt sovg'a qilish uchun🎂
+  /duel - duelni boshlash uchun🔫
+  /natija - mini o'yinlar statistikasi📊
+  /oyin - "Son o'yladim" o'yinini boshlash🎮
+  /oyinhaqida - "Son o'yladim" o'yinini qoidalari🗞
+  /ariza xat - yaratuvchiga arz va takliflar🔖
 
 adminhelp: |
 
   <b>Bot adminlari uchun ma'lumot</b>
-
-  /setup - ushbu buyuruq orqali ma'lumot olasiz - /tourhelp
-  /score name1 score1 name2 score2 - natijani ma'lum qilish
-  /win winner score loser score Keyingi raund tipi - turnirni yakunlash (agar shu raund yakunlovchi - final bo'lsa, tipga overni ishlating)
-  /rt - turnirni bekor qilish
-  /tourmessage - turnirni asosiy postini belgilash uchun
-
-  /badneko - bot buyuruqlarini ishlatishni taqiqlash uchun
-  /goodneko - bot buyuruqlarini ishlatishga ruhsat berish uchun
-  /nekos - kimlar yomon mushukcha bo'lganini ko'rish uchun
-  /critical - barcha duellarni yangilash uchun
-  /getinfo - ma'lumot olish uchun reply qiling
+  
+  /yomonmushukcha - bot buyuruqlarini ishlatishni taqiqlash uchun
+  /yaxshimushukcha - bot buyuruqlarini ishlatishga ruhsat berish uchun
+  /mushuklar - kimlar yomon mushukcha bo'lganini ko'rish uchun
+  /id - ma'lumot olish uchun reply qiling
 
 mainadminhelp: |
 
   <b>Bot yaratuvchisi uchun ma'lumot</b>
 
-  /owner (reply) -admin qo'shish uchun
-  /announce сообщение - hammani lichkasiga ma'lumot tashlash uchun
-  /update сообщение - chatdagi yangilanishlar haqida ma'lumot yuborish uchun. Yangilanish qatorma qatorma yozilsin
-  /owners - bot adminlarini boshqarish uchun
-  /chats - chatlarni boshqarish uchun
+  /ega (reply) -admin qo'shish uchun
+  /yangilik - hammani lichkasiga ma'lumot tashlash uchun
+  /yangilanish - chatdagi yangilanishlar haqida ma'lumot yuborish uchun. Yangilanish qatorma qatorma yozilsin
+  /egalar - bot adminlarini boshqarish uchun
+  /chatlar - chatlarni boshqarish uchun
 
 setuphelp: |
   Turnirni 2xil rejimi bor - guruhli va duelli. Duelni quyidagicha chiqariladi:
@@ -79,12 +71,12 @@ setuphelp: |
 
 lovearray:
   - |-
-    Isco va Dangasa ruin qilgani kabi,
+    Asgard va Narniya do'stligi kabi,
     Shamshod va uni tugamas imtixonlari kabi,
-    Diloy va Guli smite berib chiqib ketishi kabi,
+    Qirollar to'g'ri kelganni ban qilgani kabi,
     %1$s ❤️ %2$s ham bir amallab yaqin bo'lishsin,
   - |-
-    Zaryadchikdagi telefon va qopqon kabi,
+    Zaryadchikdagi telefon va saroylar jangi kabi,
     Qunduz amaki va jiyanlari kabi,
     Wi-Fi xonim va janob internet kabi,
     %1$s va %2$s bir biriga bog'lansin.
@@ -99,14 +91,14 @@ lovearray:
     Dengizchi uzoq safardan so'ng yerga qadam bosgani kabi,
     %1$s va %2$s yangi tarixga asos solishsin.
   - |-
-    Roses are red,
-    Violets are blue,
-    Juftlar aytishadi "Sen meni yaqinimsan" -
+    Sevdim seni,
+    Sevmasang meni,
+    Yer yutsin seni,
     %1$s va %2$s
   - |-
-    Farishta bo'rini himoya qilgani kabi,
-    Afsungarni yer bo'rilar,
-    Kupidon o'qini o'ziga otgani kabi,
+    Kristal tekin bo'lganda,
+    Tanga sahroda oqqanda,
+    Olmos yomg'iri yoqqanda,
     Birga bo'lishar %1$s va %2$slar!
   - |-
     Ti ruskiy znaesh,
