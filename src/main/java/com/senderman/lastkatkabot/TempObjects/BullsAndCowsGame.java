@@ -30,7 +30,7 @@ public class BullsAndCowsGame {
         answerArray = split(answer);
         handler.sendMessage(chatId, "Men bir son o'yladim!\n" +
                 "Chatga o'z variantlaringizni jo'nating, u faqat 4ta takrorlanmaydigan sonlardan tashkil topishi lozim!\n" +
-                "O'yin qoidalari - /bnchelp");
+                "O'yin qoidalari - /oyinhaqida");
     }
 
     public void check(Message message) {
