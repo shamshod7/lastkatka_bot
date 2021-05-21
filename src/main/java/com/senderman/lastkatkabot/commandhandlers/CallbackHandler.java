@@ -25,14 +25,14 @@ public class CallbackHandler {
         }
         Methods.answerCallbackQuery()
                 .setCallbackQueryId(query.getId())
-                .setText("Siz respekt berdingiz")
+                .setText("Siz respekt berdingiz!")
                 .setShowAlert(true)
                 .call(handler);
         Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setMessageId(query.getMessage().getMessageId())
                 .setReplyMarkup(UsercommandsHandler.getMarkupForPayingRespects())
-                .setText(query.getMessage().getText() + "\n" + query.getFrom().getFirstName() + " respekt berdi")
+                .setText(query.getMessage().getText() + "\n" + query.getFrom().getFirstName() + " hurmat bildirdi👏🏻")
                 .call(handler);
     }
 
@@ -48,7 +48,7 @@ public class CallbackHandler {
         if (query.getMessage().getDate() + 2400 < System.currentTimeMillis() / 1000) {
             Methods.answerCallbackQuery()
                     .setCallbackQueryId(query.getId())
-                    .setText("Tort buzildi!")
+                    .setText("Tort aynib qoldi!")
                     .setShowAlert(true)
                     .call(handler);
             Methods.editMessageText()
