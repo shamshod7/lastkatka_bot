@@ -30,7 +30,7 @@ help: |
   /xat ushbu xat bilan kimga qanday jarayon qilmoqchiligizni belgilang📝
   /zorsan - respekt berish uchun👍🏻
   /tosh - kubik tashlash uchun. Diapazonni ko'rsatishingiz mumkin, misol /dice 1 25, yoki faqat maksimumni ko'rsatib, /dice 25🎲
-  /tort tort nima bilan (misol /cake qulupnayli) - to'rt sovg'a qilish uchun🎂
+  /tort tort nima bilan (misol /tort qulupnayli) - to'rt sovg'a qilish uchun🎂
   /duel - duelni boshlash uchun🔫
   /natija - mini o'yinlar statistikasi📊
   /oyin - "Son o'yladim" o'yinini boshlash🎮
@@ -41,10 +41,9 @@ adminhelp: |
 
   <b>Bot adminlari uchun ma'lumot</b>
   
-  /yomonmushukcha - bot buyuruqlarini ishlatishni taqiqlash uchun
-  /yaxshimushukcha - bot buyuruqlarini ishlatishga ruhsat berish uchun
-  /mushuklar - kimlar yomon mushukcha bo'lganini ko'rish uchun
-  /id - ma'lumot olish uchun reply qiling
+  /yomonmushukcha - bot buyuruqlarini ishlatishni taqiqlash uchun😸
+  /yaxshimushukcha - bot buyuruqlarini ishlatishga ruhsat berish uchun😾
+  /mushuklar - kimlar yomon mushukcha bo'lganini ko'rish uchun😻
 
 mainadminhelp: |
 
