@@ -72,7 +72,7 @@ public class CallbackHandler {
                     );
         } else {
             acq.setText("Ha mayli");
-            emt.setText("🤢<b>" + query.getFrom().getFirstName() + "</b> <b>" + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, "") + "</b> tortni rad etdi!"
+            emt.setText("🤢<b>" + query.getFrom().getFirstName() + "</b> <b>" + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_NOT, "") + "</b> tortni rad etdi!"
                     );
         }
         acq.call(handler);
