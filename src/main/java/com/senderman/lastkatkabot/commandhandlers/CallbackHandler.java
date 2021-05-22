@@ -68,12 +68,12 @@ public class CallbackHandler {
                 .setParseMode(ParseMode.HTML);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("y o q i m l i  i sh t a h a");
-            emt.setText("\uD83C\uDF82 <b>" + query.getFrom().getFirstName() + "</b> <b>" + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, "") + "</b> tortni oldi!"
+            emt.setText("🍰<b>" + query.getFrom().getFirstName() + "</b> <b>" + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, "") + "</b> tortni oldi!"
                     );
         } else {
             acq.setText("Ha mayli");
-            emt.setText("\uD83D\uDEAB \uD83C\uDF82 " + query.getFrom().getFirstName() + " tortni rad etdi"
-                    + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_NOT, ""));
+            emt.setText("🤢<b>" + query.getFrom().getFirstName() + "</b> <b>" + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, "") + "</b> tortni rad etdi!"
+                    );
         }
         acq.call(handler);
         emt.call(handler);
