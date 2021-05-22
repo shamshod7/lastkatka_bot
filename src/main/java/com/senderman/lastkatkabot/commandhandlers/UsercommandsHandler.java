@@ -114,10 +114,8 @@ public class UsercommandsHandler {
                 ((total == 0) ? 0 : 100 * wins / total) + "%" +
                 "\n\n\uD83D\uDC2E <b>Bir sonni o'yladim</b> o'yinidagi g'alabalar soni: "
                 + stats.get("bncwins");
-               .setParseMode(ParseMode.HTML)
         handler.sendMessage(message.getChatId(), text);
-        
-
+               .setParseMode(ParseMode.HTML)
     }
 
     public void pinlist(Message message) {
