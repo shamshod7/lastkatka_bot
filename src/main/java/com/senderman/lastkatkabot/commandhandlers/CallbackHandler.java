@@ -64,9 +64,9 @@ public class CallbackHandler {
                 .setChatId(query.getMessage().getChatId())
                 .setMessageId(query.getMessage().getMessageId())
                 .setReplyMarkup(null);
+                .setParseMode(ParseMode.HTML)
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("y o q i m l i  i sh t a h a");
-            emt.setParseMode(ParseMode.HTML)
             emt.setText("\uD83C\uDF82 <b>" + query.getFrom().getFirstName() + "</b> tortni oldi"
                     + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, ""));
         } else {
