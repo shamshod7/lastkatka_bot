@@ -60,17 +60,17 @@ public class UsercommandsHandler {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
                         .setText("Qabul qilish")
-                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_OK + message.getText().replace("/cake", "")),
+                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_OK + message.getText().replace("/tort", "")),
                 new InlineKeyboardButton()
                         .setText("Inkor etish")
-                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_NOT + message.getText().replace("/cake", "")));
+                        .setCallbackData(LastkatkaBot.CALLBACK_CAKE_NOT + message.getText().replace("/tort", "")));
         markup.setKeyboard(List.of(row1));
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
                 .setText("\uD83C\uDF82 " + message.getReplyToMessage().getFrom().getFirstName()
                         + ", foydalanuvchi " + message.getFrom().getFirstName()
-                        + " sizga tort sovg'a qildi" + message.getText().replace("/cake", ""))
+                        + " sizga tort sovg'a qildi" + message.getText().replace("/tort", ""))
                 .setReplyToMessageId(message.getReplyToMessage().getMessageId())
                 .setReplyMarkup(markup));
     }
