@@ -59,10 +59,10 @@ public class UsercommandsHandler {
     public void cake(Message message) {
         var markup = new InlineKeyboardMarkup();
         var row1 = List.of(new InlineKeyboardButton()
-                        .setText("Qabul qilish")
+                        .setText("Qabul qilish😋")
                         .setCallbackData(LastkatkaBot.CALLBACK_CAKE_OK + message.getText().replace("/tort", "")),
                 new InlineKeyboardButton()
-                        .setText("Inkor etish")
+                        .setText("Inkor etish😝")
                         .setCallbackData(LastkatkaBot.CALLBACK_CAKE_NOT + message.getText().replace("/tort", "")));
         markup.setKeyboard(List.of(row1));
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
@@ -71,7 +71,7 @@ public class UsercommandsHandler {
                 .setParseMode(ParseMode.HTML)
                 .setText("🎂<b>" + message.getReplyToMessage().getFrom().getFirstName()
                         + "</b>, foydalanuvchi <b>" + message.getFrom().getFirstName()
-                        + "</b> sizga <b>" + message.getText().replace("/tort", "</b>") + " tort sovg'a qildi!")
+                        + "</b> sizga <b>" + message.getText().replace("/tort ", "") + "</b> tort sovg'a qildi!")
                 .setReplyToMessageId(message.getReplyToMessage().getMessageId())
                 .setReplyMarkup(markup));
     }
