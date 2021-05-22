@@ -5,6 +5,7 @@ import com.senderman.lastkatkabot.LastkatkaBot;
 import com.senderman.lastkatkabot.LastkatkaBotHandler;
 import com.senderman.lastkatkabot.Services;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 
 public class CallbackHandler {
 
@@ -63,8 +64,8 @@ public class CallbackHandler {
         var emt = Methods.editMessageText()
                 .setChatId(query.getMessage().getChatId())
                 .setMessageId(query.getMessage().getMessageId())
-                .setParseMode(ParseMode.HTML)
-                .setReplyMarkup(null);
+                .setReplyMarkup(null)
+                .setParseMode(ParseMode.HTML);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("y o q i m l i  i sh t a h a");
             emt.setText("\uD83C\uDF82 <b>" + query.getFrom().getFirstName() + "</b> tortni oldi"
