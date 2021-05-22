@@ -66,7 +66,8 @@ public class CallbackHandler {
                 .setReplyMarkup(null);
         if (actions == CAKE_ACTIONS.CAKE_OK) {
             acq.setText("y o q i m l i  i sh t a h a");
-            emt.setText("\uD83C\uDF82 " + query.getFrom().getFirstName() + " tortni oldi"
+               .setParseMode(ParseMode.HTML)
+            emt.setText("\uD83C\uDF82 <b>" + query.getFrom().getFirstName() + "</b> tortni oldi"
                     + query.getData().replace(LastkatkaBot.CALLBACK_CAKE_OK, ""));
         } else {
             acq.setText("Ha mayli");
