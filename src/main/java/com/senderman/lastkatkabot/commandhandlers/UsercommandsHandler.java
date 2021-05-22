@@ -227,7 +227,7 @@ public class UsercommandsHandler {
     public void lastpairs(long chatId) {
         var history = Services.db().getPairsHistory(chatId);
         if (history == null)
-            handler.sendMessage(chatId, "Bu chatda holi /pair buyurig'i ishlatilmagan!");
+            handler.sendMessage(chatId, "Bu chatda holi /juftlash buyurig'i ishlatilmagan!");
         else
             handler.sendMessage(chatId, "<b>Ohirgi 10 ta juftlik:</b>\n\n" + history);
     }
