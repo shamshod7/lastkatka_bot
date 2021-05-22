@@ -68,9 +68,10 @@ public class UsercommandsHandler {
         Methods.deleteMessage(message.getChatId(), message.getMessageId()).call(handler);
         handler.sendMessage(Methods.sendMessage()
                 .setChatId(message.getChatId())
-                .setText("\uD83C\uDF82 " + message.getReplyToMessage().getFrom().getFirstName()
-                        + ", foydalanuvchi " + message.getFrom().getFirstName()
-                        + " sizga tort sovg'a qildi" + message.getText().replace("/tort", ""))
+                .setParseMode(ParseMode.HTML)
+                .setText("🎂<b>" + message.getReplyToMessage().getFrom().getFirstName()
+                        + "</b>, foydalanuvchi <b>" + message.getFrom().getFirstName()
+                        + "</b> sizga <b>" + message.getText().replace("/tort", "</b>") + " tort sovg'a qildi!")
                 .setReplyToMessageId(message.getReplyToMessage().getMessageId())
                 .setReplyMarkup(markup));
     }
